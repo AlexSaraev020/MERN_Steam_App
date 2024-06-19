@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "commonjs",
+      "outDir": "./build",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true
+      
+    },
+    
+      "scripts": {
+        "dev": "nodemon --exec npx tsc"
+      },
+    
+    
+    "include": ["src/**/*", "../index.ts", "src/Models/UserModel"],
+    "exclude": ["node_modules", "./build"]
+    
+  }
+  
+  
