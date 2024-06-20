@@ -5,7 +5,8 @@ import { Carousel } from 'flowbite-react';
 import { fetchGames } from '../../../actions/apiRequests';
 import { useState, useEffect } from 'react';
 import { Game } from '../../../types/types';
-import Navigation from '../../Navigation/Navigation';
+import Navigation from '../../Navigation/NavigationMenu';
+import { shuffle } from '../../../actions/generalFunctionalities';
 
 
 interface CarouselProps{
@@ -23,7 +24,7 @@ const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange}) => {
         const fetchAllGames = async () =>{
             try {
                 const games = await fetchGames()
-                setGames(games)
+                setGames(shuffle(games))
             } catch (error) {
                 console.error('Error during API request:', error);
             }
@@ -51,7 +52,7 @@ const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange}) => {
                             key={game.id}
                             className="flex flex-col h-full items-center justify-center overflow-hidden"
                         >
-                            <Link to={`/game/${game.id}/${game.title}/${game.short_description}`} className="relative">
+                            <Link to={`/game/${game.id}`} className="relative">
                                 <img
                                     className="scale-1 rounded-lg object-cover h-[300px] sm:h-[400px] md:h-[500px] lg:h-[700px] xl:h-[800px] w-full"
                                     src={game.thumbnail}

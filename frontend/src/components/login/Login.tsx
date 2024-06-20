@@ -4,11 +4,8 @@ import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
+import { LoginProps } from '../../types/types';
 
-
-interface LoginProps {
-    setUsername: (username: string) => void;
-}
 
 function Login({ setUsername }: LoginProps) {
     const navigate = useNavigate();

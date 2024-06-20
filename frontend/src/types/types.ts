@@ -5,8 +5,13 @@ export interface Game {
     id: number;
     title: string;
     thumbnail: string;
-    genre: { id: string }[];
+    genre: string;
     short_description: string;
+    platform: string;
+    publisher: string;
+    developer: string;
+    release_date: string;
+    game_url: string;
 }
 
 
@@ -14,6 +19,9 @@ export interface Game {
 
 //User Related
 
+export interface LoginProps {
+    setUsername: (username: string) => void;
+}
 
 
 export interface UserProps {

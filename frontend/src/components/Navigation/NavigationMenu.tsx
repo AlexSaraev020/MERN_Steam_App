@@ -8,7 +8,7 @@ import { ReactComponent as ProfileSVG } from '../../icons/profile.svg';
 
 const Navigation: React.FC = () => {
     return (
-        <header className="text-white items-center justify-center flex">
+        <div className="text-white items-center justify-center flex">
             <ul className="space-x-20 flex md:text-sm lg:text-md xl:text-lg 2xl:text-xl font-bold border-b py-1 sm:py-2">
                 <Link to='/'>
                     <li className="flex items-center transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300 hover:cursor-pointer">
@@ -36,7 +36,7 @@ const Navigation: React.FC = () => {
                     </li>
                 </Link>
             </ul>
-        </header>
+        </div>
 
 
     )

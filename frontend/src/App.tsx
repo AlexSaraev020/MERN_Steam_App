@@ -4,6 +4,7 @@ import SignUp from "./components/signUp/SignUp";
 import Home from "./components/homepage/Home";
 import { useState } from "react";
 import GamePage from "./components/gamePage/gamePage";
+import Nav from "./components/Navigation/Nav";
 
 function App() {
     const [username, setUsername] = useState<string>('');
@@ -14,8 +15,9 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Login setUsername={setUsername} />} />
                     <Route path="/register" element={<SignUp />} />
-                    <Route path="/home" element={<Home username={username} />} />
-                    <Route path="/game/:id/:title/:description" element={<GamePage />} />
+                    <Route path="/home" element={<Home/>} />
+                    <Route path="/game/:id" element={<GamePage />} />
+                    <Route element={<Nav username={username}/>} />
                 </Routes>
             </BrowserRouter>
         </div>
