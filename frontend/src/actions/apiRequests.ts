@@ -15,14 +15,6 @@ export const fetchGames = async (): Promise<Game[]> => {
   }
 };
 
-export const fetchAllGames = async (setGames: React.Dispatch<React.SetStateAction<Game[]>>) => {
-  try {
-    const games = await fetchGames()
-    setGames(games)
-  } catch (err) {
-    console.error('Error during API request:', err);
-  }
-};
 
 export const fetchGameDetails = async (id: string | undefined, setGamesDetails: React.Dispatch<React.SetStateAction<Game | null>>, setGamesByGenre: React.Dispatch<React.SetStateAction<Game[]>>) => {
   try {
