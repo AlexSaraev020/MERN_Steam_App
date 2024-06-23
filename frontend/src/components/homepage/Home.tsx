@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import background from '../../images/login.jpg';
-import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import CarouselComponent from "./carousel/Carousel";
 import { Game } from "../../types/types";
 import Recommended from "./recommended/Recommended";
 import { fetchGames } from "../../actions/apiRequests";
+import { shuffle } from "../../actions/generalFunctionalities";
 import Nav from "../Navigation/Nav";
 
 
@@ -22,7 +22,7 @@ const Home= () => {
                     fetchGames(),
                     fetchGames()
                 ]);
-                setGames(games);
+                setGames(shuffle(games));
                 setGames1(games1);
             } catch (err) {
                 console.error('Error during API request:', err);
@@ -47,7 +47,7 @@ const Home= () => {
                 <Nav />
                 <div className="flex flex-col w-full relative">
                     {/* Carousel */}
-                    <CarouselComponent handleCarouselChange = {handleCarouselChange} />
+                    <CarouselComponent games={games} handleCarouselChange = {handleCarouselChange} />
                     {/* Recommended Games */}
                     <Recommended games1={games1} />
                     {/* Genre Filter */}

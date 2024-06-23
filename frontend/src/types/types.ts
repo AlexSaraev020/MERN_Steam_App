@@ -27,3 +27,13 @@ export interface LoginProps {
 export interface UserProps {
     username?: string;
 }
+
+
+
+//Nav Related
+
+export interface NavLinkType {
+    to: string;
+    icon: JSX.Element;
+    label: string;
+}

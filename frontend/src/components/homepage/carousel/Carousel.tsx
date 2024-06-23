@@ -10,28 +10,13 @@ import { shuffle } from '../../../actions/generalFunctionalities';
 
 
 interface CarouselProps{
-    handleCarouselChange: (id: number) => void
+    handleCarouselChange: (id: number) => void;
+    games: Game[];
 }
 
 
 
-const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange}) => {
-    
-    const [games, setGames] = useState<Game[]>([]);
-
-
-    useEffect(()=>{
-        const fetchAllGames = async () =>{
-            try {
-                const games = await fetchGames()
-                setGames(shuffle(games))
-            } catch (error) {
-                console.error('Error during API request:', error);
-            }
-        }
-        fetchAllGames()
-    },[])
-
+const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange, games}) => {
     return (
         <section className="relative flex justify-center items-center mt-10 sm:mt-14 md:mt-10 md:mb-10 lg:mt-6 2xl:mt-10">
             <div className="w-full flex flex-col items-center justify-center ">
@@ -54,7 +39,7 @@ const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange}) => {
                         >
                             <Link to={`/game/${game.id}`} className="relative">
                                 <img
-                                    className="scale-1 rounded-lg object-cover h-[300px] sm:h-[400px] md:h-[500px] lg:h-[700px] xl:h-[800px] w-full"
+                                    className="scale-1 rounded-lg h-[300px] sm:h-[400px] md:h-[500px] lg:h-[700px] xl:h-[800px] w-full"
                                     src={game.thumbnail}
                                     alt={game.title}
                                 />
