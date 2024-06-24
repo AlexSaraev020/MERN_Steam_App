@@ -15,6 +15,25 @@ export const fetchGames = async (): Promise<Game[]> => {
   }
 };
 
+export const fetchAllGames = async (setGames: React.Dispatch<React.SetStateAction<Game[]>>) => {
+  try {
+    const games = await fetchGames();
+    setGames(games);
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+export const searchGame = async (setSearchedGames: React.Dispatch<React.SetStateAction<Game[]>>, enteredText: string) => {
+  try {
+    const games = await fetchGames();
+    const filteredGames = games.filter(item => item.title.toLocaleLowerCase().includes(enteredText.toLowerCase()))
+    setSearchedGames(filteredGames)
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 export const fetchGameDetails = async (id: string | undefined, setGamesDetails: React.Dispatch<React.SetStateAction<Game | null>>, setGamesByGenre: React.Dispatch<React.SetStateAction<Game[]>>) => {
   try {

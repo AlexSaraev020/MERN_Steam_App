@@ -62,13 +62,9 @@ app.post("/login", async (req: Request<any, any, User>, res: Response<LoginRespo
     }
 });
 
-// Ruta pentru a face cererea GET către API-ul extern și a o trimite înapoi către frontend
 app.get('/api/games', async (req: Request, res: Response) => {
     try {
-        // Folosim axios pentru a face cererea GET către API-ul extern
         const response = await axios.get('https://www.freetogame.com/api/games');
-
-        // Trimitem înapoi datele primite de la API-ul extern către frontend
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching games:', error);

@@ -18,7 +18,7 @@ const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGen
     <div className="w-full overflow-x-auto space-y-4 mt-4 flex items-center justify-center">
         <div className="relative flex flex-col items-end w-full sm:w-11/12 xl:w-full overflow-hidden mt-4 py-4 rounded-xl bg-opacity-50">
             <div className="flex justify-between w-full mb-1 lg:mb-2 -mt-3 lg:mt-0">
-                <h2 className="text-white ml-10 sm:ml-10 md:ml-10 lg:ml-12 2xl:ml-16 font-sans text-sm sm:text-sm md:text-md lg:text-2xl font-bold">More <span className="text-blue-400">{genre}</span>  games :</h2>
+                <h2 className="text-white ml-10 sm:ml-10 md:ml-10 lg:ml-12 2xl:ml-16 font-sans text-sm sm:text-sm md:text-md lg:text-2xl font-bold">More <span className="text-emerald-400">{genre}</span>  games :</h2>
                 <Link
                     to='/allgames'
                     className="text-white text-sm sm:text-sm md:text-md lg:text-xl hover:underline font-sans font-bold mr-10 sm:mr-10 md:mr-10 lg:mr-12 2xl:mr-16"

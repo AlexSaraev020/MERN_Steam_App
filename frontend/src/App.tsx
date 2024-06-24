@@ -6,6 +6,7 @@ import { useState } from "react";
 import GamePage from "./components/gamePage/gamePage";
 import Nav from "./components/Navigation/Nav";
 import AllGames from "./components/allGames/allGames";
+import AllSearchedGames from "./components/allGames/allSearchedGames";
 
 function App() {
     const [username, setUsername] = useState<string>('');
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/game/:id" element={<GamePage />} />
                     <Route element={<Nav username={username}/>} />
                     <Route path="/allgames" element={<AllGames/>}/>
+                    <Route path="/searchbytitle/:title" element={<AllSearchedGames/>}/>
                 </Routes>
             </BrowserRouter>
         </div>

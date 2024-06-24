@@ -2,11 +2,8 @@ import { ReactComponent as LeftArrow } from '../../../icons/leftarrow.svg';
 import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Link } from 'react-router-dom';
 import { Carousel } from 'flowbite-react';
-import { fetchGames } from '../../../actions/apiRequests';
-import { useState, useEffect } from 'react';
 import { Game } from '../../../types/types';
 import Navigation from '../../Navigation/NavigationMenu';
-import { shuffle } from '../../../actions/generalFunctionalities';
 
 
 interface CarouselProps{

@@ -8,7 +8,7 @@ import { shuffle } from "../../actions/generalFunctionalities";
 import Nav from "../Navigation/Nav";
 
 
-const Home= () => {
+const Home = () => {
 
     const [games, setGames] = useState<Game[]>([]);
     const [games1, setGames1] = useState<Game[]>([]);
@@ -42,7 +42,7 @@ const Home= () => {
     return (
         <div className="relative flex min-h-screen flex-col justify-center items-center">
             <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={backgroundImage} />
-            <div className='absolute inset-0 bg-slate-800 opacity-[0.7]'></div>
+            <div className='absolute inset-0 bg-zinc-800 opacity-[0.7]'></div>
             <div className='relative w-full flex flex-col min-h-screen'>
                 <Nav />
                 <div className="flex flex-col w-full relative">
