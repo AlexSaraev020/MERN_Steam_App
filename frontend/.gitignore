@@ -32,9 +32,6 @@ Thumbs.db
 # Build artifacts
 build/
 dist/
-*.js
-*.css
-*.html
 *.map
 
 # Test coverage output

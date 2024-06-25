@@ -25,8 +25,8 @@ const GamePage = () => {
             <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={gamesDetails?.thumbnail} />
             <div className='absolute inset-0 bg-zinc-950 opacity-80'></div>
             <Nav />
-            <div className="w-full flex items-center justify-center z-10 min-h-screen">
-                <div className="rounded-t-lg w-11/12 md:w-5/6 flex flex-col min-h-screen bg-zinc-900 p-8 mt-4">
+            <div className="w-full flex items-center justify-center z-10">
+                <div className="rounded-t-lg w-full md:w-[95%] lg:w-5/6 flex flex-col bg-zinc-900 p-8 mt-4">
                     <div className="mb-6 -mt-6 hidden lg:block">
                         <NavigationMenu />
                     </div>
@@ -36,7 +36,7 @@ const GamePage = () => {
                             <img className="w-full rounded-xl" src={gamesDetails?.thumbnail} alt={gamesDetails?.title} />
                         </div>
                         <div className="w-full xl:w-5/12 xl:pl-4 flex flex-col justify-between">
-                            <div>
+                            <div className="space-y-3">
                                 <h2 className="text-xl lg:text-3xl xl:text-5xl font-bold ">{gamesDetails?.title}</h2>
                                 <h2 className="text-sm xl:text-xl">Genre : <span className="text-emerald-400 font-bold">{gamesDetails?.genre}</span></h2>
                                 <p className="text-sm xl:text-lg text-gray-400">{gamesDetails?.short_description}</p>
