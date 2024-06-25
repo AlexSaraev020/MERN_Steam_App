@@ -1,5 +1,6 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ReactComponent as SearchSVG } from '../../icons/search.svg';
 
 const SearchInput = () => {
     const navigate = useNavigate();
@@ -9,44 +10,33 @@ const SearchInput = () => {
         setEnteredText(e.target.value);
     }
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement> | MouseEvent) => {
         e.preventDefault();
         try {
             if (enteredText) {
                 navigate(`/searchbytitle/${enteredText}`);
-            }else{
+            } else {
                 alert('Enter a game title')
             }
-            
+
         } catch (error) {
             console.error(error);
         }
     };
 
     return (
-        <form autoComplete="off" className="relative top-1 hidden lg:block" onSubmit={handleSubmit}>
+        <form autoComplete="off" className="relative top-1 lg:block text-white " onSubmit={handleSubmit}>
             <div className="relative group">
                 <input
                     placeholder="Search..."
-                    className="shadow-2xl bg-zinc-700 bg-opacity-30 border-2 border-transparent px-3 py-1 w-60 xl:px-4 xl:py-2 rounded-xl xl:w-80 transition-all focus:w-96 outline-none focus:border-emerald-400"
+                    className="shadow-lg shadow-emerald-500/30 bg-zinc-700 bg-opacity-30 border-2 border-transparent px-4 py-3 lg:px-3 lg:py-1 xl:px-4 xl:py-2 rounded-xl w-80 transition-all lg:focus:w-96 outline-none focus:border-emerald-400"
                     name="search"
                     value={enteredText}
                     onChange={handleChange}
                 />
-                <svg
-                    className="w-4 h-4 xl:w-5 xl:h-5 absolute top-3 right-3 text-emerald-400"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                    ></path>
-                </svg>
+                <button type="submit">
+                    <SearchSVG />
+                </button>
             </div>
         </form>
     );
