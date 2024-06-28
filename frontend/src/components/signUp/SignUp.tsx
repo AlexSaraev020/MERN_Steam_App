@@ -21,7 +21,7 @@ function SignUp() {
                 if (result.status === 201) {
                     navigate('/')
                 } else {
-                    alert('Nu')
+                    alert('Email already used!')
                 }
             })
             .catch(err => console.log(err))

@@ -7,19 +7,7 @@ import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
 
 const Nav: React.FC<UserProps> = ({ username }) => {
-    const [storedUsername, setStoredUsername] = useState<string>('');
     const [isMenuActive, setIsMenuActive] = useState(false);
-    useEffect(() => {
-        const savedUsername = localStorage.getItem('username') || 'Guest';
-        setStoredUsername(savedUsername);
-    }, []);
-
-    useEffect(() => {
-        if (username) {
-            localStorage.setItem('username', username);
-            setStoredUsername(username);
-        }
-    }, [username]);
 
     const handleClick = () => {
         setIsMenuActive(!isMenuActive);
@@ -58,7 +46,7 @@ const Nav: React.FC<UserProps> = ({ username }) => {
                     <SearchInput />
                 </div>
                 <h2 className='text-emerald-400 text-sm sm:text-lg md:text-2xl font-bold absolute right-24 lg:right-4 top-6'>
-                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{storedUsername}
+                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{username}
                 </h2>
 
             </div>

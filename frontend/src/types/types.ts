@@ -21,6 +21,7 @@ export interface Game {
 
 export interface LoginProps {
     setUsername: (username: string) => void;
+    username: string;
 }
 
 
