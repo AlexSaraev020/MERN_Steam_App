@@ -6,6 +6,7 @@ const TOKEN_KEY: string = process.env.JWT_SECRET as string;
 
 interface UserPayload {
     userId: string;
+    userName: string;
     email: string;
 }
 

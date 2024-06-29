@@ -4,10 +4,9 @@ import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
-import { LoginProps } from '../../types/types';
 
 
-function Login({ setUsername }: LoginProps) {
+function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
@@ -17,12 +16,10 @@ function Login({ setUsername }: LoginProps) {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/login', { email, password, rememberMe });
-    
+
             if (response.status === 200) {
-                
                 localStorage.setItem('token', response.data.token);
                 if (response.data.name) {
-                    setUsername(response.data.name);
                     navigate('/home');
                 } else {
                     alert('Username not set correctly');
@@ -80,9 +77,11 @@ function Login({ setUsername }: LoginProps) {
                                 id="remember"
                                 type="checkbox"
                                 className="w-5 h-5 border-2 border-emerald-500 rounded bg-zinc-800 focus:ring-4 focus:ring-emerald-500"
-                            />                        </div>
+                            />
+                        </div>
                         <label htmlFor="remember" className="ml-2 text-sm font-semibold text-zinc-300">Remember me</label>
                     </div>
+                    
                     <button
                         type="submit"
                         className="w-10/12 bg-emerald-500 text-zinc-800 text-xl font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-md hover:bg-emerald-600 mb-6"
@@ -98,6 +97,12 @@ function Login({ setUsername }: LoginProps) {
                             className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
                         >
                             Sign Up
+                        </Link>
+                        <Link
+                            to={`/home/${email}`}
+                            className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
+                        >
+                            Guest
                         </Link>
                     </div>
                 </div>

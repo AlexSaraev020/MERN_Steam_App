@@ -1,17 +1,16 @@
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import { useState, useEffect } from 'react';
-import { UserProps } from '../../types/types';
 import { Link } from 'react-router-dom';
 import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
+import { jwtDecode } from 'jwt-decode';
 
-const Nav: React.FC<UserProps> = ({ username }) => {
+const Nav: React.FC = () => {
     const [isMenuActive, setIsMenuActive] = useState(false);
+    const [username, setUsername] = useState<string | null>(null);
 
-    const handleClick = () => {
-        setIsMenuActive(!isMenuActive);
-    };
+
 
     useEffect(() => {
         if (isMenuActive) {
@@ -35,6 +34,27 @@ const Nav: React.FC<UserProps> = ({ username }) => {
         };
     }, []);
 
+    useEffect(() => {
+        const fetchUsername = () => {
+            const token = localStorage.getItem('token');
+            
+            if (token) {
+                try {
+                    const decodedToken: any = jwtDecode(token);
+                    console.log(decodedToken)
+                    setUsername(decodedToken.userName);
+                } catch (error) {
+                    console.error('Error decoding JWT:', error);
+                }
+            }
+        };
+    
+        fetchUsername();
+    }, []);
+
+    const handleClick = () => {
+        setIsMenuActive(!isMenuActive);
+    };
     return (
         <nav className=''>
             <div className={`flex items-center justify-center w-full p-2 sm:p-10 bg-black bg-opacity-50 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h-[70px]`}>
@@ -56,14 +76,14 @@ const Nav: React.FC<UserProps> = ({ username }) => {
             {isMenuActive &&
                 <div className='h-screen w-full absolute bg-gradient-to-r from-zinc-900 to-zinc-900 via-zinc-800 z-40'>
                     <div className='flex flex-col h-screen items-center justify-center'>
-                            <Link to="/home" className="flex items-end space-x-1">
-                                <SvgIcon className='w-12 h-14' />
-                                <h2 className='text-white text-4xl lg:text-3xl font-bold'>Gamers<span className="text-emerald-400">Lobby</span></h2>
-                            </Link>
-                            <div className='mt-6'>
-                                <SearchInput />
-                            </div>
-                            <NavigationMenu />
+                        <Link to="/home" className="flex items-end space-x-1">
+                            <SvgIcon className='w-12 h-14' />
+                            <h2 className='text-white text-4xl lg:text-3xl font-bold'>Gamers<span className="text-emerald-400">Lobby</span></h2>
+                        </Link>
+                        <div className='mt-6'>
+                            <SearchInput />
+                        </div>
+                        <NavigationMenu />
                     </div>
                 </div>
             }

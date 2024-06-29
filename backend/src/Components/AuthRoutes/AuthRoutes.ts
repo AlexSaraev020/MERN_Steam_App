@@ -37,12 +37,21 @@ export function setupRoutes(app: Express) {
     app.post("/login", async (req, res) => {
         const { email, password, rememberMe } = req.body;
         console.log('Received:', email, password, rememberMe);
+        
         try {
             const user = await UserModel.findOne({ email });
             if (user) {
                 if (await bcrypt.compare(password, user.password)) {
-                    const token = generateToken({ userId: user.id.toString(), email: user.email }, rememberMe);
-                    res.cookie('token', token)
+                    const token = generateToken({ userId: user.id.toString(),userName:user.name, email: user.email }, rememberMe);
+                    const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+                    
+                    res.cookie('token', token, {
+                        httpOnly: true,
+                        secure: true,
+                        maxAge: maxAge,
+                        sameSite: 'strict'
+                    });
+                    
                     res.json({
                         _id: user.id,
                         name: user.name,
@@ -50,9 +59,9 @@ export function setupRoutes(app: Express) {
                         rememberMe: rememberMe,
                         token: token
                     });
-
+    
                 } else {
-                    throw new Error('Invalid credentials');
+                    res.status(401).json({ message: 'Invalid credentials' });
                 }
             } else {
                 res.status(400).json({ message: 'User not found' });
@@ -61,8 +70,9 @@ export function setupRoutes(app: Express) {
             console.error("Error during login:", error);
             res.status(500).json({ message: 'Internal server error' });
         }
-
     });
+    
+    
 
 
     //Just for the moment

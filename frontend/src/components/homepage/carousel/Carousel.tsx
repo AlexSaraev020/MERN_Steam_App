@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Carousel } from 'flowbite-react';
 import { Game } from '../../../types/types';
 import Navigation from '../../Navigation/NavigationMenu';
+import FavoriteButton from '../../favorite/FavoriteButton';
 
 
 interface CarouselProps{
@@ -41,6 +42,7 @@ const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange, games}
                                     alt={game.title}
                                 />
                                 <h2 className="absolute inset-x-0 bottom-0 text-white font-bold text-md xl:text-3xl bg-black bg-opacity-40 p-2 rounded">{game.title}</h2>
+                                
                             </Link>
                         </div>
                     ))}

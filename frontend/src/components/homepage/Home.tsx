@@ -6,6 +6,7 @@ import Recommended from "./recommended/Recommended";
 import { fetchGames } from "../../actions/apiRequests";
 import { shuffle } from "../../actions/generalFunctionalities";
 import Nav from "../Navigation/Nav";
+import FavoriteButton from "../favorite/FavoriteButton";
 
 
 const Home = () => {
@@ -51,7 +52,7 @@ const Home = () => {
                     {/* Recommended Games */}
                     <Recommended games1={games1} />
                     {/* Genre Filter */}
-                    
+                    <FavoriteButton />
                     {/* Games Filtered */}
 
                 </div>
