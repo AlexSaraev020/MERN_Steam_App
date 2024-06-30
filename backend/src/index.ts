@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './Components/ConnectToDatabase/Mongoose';
 import { setupRoutes } from './Components/AuthRoutes/AuthRoutes';
-import { fetchGames } from './Components/FetchGames/FetchGames';
+import { checkFavorites  , favoriteGame , fetchGames } from './Components/FetchGames/FetchGames';
 
 const app = express();
 const port = 3001;
@@ -21,6 +21,11 @@ connectToDatabase();
 setupRoutes(app);
 
 fetchGames(app)
+
+checkFavorites(app)
+
+favoriteGame(app);
+
 
 app.get('/', (req, res) => {
   res.send('Backendul funcționează');

@@ -7,14 +7,14 @@ import Navigation from '../../Navigation/NavigationMenu';
 import FavoriteButton from '../../favorite/FavoriteButton';
 
 
-interface CarouselProps{
+interface CarouselProps {
     handleCarouselChange: (id: number) => void;
     games: Game[];
 }
 
 
 
-const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange, games}) => {
+const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games }) => {
     return (
         <section className="relative flex justify-center items-center mt-10 sm:mt-14 md:mt-10 md:mb-10 lg:mt-6 2xl:mt-10">
             <div className="w-full flex flex-col items-center justify-center ">
@@ -35,15 +35,21 @@ const CarouselComponent:React.FC<CarouselProps> = ({handleCarouselChange, games}
                             key={game.id}
                             className="flex flex-col h-full items-center justify-center overflow-hidden"
                         >
-                            <Link to={`/game/${game.id}`} className="relative">
-                                <img
-                                    className="scale-1 rounded-lg h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[550px] w-full"
-                                    src={game.thumbnail}
-                                    alt={game.title}
-                                />
-                                <h2 className="absolute inset-x-0 bottom-0 text-white font-bold text-md xl:text-3xl bg-black bg-opacity-40 p-2 rounded">{game.title}</h2>
-                                
-                            </Link>
+                            <div className='relative'>
+                                <Link to={`/game/${game.id}`} className="relative">
+                                    <img
+                                        className="scale-1 rounded-lg h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[550px] w-full"
+                                        src={game.thumbnail}
+                                        alt={game.title}
+                                    />
+                                    <h2 className="absolute inset-x-0 bottom-0 text-white font-bold text-md xl:text-3xl bg-black bg-opacity-40 p-2 rounded">{game.title}</h2>
+
+                                </Link>
+                                <div className='absolute top-0 w-full bg-black bg-opacity-40 flex justify-end'>
+                                    <FavoriteButton gameId={game.id} />
+                                </div>
+                            </div>
+
                         </div>
                     ))}
                 </Carousel>

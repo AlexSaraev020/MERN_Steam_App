@@ -5,10 +5,11 @@ import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
 import { jwtDecode } from 'jwt-decode';
+import { fetchUsername } from '../../actions/apiRequests';
 
 const Nav: React.FC = () => {
     const [isMenuActive, setIsMenuActive] = useState(false);
-    const [username, setUsername] = useState<string | null>(null);
+    const [username, setUsername] = useState<string>('');
 
 
 
@@ -35,21 +36,7 @@ const Nav: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const fetchUsername = () => {
-            const token = localStorage.getItem('token');
-            
-            if (token) {
-                try {
-                    const decodedToken: any = jwtDecode(token);
-                    console.log(decodedToken)
-                    setUsername(decodedToken.userName);
-                } catch (error) {
-                    console.error('Error decoding JWT:', error);
-                }
-            }
-        };
-    
-        fetchUsername();
+        fetchUsername(setUsername)
     }, []);
 
     const handleClick = () => {

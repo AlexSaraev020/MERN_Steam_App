@@ -52,7 +52,7 @@ const Home = () => {
                     {/* Recommended Games */}
                     <Recommended games1={games1} />
                     {/* Genre Filter */}
-                    <FavoriteButton />
+                   
                     {/* Games Filtered */}
 
                 </div>

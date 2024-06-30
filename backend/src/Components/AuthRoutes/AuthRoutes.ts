@@ -36,8 +36,6 @@ export function setupRoutes(app: Express) {
 
     app.post("/login", async (req, res) => {
         const { email, password, rememberMe } = req.body;
-        console.log('Received:', email, password, rememberMe);
-        
         try {
             const user = await UserModel.findOne({ email });
             if (user) {
@@ -67,7 +65,6 @@ export function setupRoutes(app: Express) {
                 res.status(400).json({ message: 'User not found' });
             }
         } catch (error) {
-            console.error("Error during login:", error);
             res.status(500).json({ message: 'Internal server error' });
         }
     });

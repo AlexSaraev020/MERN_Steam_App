@@ -3,6 +3,7 @@ import { ReactComponent as LeftArrow } from '../../../icons/leftarrow.svg';
 import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Game } from "../../../types/types";
 import TruncatedName from "../TruncatedName";
+import FavoriteButton from "../../favorite/FavoriteButton";
 
 interface GamesRecommendedProps {
     games1: Game[]
@@ -50,11 +51,21 @@ const Recommended: React.FC<GamesRecommendedProps> = ({ games1 }) => {
                             </button>
                             <div id="gameSlider2" className="flex space-x-3 sm:-space-x-6 md:space-x-0 lg:space-x-4 overflow-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
                                 {recommendedGames.map(game => (
-                                    <Link to={`/game/${game.id}`} className="relative flex-none w-44 sm:w-60 snap-center h-40 sm:h-36 md:h-40 lg:h-44 xl:h-48" key={game.id}>
-                                        <img className="rounded-lg h-44 sm:h-36 md:h-40 lg:h-44 xl:h-48 sm:w-10/12 md:w-11/12 lg:w-full object-cover" src={game.thumbnail} alt={game.title} />
-                                        <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 flex items-center sm:w-10/12 md:w-11/12 lg:w-full rounded-b-lg justify-center opacity-100">                                                    <p className="text-white text-lg sm:text-xl font-bold text-center p-x-2"><TruncatedName name={game.title} /></p>
+                                    <div className="relative flex-none w-44 sm:w-60 snap-center h-40 sm:h-36 md:h-40 lg:h-44 xl:h-48">
+                                        <Link to={`/game/${game.id}`} key={game.id}>
+                                            <img className="rounded-lg h-44 sm:h-36 md:h-40 lg:h-44 xl:h-48 sm:w-10/12 md:w-11/12 lg:w-full object-cover" src={game.thumbnail} alt={game.title} />
+                                            <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 flex items-center sm:w-10/12 md:w-11/12 lg:w-full rounded-b-lg justify-center opacity-100">                                                    <p className="text-white text-lg sm:text-xl font-bold text-center p-x-2"><TruncatedName name={game.title} /></p>
+                                            </div>
+
+
+                                        </Link>
+                                        <div className="w-full bg-black bg-opacity-40 absolute top-0 right-0 flex justify-end">
+                                            <div className=" h-8 w-8">
+                                                <FavoriteButton gameId={game.id} />
+                                            </div>
                                         </div>
-                                    </Link>
+                                    </div>
+
                                 ))}
                             </div>
                             <button
