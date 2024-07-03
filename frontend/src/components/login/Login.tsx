@@ -4,9 +4,13 @@ import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
+import { User } from '../../types/types';
 
+interface LoginProps {
+    setUser: (user: User) => void
+}
 
-function Login() {
+const Login: React.FC<LoginProps> = ({ setUser }) => {
     const navigate = useNavigate();
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
@@ -19,6 +23,7 @@ function Login() {
 
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
+                setUser(response.data)
                 if (response.data.name) {
                     navigate('/home');
                 } else {
@@ -99,7 +104,7 @@ function Login() {
                             Sign Up
                         </Link>
                         <Link
-                            to={`/home/${email}`}
+                            to={`/home`}
                             className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
                         >
                             Guest

@@ -3,15 +3,15 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Game } from "../../types/types";
 import { fetchGameDetails } from "../../actions/apiRequests";
-import Nav from "../Navigation/Nav";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import RecommendedByGenre from "../homepage/recommended/RecommendedByGenre";
+import { User } from "../../types/types";
 
 
 
 
 
-const GamePage = () => {
+const GamePage = ({setUser} : {setUser: (user?: User) => void}) => {
     const { id } = useParams<{ id: string | undefined }>();
     const [gamesDetails, setGamesDetails] = useState<Game | null>(null)
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([])
@@ -24,11 +24,10 @@ const GamePage = () => {
         <div className="flex flex-col bg-gray-300 min-h-screen relative text-white">
             <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={gamesDetails?.thumbnail} />
             <div className='absolute inset-0 bg-zinc-950 opacity-80'></div>
-            <Nav />
             <div className="w-full flex items-center justify-center z-10">
                 <div className="rounded-t-lg w-full md:w-[95%] lg:w-5/6 flex flex-col bg-zinc-900 p-8 mt-4">
                     <div className="mb-6 -mt-6 hidden lg:block">
-                        <NavigationMenu />
+                        <NavigationMenu setUser={setUser} />
                     </div>
 
                     <div className="flex flex-col xl:flex-row w-full">

@@ -1,6 +1,7 @@
 import { Express } from 'express';
 import UserModel from '../../Models/UserModel';
 import { generateToken } from '../../JWT/JWT';
+import { favoriteGame } from '../FetchGames/FetchGames';
 const bcrypt = require('bcrypt');
 
 
@@ -54,8 +55,9 @@ export function setupRoutes(app: Express) {
                         _id: user.id,
                         name: user.name,
                         email: user.email,
+                        favoriteGames: user.favoriteGames,
                         rememberMe: rememberMe,
-                        token: token
+                        token: token,
                     });
     
                 } else {

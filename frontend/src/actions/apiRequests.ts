@@ -63,16 +63,3 @@ export const fetchUsername = (setUsername: React.Dispatch<React.SetStateAction<s
     }
   }
 };
-
-export const fetchUserId = (setIdUser: React.Dispatch<React.SetStateAction<number | null>>) => {
-  const token = localStorage.getItem('token');
-
-  try {
-    if (token) {
-      const decodedToken: any = jwtDecode(token);
-      setIdUser(decodedToken.userId);
-    }
-  } catch (error) {
-    console.error(error)
-  }
-};

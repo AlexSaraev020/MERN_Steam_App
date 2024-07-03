@@ -1,27 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { fetchUserId } from '../../actions/apiRequests';
+import { User } from '../../types/types';
 
 interface FavoriteButtonProps {
     gameId: number;
+    user?: User;
 }
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
+
+
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId, user }) => {
     const [favorite, setFavorite] = useState<boolean>(false);
-    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
-        fetchUserId(setUserId);
-    }, [userId]);
+        if (user) {
+            try {
+                if (user.favoriteGames && user.favoriteGames.includes(gameId)) {
+                    setFavorite(true);
+                } else {
+                    setFavorite(false);
+                }
+            } catch (error) {
+                console.error('Error in useEffect:', error);
+            }
+        } else {
+            console.error('User not found!');
+        }
+    }, [user, gameId]);
 
     const handleFavorite = async () => {
-        
         try {
+            if (!user) {
+                console.error('User is not defined');
+                alert('You must be logged in order to perform this action!')
+                return;
+            }
+
             if (!favorite) {
-                await axios.post('http://localhost:3001/favorite', { userId, gameId });
+                await axios.post('http://localhost:3001/favorite', { userId: user._id, gameId });
                 setFavorite(!favorite);
             } else {
-                await axios.delete('http://localhost:3001/rmfavorite', { data: { userId, gameId } });
+                await axios.delete('http://localhost:3001/rmfavorite', { data: { userId: user._id, gameId } });
                 setFavorite(!favorite);
             }
         } catch (error) {

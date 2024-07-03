@@ -18,14 +18,10 @@ export interface Game {
 
 //User Related
 
-export interface LoginProps {
-    setUsername: (username: string) => void;
-    username: string;
-}
-
-
-export interface UserProps {
-    username?: string;
+export interface User {
+    _id?: string;
+    name?: string;
+    favoriteGames: number[];
 }
 
 
