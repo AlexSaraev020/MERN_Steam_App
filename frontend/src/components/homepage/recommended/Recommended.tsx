@@ -4,16 +4,25 @@ import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Game, User } from "../../../types/types";
 import TruncatedName from "../TruncatedName";
 import FavoriteButton from "../../favorite/FavoriteButton";
+import { useEffect, useState } from "react";
+import { shuffle } from "../../../actions/generalFunctionalities";
 
 interface GamesRecommendedProps {
-    games1: Game[]
+    games?: Game[]
     user?: User;
 }
 
 
 
-const Recommended: React.FC<GamesRecommendedProps> = ({ games1 , user }) => {
-    const recommendedGames = games1.slice(0, 20);
+const Recommended: React.FC<GamesRecommendedProps> = ({ games , user }) => {
+    const [shuffledGames , setShuffledGames] = useState<Game[]>([])
+
+    useEffect(()=>{
+        if(games){
+            setShuffledGames(shuffle(games))
+        }
+    }, [games, shuffledGames])
+
     return (
         <section className="relative">
             <div className="absolute w-full bg-black bg-opacity-50 h-52 sm:h-48 md:h-52 lg:h-60 xl:h-64  bottom-4 border-t-2 border-b-2 border-emerald-400"> </div>
@@ -51,7 +60,7 @@ const Recommended: React.FC<GamesRecommendedProps> = ({ games1 , user }) => {
                                 <LeftArrow className="h-6 w-6 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                             </button>
                             <div id="gameSlider2" className="flex space-x-3 sm:-space-x-6 md:space-x-0 lg:space-x-4 overflow-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
-                                {recommendedGames.map(game => (
+                                {shuffledGames.slice(20,30).map(game => (
                                     <div key={game.id} className="relative flex-none w-44 sm:w-60 snap-center h-40 sm:h-36 md:h-40 lg:h-44 xl:h-48">
                                         <Link to={`/game/${game.id}`} key={game.id}>
                                             <img className="rounded-lg h-44 sm:h-36 md:h-40 lg:h-44 xl:h-48 sm:w-10/12 md:w-11/12 lg:w-full object-cover" src={game.thumbnail} alt={game.title} />

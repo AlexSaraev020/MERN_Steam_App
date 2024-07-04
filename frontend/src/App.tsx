@@ -6,12 +6,12 @@ import { User } from "./types/types";
 function App() {
 
     
-    const [user, setUser] = useState<User | undefined>(undefined)
+    
 
     return (
         <div className="App">
             <BrowserRouter>
-                <MainApp user = {user} setUser = {setUser} />
+                <MainApp />
             </BrowserRouter>
         </div>
     );

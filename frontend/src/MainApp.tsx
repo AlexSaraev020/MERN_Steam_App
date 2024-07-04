@@ -6,20 +6,16 @@ import GamePage from "./components/gamePage/gamePage";
 import AllGames from "./components/allGames/allGames";
 import AllSearchedGames from "./components/allGames/allSearchedGames";
 import Nav from "./components/Navigation/Nav";
-import { User } from "./types/types";
-
-interface MainAppProps {
-    user?: User;
-    setUser: (user?: User) => void;
-}
+import { Game, User } from "./types/types";
+import { useState } from "react";
 
 
-const MainApp: React.FC<MainAppProps> = ({user,setUser}) => {
+const MainApp = () => {
     const location = useLocation();
-
     const hideNavOnRoutes = ["/", "/register"];
-
     const shouldHideNav = hideNavOnRoutes.includes(location.pathname);
+    const [user, setUser] = useState<User | undefined>(undefined)
+    const [allGames, setAllGames] = useState<Game[] | undefined>(undefined);
 
     return (
         <div className="">
@@ -27,10 +23,10 @@ const MainApp: React.FC<MainAppProps> = ({user,setUser}) => {
             <Routes>
                 <Route path="/" element={<Login setUser={setUser} />} />
                 <Route path="/register" element={<SignUp />} />
-                <Route path="/home" element={<Home setUser={setUser} user={user} />} />
-                <Route path="/game/:id" element={<GamePage setUser={setUser}/>} />
-                <Route path="/allgames" element={<AllGames setUser={setUser}/>} />
-                <Route path="/searchbytitle/:title" element={<AllSearchedGames setUser={setUser} />} />
+                <Route path="/home" element={<Home setAllGames={setAllGames} setUser={setUser} user={user} />} />
+                <Route path="/game/:id" element={<GamePage setUser={setUser} user={user} games={allGames}/>} />
+                <Route path="/allgames" element={<AllGames allGames={allGames} setUser={setUser}/>} />
+                <Route path="/searchbytitle/:title" element={<AllSearchedGames games={allGames} setUser={setUser} />} />
             </Routes>
         </div>
     );

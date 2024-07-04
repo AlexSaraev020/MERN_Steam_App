@@ -3,19 +3,23 @@ import { Link } from "react-router-dom";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import { useState, useEffect } from "react";
 import { Game } from "../../types/types";
-import { fetchAllGames } from "../../actions/apiRequests";
 import { User } from "../../types/types";
 
+interface AllGamesProps {
+    setUser : (user? : User)=> void;
+    allGames?: Game[]
+}
 
 
-const AllGames = ({setUser} : {setUser: (user?: User) => void}) => {
-    const [games, setGames] = useState<Game[]>([])
+const AllGames: React.FC<AllGamesProps> = ({setUser, allGames}) => {
+    const [slicedGames, setSlicedGames] = useState<Game[]>([])
 
+    useEffect(()=>{
+        if(allGames){
+            setSlicedGames(allGames.slice(0,20))
+        }
+    } , [allGames])
 
-    useEffect(() => {
-        fetchAllGames(setGames)
-    }, [setGames])
-    const slicedGames = games.slice(0, 10)
     return (
         <div className="flex flex-col bg-zinc-900 min-h-screen text-white w-full">
             <div className="mt-6 hidden lg:block">

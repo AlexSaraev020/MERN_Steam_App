@@ -2,27 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import { Game } from "../../types/types";
-import { searchGame } from "../../actions/apiRequests";
 import { useParams } from "react-router-dom";
 import { User } from "../../types/types";
 
-const AllSearchedGames = ({setUser} : {setUser: (user?: User) => void}) => {
+interface AllSearchedGamesProps {
+    setUser: (user?: User) => void;
+    games?: Game[];
+}
+
+const AllSearchedGames: React.FC<AllSearchedGamesProps> = ({ setUser, games }) => {
     const [searchedGames, setSearchedGames] = useState<Game[]>([]);
     const { title } = useParams<{ title: string }>();
 
     useEffect(() => {
-        const fetchSearchedGames = async () => {
-            if (title) {
-                try {
-                    await searchGame(setSearchedGames, title);
-                } catch (error) {
-                    console.error(error);
-                }
+            if (title && games) {
+                const filteredGames = games.filter(item => item.title.toLocaleLowerCase().includes(title))
+                setSearchedGames(filteredGames)
             }
-        };
-
-        fetchSearchedGames();
-    }, [title]);
+    }, [title, games]);
 
     const slicedGames = searchedGames.slice(0, 10);
 

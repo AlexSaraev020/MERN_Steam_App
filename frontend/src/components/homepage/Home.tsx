@@ -4,40 +4,42 @@ import CarouselComponent from "./carousel/Carousel";
 import { Game, User } from "../../types/types";
 import Recommended from "./recommended/Recommended";
 import { fetchGames } from "../../actions/apiRequests";
-import { shuffle } from "../../actions/generalFunctionalities";
-import FavoriteButton from "../favorite/FavoriteButton";
+import NavigationMenu from "../Navigation/NavigationMenu";
 
 interface HomeProps {
     user?: User
     setUser: (user?: User) => void
+    setAllGames: (games?: Game[]) => void;
 }
 
 
-const Home: React.FC<HomeProps> = ({user , setUser}) => {
+const Home: React.FC<HomeProps> = ({ user, setUser, setAllGames }) => {
 
-    const [games, setGames] = useState<Game[]>([]);
-    const [games1, setGames1] = useState<Game[]>([]);
     const [activeGameIndex, setActiveGameIndex] = useState<number>(0);
     const [backgroundImage, setBackgroundImage] = useState<string>(background);
-    
+    const [games, setGames] = useState<Game[]>([])
+
     useEffect(() => {
         const fetchAllGames = async () => {
             try {
-                const [games, games1] = await Promise.all([
+                const [allGamesResponse, gamesResponse] = await Promise.all([
                     fetchGames(),
                     fetchGames()
                 ]);
-                setGames(shuffle(games.slice(0,20)));
-                setGames1(games1.slice(0,20));
+                setAllGames(allGamesResponse);
+                setGames(gamesResponse);
             } catch (err) {
                 console.error('Error during API request:', err);
             }
         };
         fetchAllGames();
-    }, [fetchGames]);
+    }, []);
+
 
     useEffect(() => {
-        setBackgroundImage(games[activeGameIndex]?.thumbnail || background);
+        if (games) {
+            setBackgroundImage(games[activeGameIndex]?.thumbnail || background);
+        }
     }, [activeGameIndex, games]);
 
     const handleCarouselChange = (index: number) => {
@@ -49,15 +51,15 @@ const Home: React.FC<HomeProps> = ({user , setUser}) => {
             <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={backgroundImage} />
             <div className='absolute inset-0 bg-zinc-800 opacity-[0.7]'></div>
             <div className='relative w-full flex flex-col min-h-screen'>
-                <div className="flex flex-col w-full relative">
+                <div className="flex flex-col w-full relative">\
+                    {/* Navigation Menu */}
+                    <div className="hidden lg:block w-full mb-4">
+                        <NavigationMenu setUser={setUser} />
+                    </div>
                     {/* Carousel */}
-                    <CarouselComponent setUser={setUser} user={user} games={games} handleCarouselChange = {handleCarouselChange}/>
+                    <CarouselComponent user={user} games={games} handleCarouselChange={handleCarouselChange} />
                     {/* Recommended Games */}
-                    <Recommended user={user} games1={games1} />
-                    {/* Genre Filter */}
-                   
-                    {/* Games Filtered */}
-
+                    <Recommended user={user} games={games} />
                 </div>
             </div>
         </div>

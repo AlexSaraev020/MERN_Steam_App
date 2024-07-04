@@ -3,26 +3,33 @@ import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Link } from 'react-router-dom';
 import { Carousel } from 'flowbite-react';
 import { Game, User } from '../../../types/types';
-import Navigation from '../../Navigation/NavigationMenu';
 import FavoriteButton from '../../favorite/FavoriteButton';
+import { shuffle } from '../../../actions/generalFunctionalities';
+import { useEffect, useState } from 'react';
 
 
 interface CarouselProps {
     handleCarouselChange: (id: number) => void;
-    games: Game[];
+    games?: Game[];
     user?: User;
-    setUser: (user?: User) => void;
 }
 
 
 
-const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games , user, setUser }) => {
+const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games, user }) => {
+
+    const [shuffledGames, setShuffledGames] = useState<Game[]>([])
+
+    useEffect(() => {
+        if (games) {
+            setShuffledGames(shuffle(games))
+        }
+    }, [games, shuffledGames])
+
     return (
         <section className="relative flex justify-center items-center mt-10 sm:mt-14 md:mt-10 md:mb-10 lg:mt-6 2xl:mt-10">
             <div className="w-full flex flex-col items-center justify-center ">
-                <div className="hidden lg:block w-full mb-4">
-                    <Navigation setUser={setUser} />
-                </div>
+
                 <Carousel
                     leftControl={<LeftArrow className="w-10 h-10 opacity-70 hover:opacity-80" />}
                     rightControl={<RightArrow className="w-10 h-10 opacity-70 hover:opacity-80" />}
@@ -32,7 +39,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
                     className=" h-[300px] sm:h-[350px] md:h-[400px] lg:h-[500px] xl:h-[550px] w-10/12 md:w-8/12"
                     onSlideChange={handleCarouselChange}
                 >
-                    {games.map((game) => (
+                    {shuffledGames.slice(0, 10).map((game) => (
                         <div
                             key={game.id}
                             className="flex flex-col h-full items-center justify-center overflow-hidden"
