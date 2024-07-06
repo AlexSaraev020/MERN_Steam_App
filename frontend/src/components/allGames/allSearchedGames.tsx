@@ -15,10 +15,10 @@ const AllSearchedGames: React.FC<AllSearchedGamesProps> = ({ setUser, games }) =
     const { title } = useParams<{ title: string }>();
 
     useEffect(() => {
-            if (title && games) {
-                const filteredGames = games.filter(item => item.title.toLocaleLowerCase().includes(title))
-                setSearchedGames(filteredGames)
-            }
+        if (title && games) {
+            const filteredGames = games.filter(item => item.title.toLocaleLowerCase().includes(title))
+            setSearchedGames(filteredGames)
+        }
     }, [title, games]);
 
     const slicedGames = searchedGames.slice(0, 10);

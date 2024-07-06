@@ -27,8 +27,8 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
     }, [games, shuffledGames])
 
     return (
-        <section className="relative flex justify-center items-center mt-10 sm:mt-14 md:mt-10 md:mb-10 lg:mt-6 2xl:mt-10">
-            <div className="w-full flex flex-col items-center justify-center ">
+        <section className="relative flex justify-center items-center">
+            <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-0 ">
 
                 <Carousel
                     leftControl={<LeftArrow className="w-10 h-10 opacity-70 hover:opacity-80" />}
@@ -36,7 +36,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
                     pauseOnHover
                     slideInterval={5000}
                     indicators={false}
-                    className=" h-[300px] sm:h-[350px] md:h-[400px] lg:h-[500px] xl:h-[550px] w-10/12 md:w-8/12"
+                    className=" h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[45rem] xl:h-[45rem] w-11/12 sm:w-11/12 md:w-11/12 lg:w-11/12 xl:w-9/12"
                     onSlideChange={handleCarouselChange}
                 >
                     {shuffledGames.slice(0, 10).map((game) => (
@@ -45,17 +45,17 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
                             className="flex flex-col h-full items-center justify-center overflow-hidden"
                         >
                             <div className='relative'>
-                                <Link to={`/game/${game.id}`} className="relative">
+                                <Link to={`/game/${game.id}`} className="">
                                     <img
-                                        className="scale-1 rounded-lg h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[550px] w-full"
+                                        className=" scale-1 rounded-lg h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[45rem] xl:h-[45rem]"
                                         src={game.thumbnail}
                                         alt={game.title}
                                     />
-                                    <h2 className="absolute inset-x-0 bottom-0 text-white font-bold text-md xl:text-3xl bg-black bg-opacity-40 p-2 rounded-b-lg">{game.title}</h2>
+                                    <h2 className="absolute inset-x-0 bottom-0 text-white font-bold md:text-xl lg:text-3xl xl:text-3xl bg-black bg-opacity-40 p-2 rounded-b-lg">{game.title}</h2>
 
                                 </Link>
-                                <div className='absolute top-0 rounded-t-lg flex justify-end w-full h-12 bg-black bg-opacity-40'>
-                                    <div className='top-0 w-12'>
+                                <div className='absolute z-10 md:top-0 rounded-t-lg flex justify-end w-full h-12 '>
+                                    <div className=' w-24 hidden md:block bg-black bg-opacity-40 h-24'>
                                         <FavoriteButton user={user} gameId={game.id} />
                                     </div>
                                 </div>

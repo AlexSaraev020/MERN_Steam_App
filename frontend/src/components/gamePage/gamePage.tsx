@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Game } from "../../types/types";
 import NavigationMenu from "../Navigation/NavigationMenu";
@@ -19,14 +19,6 @@ const GamePage: React.FC<GamePageProps> = ({ user, setUser, games }) => {
     const { id } = useParams<{ id: string | undefined }>();
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([])
     const [game, setGame] = useState<Game | undefined>(undefined)
-    const favoriteRef = useRef<HTMLButtonElement | null>(null);
-
-    const handleFavoriteRef = () => {
-        if (favoriteRef.current) {
-            favoriteRef.current.click()
-        }
-    }
-
     useEffect(() => {
         const gameFound = games?.find(index => index.id.toString() === id);
         setGame(gameFound)
@@ -35,6 +27,7 @@ const GamePage: React.FC<GamePageProps> = ({ user, setUser, games }) => {
             setGamesByGenre(gameGenre);
           }
     }, [game?.genre, games, id])
+    
 
     return (
         <div className="flex flex-col bg-gray-300 min-h-screen relative text-white">

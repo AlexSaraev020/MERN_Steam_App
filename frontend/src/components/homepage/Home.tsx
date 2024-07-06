@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import background from '../../images/login.jpg';
 import CarouselComponent from "./carousel/Carousel";
 import { Game, User } from "../../types/types";
@@ -10,10 +10,11 @@ interface HomeProps {
     user?: User
     setUser: (user?: User) => void
     setAllGames: (games?: Game[]) => void;
+    setFavoriteGames: (games?: Game[]) => void;
 }
 
 
-const Home: React.FC<HomeProps> = ({ user, setUser, setAllGames }) => {
+const Home: React.FC<HomeProps> = ({ user, setUser, setAllGames , setFavoriteGames }) => {
 
     const [activeGameIndex, setActiveGameIndex] = useState<number>(0);
     const [backgroundImage, setBackgroundImage] = useState<string>(background);
@@ -27,14 +28,15 @@ const Home: React.FC<HomeProps> = ({ user, setUser, setAllGames }) => {
                     fetchGames()
                 ]);
                 setAllGames(allGamesResponse);
+                setFavoriteGames(allGamesResponse.filter(games => user?.favoriteGames.includes(games.id)));
                 setGames(gamesResponse);
             } catch (err) {
                 console.error('Error during API request:', err);
             }
         };
         fetchAllGames();
-    }, []);
-
+    }, [setAllGames]);
+    
 
     useEffect(() => {
         if (games) {
@@ -48,10 +50,10 @@ const Home: React.FC<HomeProps> = ({ user, setUser, setAllGames }) => {
 
     return (
         <div className="relative flex min-h-screen flex-col justify-center items-center">
-            <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={backgroundImage} />
-            <div className='absolute inset-0 bg-zinc-800 opacity-[0.7]'></div>
+            <img className='h-full w-full absolute object-cover ' alt='backgroundLogin' src={backgroundImage} />
+            <div className='absolute inset-0 bg-[#171717] opacity-[1]'></div>
             <div className='relative w-full flex flex-col min-h-screen'>
-                <div className="flex flex-col w-full relative">\
+                <div className="flex flex-col w-full relative">
                     {/* Navigation Menu */}
                     <div className="hidden lg:block w-full mb-4">
                         <NavigationMenu setUser={setUser} />

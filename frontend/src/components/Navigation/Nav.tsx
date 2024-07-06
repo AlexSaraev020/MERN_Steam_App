@@ -56,7 +56,7 @@ const Nav = ({setUser} : {setUser: (user?: User) => void}) => {
     };
     return (
         <nav className=''>
-            <div className={`flex items-center justify-center w-full p-2 sm:p-10 bg-black bg-opacity-90 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h-[70px]`}>
+            <div className={`flex items-center justify-center w-full p-2 sm:p-10 bg-zinc-950 bg-opacity-40 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h-[70px]`}>
                 <Link to="/home" className="flex items-end space-x-1 absolute left-4 top-4">
                     <SvgIcon className='h-8 w-8 sm:h-10 sm:w-10' />
                     <h2 className='text-white text-lg sm:text-2xl md:text-3xl font-bold'>Gamers<span className="text-emerald-400">Lobby</span></h2>
@@ -75,7 +75,7 @@ const Nav = ({setUser} : {setUser: (user?: User) => void}) => {
             {isMenuActive &&
                 <div className='h-screen w-full absolute bg-gradient-to-r from-zinc-900 to-zinc-900 via-zinc-800 z-40'>
                     <div className='flex flex-col h-screen items-center justify-center'>
-                        <Link to="/home" className="flex items-end space-x-1">
+                        <Link onClick={handleClick} to="/home" className="flex items-end space-x-1">
                             <SvgIcon className='w-12 h-14' />
                             <h2 className='text-white text-4xl lg:text-3xl font-bold'>Gamers<span className="text-emerald-400">Lobby</span></h2>
                         </Link>

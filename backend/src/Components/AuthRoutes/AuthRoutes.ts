@@ -20,7 +20,7 @@ export function setupRoutes(app: Express) {
             } else {
                 const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(password, salt);
-                const newUser = await UserModel.create({ name, email, password: hashedPassword });
+                const newUser = await UserModel.create({ name, email, password: hashedPassword }); 
                 if (newUser) {
                     res.status(201).json(newUser);
                 } else {

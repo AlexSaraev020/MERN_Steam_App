@@ -19,15 +19,14 @@ interface LogOutProps {
     setUser: (user?: User) => void
 }
 
-const NavigationMenu: React.FC<LogOutProps> = ({setUser}) => {
+const NavigationMenu: React.FC<LogOutProps> = ({ setUser }) => {
     const navigate = useNavigate();
 
     const navLinks: NavLinkType[] = [
-        { id:1 , to: '/home', icon: <HomeSVG className="w-6 h-6 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
-        { id:2 , to: '/allgames', icon: <StoreSVG className="w-6 h-6 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Catalogue' },
-        { id:3 , to: '/profile', icon: <ProfileSVG className="w-6 h-6 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Profile' },
-        { id:4 , to: '/favorite', icon: <FavouritesSVG className="w-6 h-6 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Favorite' },
-        { id:5 , to: '/', icon: <LogOutSVG className="w-6 h-6 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Log Out' }
+        { id: 1, to: '/home', icon: <HomeSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
+        { id: 2, to: '/allgames', icon: <StoreSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Catalogue' },
+        { id: 3, to: '/profile', icon: <ProfileSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Profile' },
+        { id: 4, to: '/allfavoritegames', icon: <FavouritesSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Favorite' },
     ];
 
     const handleLogout = () => {
@@ -39,22 +38,25 @@ const NavigationMenu: React.FC<LogOutProps> = ({setUser}) => {
 
     return (
         <div className='border-b-2 border-emerald-400 lg:border-0'>
-            <ul className="space-y-5 mb-4 mt-6 lg:space-x-10 flex flex-col lg:flex-row items-center justify-center text-2xl lg:text-md xl:text-lg 2xl:text-xl font-bold lg:border-b border-emerald-500 lg:border-white py-1 sm:py-2">
+            <ul className="space-y-5 lg:space-y-0 mb-4 mt-6 lg:space-x-10 flex flex-col lg:flex-row items-center justify-center text-2xl lg:text-md xl:text-lg 2xl:text-xl font-bold py-1 sm:py-2">
                 {navLinks.map((link) => (
                     <li key={link.id} className='flex items-center justify-center'>
 
-                        <Link onClick={handleLogout} to={link.to} className='flex items-center justify-center'>
-                            <button className="group relative flex items-center justify-center overflow-hidden rounded-xl bg-zinc-800 shadow-lg shadow-emerald-500/20 w-60 lg:w-auto border-2 lg:border-0 border-emerald-500 lg:px-8 xl:px-10 py-3 text-md font-medium hover:text-emerald-300 text-white focus:outline-none focus:ring active:bg-emerald-600 active:text-white">
-                                <span className="ease absolute left-0 top-0 h-0 w-0 border-t-2 lg:border-t-2 border-emerald-600 transition-all duration-200 group-hover:w-full"></span>
-                                <span className="ease absolute right-0 top-0 h-0 w-0 border-r-2 lg:border-r-2 border-emerald-600 transition-all duration-200 group-hover:h-full"></span>
-                                <span className="ease absolute bottom-0 right-0 h-0 w-0 border-b-2 lg:border-b-2 border-emerald-600 transition-all duration-200 group-hover:w-full"></span>
-                                <span className="ease absolute bottom-0 left-0 h-0 w-0 border-l-2 lg:border-l-2 border-emerald-600 transition-all duration-200 group-hover:h-full"></span>
-                                <span className=''>{link.icon}</span>
+                        <Link to={link.to} className='flex items-center justify-center'>
+                            <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-lg hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
+                                {link.icon}
                                 {link.label}
                             </button>
                         </Link>
+
                     </li>
                 ))}
+                <Link onClick={handleLogout} to='/' className='flex items-center justify-center'>
+                    <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-lg hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
+                        <LogOutSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />
+                        Log Out
+                    </button>
+                </Link>
             </ul>
         </div>
     );
