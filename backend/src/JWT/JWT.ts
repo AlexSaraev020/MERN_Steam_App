@@ -8,20 +8,12 @@ interface UserPayload {
     userId: string;
     userName: string;
     email: string;
+    favoriteGames: number[],
 }
 
 export function generateToken(userPayload: UserPayload, rememberMe: boolean = false): string {
-    const expiresIn = rememberMe ? '1d' : '1h'
+    const expiresIn = rememberMe ? '7d' : '1h'
     const token: string = jwt.sign(userPayload, TOKEN_KEY, { expiresIn });
     return token;
 }
 
-export function verifyToken(token: string) {
-    try {
-        const decoded = jwt.verify(token, TOKEN_KEY) as UserPayload
-        return decoded
-    } catch (error) {
-        console.error('Error verifying JWT token:', error);
-        return null;
-    }
-}

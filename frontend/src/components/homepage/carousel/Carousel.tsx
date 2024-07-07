@@ -11,12 +11,11 @@ import { useEffect, useState } from 'react';
 interface CarouselProps {
     handleCarouselChange: (id: number) => void;
     games?: Game[];
-    user?: User;
 }
 
 
 
-const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games, user }) => {
+const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games }) => {
 
     const [shuffledGames, setShuffledGames] = useState<Game[]>([])
 
@@ -56,7 +55,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
                                 </Link>
                                 <div className='absolute z-10 md:top-0 rounded-t-lg flex justify-end w-full h-12 '>
                                     <div className=' w-24 hidden md:block bg-black bg-opacity-40 h-24'>
-                                        <FavoriteButton user={user} gameId={game.id} />
+                                        <FavoriteButton gameId={game.id} />
                                     </div>
                                 </div>
                             </div>

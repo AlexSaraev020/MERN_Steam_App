@@ -7,6 +7,9 @@ import { ReactComponent as ProfileSVG } from '../../icons/profile.svg';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../../types/types';
+import { UserContext } from '../../contexts/UserContext';
+import { useContext } from 'react';
+
 
 interface NavLinkType {
     id: number;
@@ -15,12 +18,12 @@ interface NavLinkType {
     label: string;
 }
 
-interface LogOutProps {
-    setUser: (user?: User) => void
-}
 
-const NavigationMenu: React.FC<LogOutProps> = ({ setUser }) => {
+
+const NavigationMenu = ({setIsMenuActive } : {setIsMenuActive: (isMenuActive: boolean) => void}) => {
     const navigate = useNavigate();
+    const userContext = useContext(UserContext);
+    const setUser = userContext?.setUser
 
     const navLinks: NavLinkType[] = [
         { id: 1, to: '/home', icon: <HomeSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
@@ -30,10 +33,20 @@ const NavigationMenu: React.FC<LogOutProps> = ({ setUser }) => {
     ];
 
     const handleLogout = () => {
-        Cookies.remove('token');
+        const cookies = Cookies.get();
+        for (const cookie in cookies) {
+            Cookies.remove(cookie);
+        }
         localStorage.clear();
-        setUser(undefined)
+        if (setUser) {
+            setUser(undefined);
+        }
+        setIsMenuActive(false)
         navigate('/');
+    };
+
+    const handleMenu = () => {
+        setIsMenuActive(false)
     };
 
     return (
@@ -42,7 +55,7 @@ const NavigationMenu: React.FC<LogOutProps> = ({ setUser }) => {
                 {navLinks.map((link) => (
                     <li key={link.id} className='flex items-center justify-center'>
 
-                        <Link to={link.to} className='flex items-center justify-center'>
+                        <Link onClick={handleMenu} to={link.to} className='flex items-center justify-center'>
                             <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-lg hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
                                 {link.icon}
                                 {link.label}

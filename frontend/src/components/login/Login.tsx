@@ -1,20 +1,18 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
-import { User } from '../../types/types';
+import { UserContext } from '../../contexts/UserContext';
 
-interface LoginProps {
-    setUser: (user: User) => void
-}
-
-const Login: React.FC<LoginProps> = ({ setUser }) => {
+const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
-    const [rememberMe, setRememberMe] = useState<boolean>(false)
+    const [rememberMe, setRememberMe] = useState<boolean>(false);
+    const userContext = useContext(UserContext);
+    const setUser = userContext?.setUser;
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -22,8 +20,12 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
             const response = await axios.post('http://localhost:3001/login', { email, password, rememberMe });
 
             if (response.status === 200) {
-                localStorage.setItem('token', response.data.token);
-                setUser(response.data)
+                document.cookie = `token=${response.data.token}; max-age=${rememberMe ? 7 * 24 * 60 * 60 : 60 * 60}; path=/`;
+
+                if (setUser) {
+                    setUser(response.data);
+                }
+
                 if (response.data.name) {
                     navigate('/home');
                 } else {

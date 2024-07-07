@@ -4,7 +4,7 @@ import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Game, User } from "../../../types/types";
 import TruncatedName from "../TruncatedName";
 import FavoriteButton from "../../favorite/FavoriteButton";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { shuffle } from "../../../actions/generalFunctionalities";
 
 interface GamesRecommendedProps {
@@ -14,95 +14,75 @@ interface GamesRecommendedProps {
 
 
 
-const Recommended: React.FC<GamesRecommendedProps> = ({ games , user }) => {
-    const [shuffledGames , setShuffledGames] = useState<Game[]>([])
+const Recommended: React.FC<GamesRecommendedProps> = ({ games, user }) => {
+    const [shuffledGames, setShuffledGames] = useState<Game[]>([])
 
-    useEffect(()=>{
-        if(games){
+    useEffect(() => {
+        if (games) {
             setShuffledGames(shuffle(games))
         }
     }, [games, shuffledGames])
 
-    return (
-        <section className="relative">
-            <div className="absolute w-full bg-black bg-opacity-50 h-52 sm:h-48 md:h-52 lg:h-60 xl:h-64  bottom-4 border-t-2 border-b-2 border-emerald-400"> </div>
-            <div className="relative w-[97%] xl:w-9/12 mb-4 flex flex-col justify-center items-center mx-auto ">
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-                <div className="w-full overflow-x-auto space-y-4 mt-4 flex flex-col items-center justify-center">
-                    <div className="relative flex flex-col items-end w-full sm:w-11/12 xl:w-full overflow-hidden mt-4 py-4 rounded-xl bg-opacity-50">
-                        <div className="flex justify-between w-full mb-1 lg:mb-2 -mt-3 lg:mt-0">
-                            <h2 className="text-emerald-400 ml-10 sm:ml-10 md:ml-10 lg:ml-12 2xl:ml-16 font-sans text-sm sm:text-sm md:text-md lg:text-xl font-bold">Recommended:</h2>
-                            <Link
-                                to='/allgames'
-                                className="text-emerald-400 text-sm sm:text-sm md:text-md lg:text-xl hover:underline font-sans font-bold mr-10 sm:mr-10 md:mr-10 lg:mr-12 2xl:mr-16"
-                            >
-                                View All games
+    const scrollLeft = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({
+                left: -300,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const scrollRight = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({
+                left: 300,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    return (
+        <section className="relative flex flex-col items-center justify-center w-full">
+            <h2 className="relative top-0 w-fit h-auto py-4 justify-center flex bg-gradient-to-r items-center from-emerald-500 via-emerald-400 to-emerald-500 bg-clip-text text-2xl xl:text-5xl font-extrabold text-transparent text-center select-auto">
+                Recommended games:
+            </h2>
+            <button
+                onClick={scrollLeft}
+                className="absolute bottom-28 left-2 sm:left-6 md:left-8 lg:left-20 xl:left-36 z-20 bg-gradient-to-br hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/70 transition-all duration-500 from-zinc-900 via-zinc-800 to-zinc-800 text-white p-2 rounded-full"
+            >
+                <svg className="h-8 w-8 md:w-10 md:h-10 stroke-emerald-500 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 12H18M6 12L11 7M6 12L11 17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+
+            </button>
+            <div className="w-11/12 lg:w-9/12 items-center justify-center flex overflow-hidden" ref={scrollContainerRef}>
+                <div className="flex flex-nowrap space-x-6 w-11/12 justify-center ">
+                    {shuffledGames.slice(20, 29).map(game => (
+                        <div key={game.id} className="relative flex-none w-[20rem] sm:w-[25rem] py-6 snap-center">
+                            <Link to={`/game/${game.id}`}>
+                                <div className="relative isolate flex flex-col justify-end overflow-hidden h-60 rounded-2xl p-2 transition-all duration-500 hover:-translate-y-6 hover:scale-125 hover:z-10">
+                                    <img src={game.thumbnail} alt={game.title} className="absolute inset-0 h-full w-full" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-gray-900/40"></div>
+                                    <h3 className="z-10 mt-3 text-lg font-bold text-white"><TruncatedName name={game.title} /></h3>
+                                    <div className="z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">City of love</div>
+                                </div>
                             </Link>
                         </div>
-
-                        <div className="relative flex w-full overflow-hidden items-center">
-                            <button
-                                className="xl:mx-2 text-white p-2 rounded-full hover:bg-opacity-75 z-10"
-                                onClick={() => {
-                                    const container = document.getElementById('gameSlider2');
-                                    if (container) {
-                                        const currentScroll = container.scrollLeft;
-                                        const cardWidth = container.offsetWidth;
-                                        const centerOffset = Math.floor(cardWidth / 2);
-
-                                        container.scrollTo({
-                                            left: currentScroll - centerOffset,
-                                            behavior: 'smooth',
-                                        });
-                                    }
-                                }}
-                            >
-                                <LeftArrow className="h-6 w-6 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
-                            </button>
-                            <div id="gameSlider2" className="flex space-x-3 sm:-space-x-6 md:space-x-0 lg:space-x-4 overflow-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
-                                {shuffledGames.slice(20,30).map(game => (
-                                    <div key={game.id} className="relative flex-none w-44 sm:w-60 snap-center h-40 sm:h-36 md:h-40 lg:h-44 xl:h-48">
-                                        <Link to={`/game/${game.id}`} key={game.id}>
-                                            <img className="rounded-lg h-44 sm:h-36 md:h-40 lg:h-44 xl:h-48 sm:w-10/12 md:w-11/12 lg:w-full object-cover" src={game.thumbnail} alt={game.title} />
-                                            <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 flex items-center sm:w-10/12 md:w-11/12 lg:w-full rounded-b-lg justify-center opacity-100">                                                    <p className="text-white text-lg sm:text-xl font-bold text-center p-x-2"><TruncatedName name={game.title} /></p>
-                                            </div>
-                                        </Link>
-                                        <div className="w-full bg-black bg-opacity-40 rounded-t-lg absolute top-0 right-0 flex justify-end">
-                                            <div className=" h-8 w-8">
-                                                <FavoriteButton user={user} gameId={game.id} />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                ))}
-                            </div>
-                            <button
-                                className="xl:mx-2 text-white p-2 rounded-full hover:bg-opacity-75 z-10"
-                                onClick={() => {
-                                    const container = document.getElementById('gameSlider2');
-                                    if (container) {
-                                        const currentScroll = container.scrollLeft;
-                                        const cardWidth = container.offsetWidth;
-                                        const centerOffset = Math.floor(cardWidth / 2);
-
-                                        container.scrollTo({
-                                            left: currentScroll + centerOffset,
-                                            behavior: 'smooth',
-                                        });
-                                    }
-                                }}
-                            >
-                                <RightArrow className="h-6 w-6 lg:w-8 lg:h-8" />
-                            </button>
-                        </div>
-
-                    </div>
-
+                    ))}
                 </div>
-
             </div>
-        </section>
+            <button
+                onClick={scrollRight}
+                className="absolute bottom-28 right-2 sm:right-6 md:right-8 lg:right-20 xl:right-36 z-20 bg-gradient-to-br hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/70 transition-all duration-500 from-zinc-900 via-zinc-800 to-zinc-800 text-white p-2 rounded-full"
+            >
+                <svg className="h-8 w-8 md:w-10 md:h-10 stroke-emerald-500 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 12H18M18 12L13 7M18 12L13 17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
 
+            </button>
+        </section>
     )
 }
 

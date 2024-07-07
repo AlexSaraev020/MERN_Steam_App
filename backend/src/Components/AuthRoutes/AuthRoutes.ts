@@ -41,12 +41,10 @@ export function setupRoutes(app: Express) {
             const user = await UserModel.findOne({ email });
             if (user) {
                 if (await bcrypt.compare(password, user.password)) {
-                    const token = generateToken({ userId: user.id.toString(),userName:user.name, email: user.email }, rememberMe);
-                    const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
-                    
+                    const token = generateToken({ userId: user.id.toString(),userName:user.name, email: user.email, favoriteGames: user.favoriteGames }, rememberMe);
+                    const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;  
                     res.cookie('token', token, {
                         httpOnly: true,
-                        secure: true,
                         maxAge: maxAge,
                         sameSite: 'strict'
                     });

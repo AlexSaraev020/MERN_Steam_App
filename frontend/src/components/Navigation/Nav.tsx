@@ -5,7 +5,7 @@ import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
 import { jwtDecode } from 'jwt-decode';
-import { User } from '../../types/types';
+import Cookies from 'js-cookie';
 
 interface DecodedToken {
     userId: string;
@@ -13,13 +13,13 @@ interface DecodedToken {
     email: string;
 }
 
-const Nav = ({setUser} : {setUser: (user?: User) => void}) => {
-    const [isMenuActive, setIsMenuActive] = useState(false);
+const Nav = ({setIsMenuActive , isMenuActive} : {setIsMenuActive: (isMenuActive: boolean) => void, isMenuActive: boolean}) => {
+    
     const [name, setName] = useState<string>('')
 
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
+        const token = Cookies.get('token')
         if (token) {
             const decodedToken = jwtDecode<DecodedToken>(token)
             setName(decodedToken.userName)
@@ -50,10 +50,10 @@ const Nav = ({setUser} : {setUser: (user?: User) => void}) => {
         };
     }, []);
 
-
     const handleClick = () => {
         setIsMenuActive(!isMenuActive);
     };
+
     return (
         <nav className=''>
             <div className={`flex items-center justify-center w-full p-2 sm:p-10 bg-zinc-950 bg-opacity-40 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h-[70px]`}>
@@ -82,7 +82,7 @@ const Nav = ({setUser} : {setUser: (user?: User) => void}) => {
                         <div className='mt-6'>
                             <SearchInput />
                         </div>
-                        <NavigationMenu setUser={setUser} />
+                        <NavigationMenu setIsMenuActive={setIsMenuActive}/>
                     </div>
                 </div>
             }

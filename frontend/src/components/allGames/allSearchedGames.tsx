@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import { Game } from "../../types/types";
 import { useParams } from "react-router-dom";
-import { User } from "../../types/types";
+import { GamesContext } from "../../contexts/GamesContext";
 
-interface AllSearchedGamesProps {
-    setUser: (user?: User) => void;
-    games?: Game[];
-}
 
-const AllSearchedGames: React.FC<AllSearchedGamesProps> = ({ setUser, games }) => {
+
+
+const AllSearchedGames = () => {
     const [searchedGames, setSearchedGames] = useState<Game[]>([]);
     const { title } = useParams<{ title: string }>();
+    const gamesContext = useContext(GamesContext);
+    const games = gamesContext?.allGames
+
 
     useEffect(() => {
         if (title && games) {
@@ -25,9 +26,6 @@ const AllSearchedGames: React.FC<AllSearchedGamesProps> = ({ setUser, games }) =
 
     return (
         <div className="flex flex-col bg-zinc-900 min-h-screen text-white w-full">
-            <div className="mt-6 hidden lg:block">
-                <NavigationMenu setUser={setUser} />
-            </div>
             <div className="w-full flex items-center justify-center mt-10">
                 <ul className="w-11/12 sm:w-9/12 space-y-20 sm:space-y-14 bg-zinc-900 rounded-t-xl flex flex-col justify-start items-center border-t-2 border-x-2 min-h-screen border-emerald-400">
                     {slicedGames.map((game) => (

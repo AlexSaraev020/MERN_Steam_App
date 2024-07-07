@@ -1,18 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import { useState, useEffect } from "react";
 import { Game } from "../../types/types";
-import { User } from "../../types/types";
-
-interface AllGamesProps {
-    setUser : (user? : User)=> void;
-    allGames?: Game[]
-}
+import { GamesContext } from "../../contexts/GamesContext";
 
 
-const AllGames: React.FC<AllGamesProps> = ({setUser, allGames}) => {
-    const [slicedGames, setSlicedGames] = useState<Game[]>([])
+
+const AllGames = () => {
+    const [slicedGames, setSlicedGames] = useState<Game[]>([]);
+    const gamesContext = useContext(GamesContext);
+    const allGames = gamesContext?.allGames
 
     useEffect(()=>{
         if(allGames){
@@ -23,9 +21,6 @@ const AllGames: React.FC<AllGamesProps> = ({setUser, allGames}) => {
 
     return (
         <div className="flex flex-col bg-inherit min-h-screen text-white w-full">
-            <div className="mt-6 hidden lg:block">
-                <NavigationMenu setUser={setUser} />
-            </div>
             <div className="w-full flex items-center justify-center mt-10">
                 <ul className="w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-[#1e1e1e] rounded-t-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration">
                     {slicedGames.map((game) => (

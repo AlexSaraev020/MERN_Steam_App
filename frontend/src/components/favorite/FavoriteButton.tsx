@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { User } from '../../types/types';
+import { UserContext } from '../../contexts/UserContext';
 
 interface FavoriteButtonProps {
     gameId: number | undefined;
-    user?: User;
 }
 
 
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId, user }) => {
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
     const [favorite, setFavorite] = useState<boolean>(false);
+    const userContext = useContext(UserContext)
+    const user = userContext?.user
 
     useEffect(() => {
         if (user && gameId) {
+            console.log(user)
             try {
                 if (user.favoriteGames && user.favoriteGames.includes(gameId)) {
                     setFavorite(true);
