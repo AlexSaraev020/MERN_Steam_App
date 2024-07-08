@@ -19,11 +19,18 @@ export interface Game {
 //User Related
 
 export interface User {
-    _id?: string;
-    name?: string;
-    favoriteGames: number[];
+    userId: string;
+    userName: string;
+    email: string;
+    favoriteGames: number[],
 }
 
+export interface DecodedToken {
+    userId: string;
+    userName: string;
+    email: string;
+    favoriteGames: number[];
+}
 
 
 //Nav Related

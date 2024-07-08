@@ -1,32 +1,22 @@
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
-
-interface DecodedToken {
-    userId: string;
-    userName: string;
-    email: string;
-}
-
-const Nav = ({setIsMenuActive , isMenuActive} : {setIsMenuActive: (isMenuActive: boolean) => void, isMenuActive: boolean}) => {
-    
-    const [name, setName] = useState<string>('')
+import { UserContext } from '../../contexts/UserContext';
 
 
-    useEffect(() => {
-        const token = Cookies.get('token')
-        if (token) {
-            const decodedToken = jwtDecode<DecodedToken>(token)
-            setName(decodedToken.userName)
-        }else{
-            setName('Guest')
-        }
-    } , [])
+
+const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive: boolean) => void, isMenuActive: boolean }) => {
+
+    const userContext = useContext(UserContext)
+
+
+
+
 
     useEffect(() => {
         if (isMenuActive) {
@@ -65,7 +55,7 @@ const Nav = ({setIsMenuActive , isMenuActive} : {setIsMenuActive: (isMenuActive:
                     <SearchInput />
                 </div>
                 <h2 className='text-emerald-400 text-sm sm:text-lg md:text-2xl font-bold absolute right-24 lg:right-4 top-6'>
-                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{name}
+                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{userContext?.user?.userName}
                 </h2>
 
             </div>
@@ -82,7 +72,7 @@ const Nav = ({setIsMenuActive , isMenuActive} : {setIsMenuActive: (isMenuActive:
                         <div className='mt-6'>
                             <SearchInput />
                         </div>
-                        <NavigationMenu setIsMenuActive={setIsMenuActive}/>
+                        <NavigationMenu setIsMenuActive={setIsMenuActive} />
                     </div>
                 </div>
             }

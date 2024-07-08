@@ -6,24 +6,22 @@ import { Game, User } from '../../../types/types';
 import FavoriteButton from '../../favorite/FavoriteButton';
 import { shuffle } from '../../../actions/generalFunctionalities';
 import { useEffect, useState } from 'react';
-
-
-interface CarouselProps {
-    handleCarouselChange: (id: number) => void;
-    games?: Game[];
-}
+import { useGames } from '../../../contexts/GamesContext';
 
 
 
-const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, games }) => {
+
+
+const CarouselComponent = () => {
 
     const [shuffledGames, setShuffledGames] = useState<Game[]>([])
+    const {allGames} = useGames()
 
     useEffect(() => {
-        if (games) {
-            setShuffledGames(shuffle(games))
+        if (allGames) {
+            setShuffledGames(shuffle(allGames))
         }
-    }, [games, shuffledGames])
+    }, [allGames, shuffledGames])
 
     return (
         <section className="relative flex justify-center items-center">
@@ -36,7 +34,6 @@ const CarouselComponent: React.FC<CarouselProps> = ({ handleCarouselChange, game
                     slideInterval={5000}
                     indicators={false}
                     className=" h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[45rem] xl:h-[45rem] w-11/12 sm:w-11/12 md:w-11/12 lg:w-11/12 xl:w-9/12"
-                    onSlideChange={handleCarouselChange}
                 >
                     {shuffledGames.slice(0, 10).map((game) => (
                         <div

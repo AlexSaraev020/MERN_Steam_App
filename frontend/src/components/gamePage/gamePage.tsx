@@ -1,22 +1,18 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Game } from "../../types/types";
-import NavigationMenu from "../Navigation/NavigationMenu";
 import RecommendedByGenre from "../homepage/recommended/RecommendedByGenre";
 import FavoriteButton from "../favorite/FavoriteButton";
-import { UserContext } from "../../contexts/UserContext";
 import { GamesContext } from "../../contexts/GamesContext";
 
-
-
 const GamePage = () => {
+
     const { id } = useParams<{ id: string | undefined }>();
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([]);
     const [game, setGame] = useState<Game | undefined>(undefined);
     const gamesContext = useContext(GamesContext);
     const games = gamesContext?.allGames
-
 
     useEffect(() => {
         const gameFound = games?.find(index => index.id.toString() === id);

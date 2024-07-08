@@ -6,22 +6,20 @@ import TruncatedName from "../TruncatedName";
 import FavoriteButton from "../../favorite/FavoriteButton";
 import { useEffect, useRef, useState } from "react";
 import { shuffle } from "../../../actions/generalFunctionalities";
-
-interface GamesRecommendedProps {
-    games?: Game[]
-    user?: User;
-}
+import { useGames } from "../../../contexts/GamesContext";
 
 
 
-const Recommended: React.FC<GamesRecommendedProps> = ({ games, user }) => {
+
+const Recommended = () => {
     const [shuffledGames, setShuffledGames] = useState<Game[]>([])
+    const { allGames} = useGames()
 
     useEffect(() => {
-        if (games) {
-            setShuffledGames(shuffle(games))
+        if (allGames) {
+            setShuffledGames(shuffle(allGames))
         }
-    }, [games, shuffledGames])
+    }, [allGames, shuffledGames])
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 

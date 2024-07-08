@@ -1,23 +1,23 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import NavigationMenu from "../Navigation/NavigationMenu";
+import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Game } from "../../types/types";
-import { GamesContext } from "../../contexts/GamesContext";
-
+import { useGames } from "../../contexts/GamesContext";
 
 
 const AllGames = () => {
-    const [slicedGames, setSlicedGames] = useState<Game[]>([]);
-    const gamesContext = useContext(GamesContext);
-    const allGames = gamesContext?.allGames
 
-    useEffect(()=>{
-        if(allGames){
-            setSlicedGames(allGames.slice(0,20))
-        }
-    } , [allGames])
+    const [slicedGames, setSlicedGames] = useState<Game[]>([]);
+    const { allGames, favoriteGames } = useGames();
+    const { pathname } = useLocation();
     
+
+    useEffect(() => {
+        if (pathname === "/allgames" && allGames) {
+            setSlicedGames(allGames.slice(0, 20));
+        } else if (pathname === "/allfavoritegames" && favoriteGames) {
+            setSlicedGames(favoriteGames.slice(0, 20));
+        }
+    }, [allGames, favoriteGames, pathname]);
 
     return (
         <div className="flex flex-col bg-inherit min-h-screen text-white w-full">
@@ -51,9 +51,7 @@ const AllGames = () => {
                 </ul>
             </div>
         </div>
-
-    )
+    );
 }
 
-
-export default AllGames
+export default AllGames;

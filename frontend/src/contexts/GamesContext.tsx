@@ -29,4 +29,5 @@ export const useGames = () => {
     if (context === undefined) {
         throw new Error('useGames must be used within a GamesProvider')
     }
+    return context
 }
