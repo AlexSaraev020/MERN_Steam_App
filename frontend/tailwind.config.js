@@ -6,9 +6,14 @@ module.exports = {
     flowbite.content(),
   ],
   theme: {
-    extend: {},
+    extend: {
+      boxShadow: {
+        'glow': "0 0px 20px rgba(255,255, 255, 0.35)",
+      }
+    },
   },
   plugins: [
     flowbite.plugin(),
   ],
+  
 }

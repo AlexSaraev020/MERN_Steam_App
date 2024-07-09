@@ -6,9 +6,7 @@ import { ReactComponent as StoreSVG } from '../../icons/store.svg';
 import { ReactComponent as ProfileSVG } from '../../icons/profile.svg';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../../types/types';
-import { UserContext } from '../../contexts/UserContext';
-import { useContext } from 'react';
+import { useUser } from '../../contexts/UserContext';
 
 
 interface NavLinkType {
@@ -20,29 +18,25 @@ interface NavLinkType {
 
 
 
-const NavigationMenu = ({setIsMenuActive } : {setIsMenuActive: (isMenuActive: boolean) => void}) => {
+const NavigationMenu = ({ setIsMenuActive }: { setIsMenuActive: (isMenuActive: boolean) => void }) => {
     const navigate = useNavigate();
-    const userContext = useContext(UserContext);
-    const setUser = userContext?.setUser
+    const { setUser, user } = useUser()
 
     const navLinks: NavLinkType[] = [
-        { id: 1, to: '/home', icon: <HomeSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
+        { id: 1, to: '/', icon: <HomeSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
         { id: 2, to: '/allgames', icon: <StoreSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Catalogue' },
         { id: 3, to: '/profile', icon: <ProfileSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Profile' },
-        { id: 4, to: '/allfavoritegames', icon: <FavouritesSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Favorite' },
+        { id: 4, to: `/allfavoritegames/${user?.userId}`, icon: <FavouritesSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Favorite' },
     ];
 
     const handleLogout = () => {
-        const cookies = Cookies.get();
-        for (const cookie in cookies) {
-            Cookies.remove(cookie);
-        }
+        Cookies.remove('token');
         localStorage.clear();
-        if (setUser) {
-            setUser(undefined);
-        }
+        setUser(undefined);
         setIsMenuActive(false)
-        navigate('/');
+        setTimeout(() => {
+            navigate('/login');
+        }, 50);
     };
 
     const handleMenu = () => {
@@ -56,7 +50,7 @@ const NavigationMenu = ({setIsMenuActive } : {setIsMenuActive: (isMenuActive: bo
                     <li key={link.id} className='flex items-center justify-center'>
 
                         <Link onClick={handleMenu} to={link.to} className='flex items-center justify-center'>
-                            <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-lg hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
+                            <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
                                 {link.icon}
                                 {link.label}
                             </button>
@@ -65,7 +59,7 @@ const NavigationMenu = ({setIsMenuActive } : {setIsMenuActive: (isMenuActive: bo
                     </li>
                 ))}
                 <Link onClick={handleLogout} to='/' className='flex items-center justify-center'>
-                    <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-lg hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
+                    <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
                         <LogOutSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />
                         Log Out
                     </button>

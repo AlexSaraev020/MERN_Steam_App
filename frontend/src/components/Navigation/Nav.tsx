@@ -4,18 +4,26 @@ import { Link } from 'react-router-dom';
 import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
-import { jwtDecode } from 'jwt-decode';
+import { UserContext, useUser } from '../../contexts/UserContext';
 import Cookies from 'js-cookie';
-import { UserContext } from '../../contexts/UserContext';
 
 
 
 const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive: boolean) => void, isMenuActive: boolean }) => {
 
-    const userContext = useContext(UserContext)
+    const { user } = useUser()
+    const [isGuest, setIsGuest] = useState<string>('')
 
-
-
+    useEffect(() => {
+        const token = Cookies.get('token')
+        if (!token) {
+            setIsGuest('Guest')
+        } else {
+            if (user) {
+                setIsGuest(user?.userName)
+            }
+        }
+    })
 
 
     useEffect(() => {
@@ -55,7 +63,7 @@ const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive
                     <SearchInput />
                 </div>
                 <h2 className='text-emerald-400 text-sm sm:text-lg md:text-2xl font-bold absolute right-24 lg:right-4 top-6'>
-                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{userContext?.user?.userName}
+                    <span className="text-white text-xs sm:text-base md:text-xl">Welcome, </span>{isGuest}
                 </h2>
 
             </div>

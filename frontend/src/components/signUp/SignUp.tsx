@@ -14,17 +14,18 @@ function SignUp() {
     const [password, setPassword] = useState<string | undefined>(undefined)
     const navigate = useNavigate()
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        axios.post('http://localhost:3001/register', { name, email, password })
-            .then(result => {
-                if (result.status === 201) {
-                    navigate('/')
-                } else {
-                    alert('Email already used!')
-                }
-            })
-            .catch(err => console.log(err))
+        try {
+            const response = await axios.post('http://localhost:3001/register', { name, email, password })
+            if (response.status === 200) {
+                navigate('/login');
+            }
+        } catch (error) {
+            console.error(error)
+        }
+
+
     }
 
 
@@ -37,7 +38,7 @@ function SignUp() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className='absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center'>
-                <div className="w-[300px] sm:w-[400px]  border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
+                <div className="w-[300px] sm:w-[400px]  shadow-glow shadow-emerald-500 border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
                     <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 '>
                         <SvgIcon className='h-8 w-8 sm:h-12 sm:w-12 mb-2 sm:mb-4' />
                         <h2 className='text-white text-[30px] sm:text-[35px] font-bold  '>Create an account</h2>
@@ -51,7 +52,7 @@ function SignUp() {
                             type="text"
                             id="username"
                             name="name"
-                            className="mt-1 p-2 w-full text-sm sm:text-md border-emerald-400 border rounded-md mb-6 bg-transparent font-semibold text-zinc-200 focus:border-emerald-400 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="Enter your username"
                             onChange={(e) => setName(e.target.value)}
                         />
@@ -65,7 +66,7 @@ function SignUp() {
                             type="email"
                             id="email"
                             name="email"
-                            className="mt-1 p-2 w-full text-sm sm:text-md border-emerald-400 border rounded-md mb-6 bg-transparent font-semibold text-zinc-200 focus:border-emerald-400 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="Enter your email"
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -79,14 +80,14 @@ function SignUp() {
                             type="password"
                             id="password"
                             name="password"
-                            className="mt-1 p-2 w-full text-sm sm:text-md border-emerald-400 border rounded-md mb-6 bg-transparent font-semibold text-zinc-200 focus:border-emerald-400 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="●●●●●●●●"
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-10/12 bg-emerald-500 text-zinc-800 text-xl font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-md hover:bg-emerald-600 mb-6"
+                        className="w-10/12 shadow-md shadow-zinc-600 hover:shadow-emerald-500 hover:text-emerald-400 transition-all duration-500 hover:scale-105 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 text-white text-xl font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-md hover:bg-emerald-600 mb-6"
                     >
                         Register
                     </button>
@@ -94,7 +95,7 @@ function SignUp() {
                         <label htmlFor="password" className="flex text-sm sm:text-md font-sm text-white ">
                             You already have an account?
                         </label>
-                        <Link to='/'
+                        <Link to='/login'
                             type="submit"
                             className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
                         >

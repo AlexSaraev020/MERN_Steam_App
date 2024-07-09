@@ -14,8 +14,6 @@ export function fetchGames(app: Express) {
     });
 }
 
-
-
 export function favoriteGame(app: Express) {
     app.post('/favorite', async (req, res) => {
         const { userId, gameId } = req.body;
@@ -49,20 +47,4 @@ export function favoriteGame(app: Express) {
         }
     });
 
-}
-
-
-export function checkFavorites(app: Express) {
-    app.get('/checkfavorite', async (req, res) => {
-        const { userId, gameId } = req.body;
-        const user = await UserModel.findById(userId)
-        if (user) {
-            try {
-                const game = await UserModel.findById(gameId)
-                res.status(200).json(game)
-            } catch (error) {
-                res.status(500).json({ message: 'Game could not be found', error });
-            }
-        }
-    })
 }

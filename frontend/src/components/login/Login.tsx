@@ -1,28 +1,44 @@
-import { useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
-import { UserContext } from '../../contexts/UserContext';
+import { useUser } from '../../contexts/UserContext';
 import { jwtDecode } from 'jwt-decode';
 import { DecodedToken } from '../../types/types';
+import Cookies from 'js-cookie';
 
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
     const [rememberMe, setRememberMe] = useState<boolean>(false);
+    const { setUser } = useUser()
 
+    useEffect(() => {
+        const token = Cookies.get('token');
+        if (token) {
+            navigate('/')
+        }
+    }, [])
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/login', { email, password, rememberMe });
 
+
             if (response.status === 200) {
                 document.cookie = `token=${response.data.token}; max-age=${rememberMe ? 7 * 24 * 60 * 60 : 60 * 60}; path=/`;
+                const token = Cookies.get('token');
+                if (token) {
+                    const decodedToken = jwtDecode<DecodedToken>(token);
+                    if (setUser) {
+                        setUser(decodedToken);
+                    }
+                }
                 if (response.data.name) {
-                    navigate('/home');
+                    navigate('/');
                 } else {
                     alert('Username not set correctly');
                 }
@@ -39,14 +55,14 @@ const Login = () => {
         <div className='h-screen relative'>
             <img className='h-full w-full absolute object-cover blur-sm' alt='backgroundLogin' src={background} />
             <div className="absolute inset-0 bg-black opacity-40 "></div>
-            <form onSubmit={handleSubmit} className='absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center'>
-                <div className="w-[300px] sm:w-[400px] border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
+            <form onSubmit={handleSubmit} className=' absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center'>
+                <div className="w-[300px] sm:w-[400px]  shadow-glow shadow-emerald-500 border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
                     <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 '>
                         <SvgIcon className='h-8 w-8 sm:h-14 sm:w-14 mb-2 sm:mb-5' />
                         <h2 className='text-zinc-200 text-[30px] sm:text-[45px] font-bold  '>GameHub</h2>
                     </div>
-                    <div className='w-10/12'>
-                        <label htmlFor="email" className="flex text-sm sm:text-lg font-medium text-zinc-200 ml-1">
+                    <div className='w-10/12 '>
+                        <label htmlFor="email" className="flex text-sm sm:text-lg font-medium  text-zinc-200 ml-1">
                             Email
                         </label>
                         <input
@@ -54,7 +70,7 @@ const Login = () => {
                             type="email"
                             id="email"
                             name="email"
-                            className="mt-1 p-2 w-full text-sm sm:text-md border-emerald-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-400 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="Enter your email"
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -69,26 +85,32 @@ const Login = () => {
                             type="password"
                             id="password"
                             name="password"
-                            className="mt-1 p-2 w-full text-sm sm:text-md border-emerald-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-400 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="●●●●●●●●"
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     <div className='flex w-10/12 items-start mb-5'>
-                        <div className="flex items-center h-5">
+                        <div className="flex items-center">
                             <input
                                 onChange={(e) => setRememberMe(e.target.checked)}
                                 id="remember"
                                 type="checkbox"
-                                className="w-5 h-5 border-2 border-emerald-500 rounded bg-zinc-800 focus:ring-4 focus:ring-emerald-500"
+                                className="hidden"
                             />
+                            <label htmlFor="remember" className=" relative w-5 h-5 border-2 border-emerald-500 rounded bg-zinc-800 focus:ring-4 focus:ring-emerald-500 cursor-pointer">
+                                <span className="absolute inset-0 flex items-center justify-center">
+                                    {rememberMe && (
+                                        <svg fill='#10b981' xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="verified"><path d="M186.301 339.893L96 249.461l-32 30.507L186.301 402 448 140.506 416 110z"></path></svg>
+                                    )}
+                                </span>
+                            </label>
+                            <span className="ml-2 text-sm font-semibold text-zinc-300">Remember me</span>
                         </div>
-                        <label htmlFor="remember" className="ml-2 text-sm font-semibold text-zinc-300">Remember me</label>
                     </div>
-
                     <button
                         type="submit"
-                        className="w-10/12 bg-emerald-500 text-zinc-800 text-xl font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-md hover:bg-emerald-600 mb-6"
+                        className="w-10/12 shadow-md shadow-zinc-600 hover:shadow-emerald-500 hover:text-emerald-400 transition-all duration-500 hover:scale-105 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 text-white text-xl font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-md hover:bg-emerald-600 mb-6"
                     >
                         Login
                     </button>
@@ -103,7 +125,7 @@ const Login = () => {
                             Sign Up
                         </Link>
                         <Link
-                            to={`/home`}
+                            to={`/`}
                             className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
                         >
                             Guest

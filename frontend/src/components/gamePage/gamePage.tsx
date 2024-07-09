@@ -4,25 +4,54 @@ import { useParams } from "react-router-dom";
 import { Game } from "../../types/types";
 import RecommendedByGenre from "../homepage/recommended/RecommendedByGenre";
 import FavoriteButton from "../favorite/FavoriteButton";
-import { GamesContext } from "../../contexts/GamesContext";
+import { useGames } from "../../contexts/GamesContext";
+import { useUser } from "../../contexts/UserContext";
+import axios from "axios";
 
 const GamePage = () => {
 
     const { id } = useParams<{ id: string | undefined }>();
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([]);
     const [game, setGame] = useState<Game | undefined>(undefined);
-    const gamesContext = useContext(GamesContext);
-    const games = gamesContext?.allGames
+    const { allGames, setFavoriteButton, favoriteGames } = useGames()
+    const { user } = useUser()
+
+
 
     useEffect(() => {
-        const gameFound = games?.find(index => index.id.toString() === id);
+
+        const getFavorite = async () => {
+
+            try {
+                if (user && id) {
+                    const response = await axios.get(`http://localhost:3001/user/${user.userId}`);
+                    const numberId = parseInt(id)
+                    if (response.status === 200) {
+                        const favoriteGameIds = response.data.userFavorite;
+                        if (favoriteGameIds.includes(numberId)){
+                            setFavoriteButton(true)
+                        }else{
+                            setFavoriteButton(false)
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching favorite games:', error);
+            }
+        };
+        getFavorite();
+    }, [game, id, setFavoriteButton, user])
+
+
+    useEffect(() => {
+        const gameFound = allGames?.find(index => index.id.toString() === id);
         setGame(gameFound)
-        if (games) {
-            const gameGenre = games?.filter(item => item.genre === game?.genre);
+        if (allGames) {
+            const gameGenre = allGames?.filter(item => item.genre === game?.genre);
             setGamesByGenre(gameGenre);
-          }
-    }, [game?.genre, games, id])
-    
+        }
+    }, [game?.genre, allGames, id])
+
 
     return (
         <div className="flex flex-col bg-gray-300 min-h-screen relative text-white">
@@ -51,9 +80,9 @@ const GamePage = () => {
                                 </a>
                             </button>
                             <button className="flex items-center text-white bg-inherit border-2 border-emerald-500 hover:bg-emerald-900 px-2 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg mt-2 xl:mt-0 text-lg xl:text-lg  focus:outline-none xl:w-48 xl:h-14">
-                                <button className="w-12">
+                                <div className="w-12">
                                     <FavoriteButton gameId={game?.id} />
-                                </button>
+                                </div>
                                 <label className="hover:cursor-pointer" htmlFor="favoriteButton">Add to favorite</label>
                             </button>
                         </div>

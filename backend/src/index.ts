@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './Components/ConnectToDatabase/Mongoose';
 import { setupRoutes } from './Components/AuthRoutes/AuthRoutes';
-import { checkFavorites  , favoriteGame , fetchGames } from './Components/FetchGames/FetchGames';
+import { favoriteGame , fetchGames } from './Components/FetchGames/FetchGames';
 
 const app = express();
 const port = 3001;
@@ -22,7 +22,6 @@ setupRoutes(app);
 
 fetchGames(app)
 
-checkFavorites(app)
 
 favoriteGame(app);
 
