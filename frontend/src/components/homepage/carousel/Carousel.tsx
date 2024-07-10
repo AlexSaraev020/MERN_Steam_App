@@ -33,7 +33,7 @@ const CarouselComponent = () => {
                     pauseOnHover
                     slideInterval={5000}
                     indicators={false}
-                    className=" h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[45rem] xl:h-[45rem] w-11/12 sm:w-11/12 md:w-11/12 lg:w-11/12 xl:w-9/12"
+                    className=" h-[15rem] min-[400px]:h-[20rem] sm:h-[30rem] md:h-[35rem] lg:h-[45rem] xl:h-[45rem] w-11/12 sm:w-11/12 md:w-11/12 lg:w-11/12 xl:w-9/12"
                 >
                     {shuffledGames.slice(0, 10).map((game) => (
                         <div
@@ -43,7 +43,7 @@ const CarouselComponent = () => {
                             <div className='relative'>
                                 <Link to={`/game/${game.id}`} className="">
                                     <img
-                                        className=" scale-1 rounded-lg h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[45rem] xl:h-[45rem]"
+                                        className=" scale-1 rounded-lg min-[400px]:h-[20rem] sm:h-[30rem] md:h-[35rem] lg:h-[45rem] xl:h-[45rem]"
                                         src={game.thumbnail}
                                         alt={game.title}
                                     />

@@ -15,6 +15,7 @@ import { jwtDecode } from "jwt-decode";
 import { DecodedToken, Game } from "./types/types";
 import Cookies from "js-cookie";
 import AllFavoriteGames from "./components/allGames/AllFavoriteGames";
+import Footer from "./components/footer/Footer";
 
 
 const MainApp = () => {
@@ -29,11 +30,11 @@ const MainApp = () => {
     useEffect(() => {
         const token = Cookies.get('token');
         if (!token) {
-            if(user?.userName !== "Guest"){
-                
+            if (user?.userName !== "Guest") {
+
                 navigate('/login')
             }
-            
+
         }
     }, [])
 
@@ -68,8 +69,9 @@ const MainApp = () => {
     return (
         <div className="bg-[#171717]">
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
+            
             {!shouldHideNav &&
-                <div className="hidden lg:block w-full mb-4">
+                <div className="hidden min-[1146px]:block w-full mb-4">
                     <NavigationMenu setIsMenuActive={setIsMenuActive} />
                 </div>}
             <Routes>
@@ -82,7 +84,7 @@ const MainApp = () => {
                 <Route path="/searchbytitle/:title" element={<AllSearchedGames />} />
             </Routes>
 
-
+            {!shouldHideNav && <Footer />}
         </div>
     );
 }

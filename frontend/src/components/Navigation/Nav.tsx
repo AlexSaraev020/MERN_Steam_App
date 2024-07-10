@@ -1,10 +1,10 @@
 import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SearchInput from './SearchInput';
 import Hamburger from './Hamburger';
 import NavigationMenu from './NavigationMenu';
-import { UserContext, useUser } from '../../contexts/UserContext';
+import { useUser } from '../../contexts/UserContext';
 import Cookies from 'js-cookie';
 
 

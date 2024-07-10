@@ -54,12 +54,12 @@ const Login = () => {
     return (
         <div className='h-screen relative'>
             <img className='h-full w-full absolute object-cover blur-sm' alt='backgroundLogin' src={background} />
-            <div className="absolute inset-0 bg-black opacity-40 "></div>
+            <div className="absolute inset-0 bg-zinc-950 opacity-80 "></div>
             <form onSubmit={handleSubmit} className=' absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center'>
-                <div className="w-[300px] sm:w-[400px]  shadow-glow shadow-emerald-500 border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
+                <div className="w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12  shadow-glow shadow-emerald-500 border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
                     <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 '>
                         <SvgIcon className='h-8 w-8 sm:h-14 sm:w-14 mb-2 sm:mb-5' />
-                        <h2 className='text-zinc-200 text-[30px] sm:text-[45px] font-bold  '>GameHub</h2>
+                        <h2 className='text-zinc-200 text-[30px] sm:text-[45px] font-bold  '>Games<span className='text-emerald-500'>Lobby</span></h2>
                     </div>
                     <div className='w-10/12 '>
                         <label htmlFor="email" className="flex text-sm sm:text-lg font-medium  text-zinc-200 ml-1">
@@ -114,22 +114,29 @@ const Login = () => {
                     >
                         Login
                     </button>
-                    <div className='flex items-center justify-start w-10/12 mb-10'>
+                    <div className='flex flex-col  sm:flex-row sm:items-center sm:justify-start w-10/12 mb-10'>
                         <label htmlFor="password" className="flex text-sm sm:text-md font-sm text-white ">
                             Don’t have an account yet?
                         </label>
-                        <Link
-                            to='/register'
-                            className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
-                        >
-                            Sign Up
-                        </Link>
-                        <Link
-                            to={`/`}
-                            className="text-emerald-400 text-sm sm:text-md font-bold ml-2 hover:underline"
-                        >
-                            Guest
-                        </Link>
+                        <div className='flex mt-4 sm:mt-0 items-center space-x-5 sm:space-x-0 sm:justify-center'>
+                            <div className=' sm:mt-0 w-[4.5rem] sm:w-fit shadow-md sm:shadow-none shadow-emerald-500 px-2 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900'>
+                                <Link
+                                    to='/register'
+                                    className="text-emerald-400 text-sm sm:text-md font-bold  sm:hover:underline"
+                                >
+                                    Sign Up
+                                </Link>
+                            </div>
+                            <div className=' sm:mt-0 w-[4.5rem] flex justify-center sm:w-fit shadow-md sm:shadow-none shadow-zinc-500 px-2 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900'>
+                                <Link
+                                    to={`/`}
+                                    className="text-zinc-400 text-sm sm:text-md font-bold sm:hover:underline"
+                                >
+                                    Guest
+                                </Link>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </form>
