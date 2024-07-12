@@ -5,8 +5,8 @@ const Home = () => {
     
 
     return (
-        <div className="relative flex min-h-screen flex-col justify-center items-center">
-            <div className='relative w-full flex flex-col min-h-screen'>
+        <div className="relative flex flex-col justify-center items-center transition-opacity duration-500 ease-in-out animate-fadeIn">
+            <div className='relative w-full flex flex-col'>
                 <div className="flex flex-col w-full relative">
                     {/* Carousel */}
                     <CarouselComponent />

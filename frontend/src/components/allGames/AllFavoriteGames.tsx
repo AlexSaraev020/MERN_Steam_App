@@ -34,7 +34,7 @@ const AllFavoriteGames = () => {
     }, [allGames, pathname, setFavoriteGames, user, user?.userId]);
 
     return (
-        <div className="flex flex-col bg-inherit min-h-screen text-white w-full">
+        <div className="flex flex-col bg-inherit min-h-screen text-white w-full transition-opacity duration-500 ease-in-out animate-fadeIn">
             <div className="w-full flex items-center justify-center mt-10">
                 <ul className="w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-[#1e1e1e] rounded-t-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration">
                     {favoriteGames.map((game) => (

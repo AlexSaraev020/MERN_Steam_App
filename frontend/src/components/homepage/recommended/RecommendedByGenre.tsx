@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ReactComponent as LeftArrow } from '../../../icons/leftarrow.svg';
 import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Game } from "../../../types/types";
-import TruncatedName from "../TruncatedName";
+import { useEffect, useRef, useState } from "react";
 
 interface GamesRecommendedByGenreProps {
     gamesByGenre: Game[];
@@ -12,69 +12,54 @@ interface GamesRecommendedByGenreProps {
 
 
 const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGenre, genre }) => {
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [scrollDirection, setScrollDirection] = useState<'right' | 'left'>('right');
     const recommendedGames = gamesByGenre.slice(0, 20);
+
+    useEffect(() => {
+        const scrollHandler = () => {
+            if (scrollRef.current) {
+                const container = scrollRef.current;
+                if (scrollDirection === 'right') {
+                    container.scrollLeft += 1;
+                    if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+                        setScrollDirection('left');
+                    }
+                } else {
+                    container.scrollLeft -= 1;
+                    if (container.scrollLeft <= 0) {
+                        setScrollDirection('right');
+                    }
+                }
+            }
+        };
+
+        const interval = setInterval(scrollHandler, 20);
+
+        return () => clearInterval(interval);
+    }, [scrollDirection]);
     return (
-        <section className="relative sm:w-full md:w-full flex flex-col justify-center items-center mx-auto z-20">
-            <div className="w-full overflow-x-auto space-y-4 mt-4 flex items-center justify-center">
-                <div className="relative flex flex-col items-end w-full sm:w-11/12 xl:w-full overflow-hidden mt-4 py-4 rounded-xl bg-opacity-50">
-                    <div className="flex justify-between w-full mb-1 lg:mb-2 -mt-3 lg:mt-0">
-                        <h2 className="text-white ml-10 sm:ml-10 md:ml-10 lg:ml-12 2xl:ml-16 font-sans text-xs sm:text-sm md:text-md lg:text-2xl font-bold">More <span className="text-emerald-400">{genre}</span>  games :</h2>
+        <section className="relative flex flex-col items-center justify-center w-full mt-10 md:mb-10">
+            <h2 className=" font-mono absolute top-0 left-0  w-fit h-auto py-4 justify-center flex text-white text-2xl xl:text-5xl font-extrabold text-transparent text-center select-auto">
+                More <span className="mx-4 text-emerald-500">{genre}</span> games
+            </h2>
+            <div className="flex relative items-center justify-center w-full md:space-x-4 mt-10">
+                <div ref={scrollRef} className="w-full items-center flex lg:scrollbar-thin scrollbar-thumb-emerald-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-14 px-9">
+                    {recommendedGames.map((game) => (
                         <Link
-                            to='/allgames'
-                            className="text-white text-xs sm:text-sm md:text-md lg:text-xl hover:underline font-sans font-bold mr-10 sm:mr-10 md:mr-10 lg:mr-12 2xl:mr-16"
+                            to={`/game/${game.id}`}
+                            key={game.id}
+                            className="relative flex-none w-full md:w-6/12 lg:w-6/12 xl:w-6/12 hover:border-2 hover:border-emerald-500 hover:shadow-glow hover:shadow-emerald-500 transition-all duration-500 hover:z-10 hover:-translate-y-6 hover:scale-105 rounded-2xl"
                         >
-                            View All games
+                            <div className="relative w-full flex flex-col justify-end overflow-hidden h-36 sm:h-48 md:h-56 lg:h-56 xl:h-72 rounded-2xl p-2">
+                                <img src={game.thumbnail} alt={game.title} className="absolute inset-0 h-full w-full object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-gray-900/40"></div>
+                                <h3 className="z-10 mt-3 text-lg font-bold text-white truncate">{game.title}</h3>
+                                <div className="z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">{game.genre}</div>
+                            </div>
                         </Link>
-                    </div>
-
-                    <div className="relative flex w-full overflow-hidden items-center">
-                        <button
-                            className="xl:mx-2 text-white p-2 rounded-full hover:bg-opacity-75 z-10"
-                            onClick={() => {
-                                const container = document.getElementById('gameSlider2');
-                                if (container) {
-                                    const currentScroll = container.scrollLeft;
-                                    const cardWidth = container.offsetWidth;
-                                    const centerOffset = Math.floor(cardWidth / 2);
-
-                                    container.scrollTo({
-                                        left: currentScroll - centerOffset,
-                                        behavior: 'smooth',
-                                    });
-                                }
-                            }}
-                        >
-                            <LeftArrow className="h-6 w-6 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
-                        </button>
-                        <div id="gameSlider2" className="flex space-x-3 sm:-space-x-6 md:space-x-0 lg:space-x-4 overflow-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
-                            {recommendedGames.map(game => (
-                                <Link to={`/game/${game.id}`} className="relative flex-none w-44 sm:w-60 snap-center h-40 sm:h-36 md:h-40 lg:h-44 xl:h-48" key={game.id}>
-                                    <img className="rounded-lg h-44 sm:h-36 md:h-40 lg:h-44 xl:h-48 sm:w-10/12 md:w-11/12 lg:w-full object-cover" src={game.thumbnail} alt={game.title} />
-                                    <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 flex items-center sm:w-10/12 md:w-11/12 lg:w-full rounded-b-lg justify-center opacity-100">
-                                        <p className="text-white text-lg sm:text-xl font-bold text-center p-x-2"><TruncatedName name={game.title} /></p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                        <button
-                            className="xl:mx-2 text-white p-2 rounded-full hover:bg-opacity-75 z-10"
-                            onClick={() => {
-                                const container = document.getElementById('gameSlider2');
-                                if (container) {
-                                    const currentScroll = container.scrollLeft;
-                                    const cardWidth = container.offsetWidth;
-                                    const centerOffset = Math.floor(cardWidth / 2);
-
-                                    container.scrollTo({
-                                        left: currentScroll + centerOffset,
-                                        behavior: 'smooth',
-                                    });
-                                }
-                            }}
-                        >
-                            <RightArrow className="h-6 w-6 lg:w-8 lg:h-8" />
-                        </button>
-                    </div>
+                    ))}
                 </div>
             </div>
         </section>

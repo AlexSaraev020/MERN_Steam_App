@@ -2,7 +2,7 @@ import { ReactComponent as LeftArrow } from '../../../icons/leftarrow.svg';
 import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Link } from 'react-router-dom';
 import { Carousel } from 'flowbite-react';
-import { Game, User } from '../../../types/types';
+import { Game } from '../../../types/types';
 import FavoriteButton from '../../favorite/FavoriteButton';
 import { shuffle } from '../../../actions/generalFunctionalities';
 import { useEffect, useState } from 'react';

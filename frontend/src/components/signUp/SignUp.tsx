@@ -1,5 +1,5 @@
 import background from '../../images/login.jpg'
-import { ReactComponent as SvgIcon } from '../../icons/pixel.svg';
+import { ReactComponent as SvgIcon } from '../../icons/logo.svg';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
@@ -37,10 +37,10 @@ function SignUp() {
             <div className="absolute inset-0 bg-zinc-950 opacity-80 "></div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className='absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center'>
+            <form onSubmit={handleSubmit} className='absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out animate-fadeIn'>
                 <div className="w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12  shadow-glow shadow-emerald-500 border-emerald-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80">
-                    <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 '>
-                        <SvgIcon className='h-8 w-8 sm:h-12 sm:w-12 mb-2 sm:mb-4' />
+                    <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 space-x-1 '>
+                        <SvgIcon className='h-12 w-12 sm:h-14 sm:w-14 stroke-emerald-500' />
                         <h2 className='text-white text-[30px] sm:text-[35px] font-bold'>Create account</h2>
                     </div>
                     <div className='w-10/12'>

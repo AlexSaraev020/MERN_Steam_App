@@ -54,11 +54,9 @@ const GamePage = () => {
 
 
     return (
-        <div className="flex flex-col bg-gray-300 min-h-screen relative text-white">
-            <img className='h-full w-full absolute object-cover blur-md' alt='backgroundLogin' src={game?.thumbnail} />
-            <div className='absolute inset-0 bg-zinc-950 opacity-80'></div>
+        <div className="flex flex-col min-h-screen relative text-white transition-opacity duration-500 ease-in-out animate-fadeIn">
             <div className="w-full flex items-center justify-center z-10">
-                <div className="rounded-t-lg w-full md:w-[95%] lg:w-5/6 flex flex-col bg-zinc-900 p-8 mt-4">
+                <div className="rounded-t-lg w-full md:w-[95%] bg-zinc-800 lg:w-5/6 flex flex-col bg-inherit p-8 mt-4">
 
                     <div className="flex flex-col xl:flex-row w-full">
                         <div className="w-full xl:w-7/12 mb-4 xl:mb-0">

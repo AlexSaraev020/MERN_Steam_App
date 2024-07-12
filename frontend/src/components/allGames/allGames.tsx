@@ -14,14 +14,14 @@ const AllGames = () => {
 
     useEffect(() => {
         if (allGames) {
-            setSlicedGames(allGames.slice(0, 20));
+            setSlicedGames(allGames.slice(0, 10));
         }
     }, [allGames, user?.userId]);
 
     return (
-        <div className="flex flex-col bg-inherit min-h-screen text-white w-full">
-            <div className="w-full flex items-center justify-center mt-10">
-                <ul className="w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-[#1e1e1e] rounded-t-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration">
+        <div className="flex flex-col bg-inherit min-h-screen text-white w-full transition-opacity duration-500 ease-in-out animate-fadeIn">
+            <div className="w-full flex items-center justify-center mt-10 ">
+                <ul className="w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-[#1e1e1e] rounded-t-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration pb-10">
                     {slicedGames.map((game) => (
                         <Link to={`/game/${game.id}`} key={game.id} className="shadow-lg hover:shadow-green-500/70 transition duration-500 delay-150 hover:scale-105 bg-neutral-900 p-2 sm:p-4 w-10/12 sm:w-11/12 flex flex-col sm:flex-row rounded-xl space-x-0 sm:space-x-3 mt-6 sm:mt-10">
                             <div className="flex justify-center items sm:block">
