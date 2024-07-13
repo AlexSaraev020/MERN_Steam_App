@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom";
-import { ReactComponent as LeftArrow } from '../../../icons/leftarrow.svg';
-import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Game } from "../../../types/types";
 import { useEffect, useRef, useState } from "react";
 
@@ -41,8 +39,8 @@ const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGen
     }, [scrollDirection]);
     return (
         <section className="relative flex flex-col items-center justify-center w-full mt-10 md:mb-10">
-            <h2 className=" font-mono absolute top-0 left-0  w-fit h-auto py-4 justify-center flex text-white text-2xl xl:text-5xl font-extrabold text-transparent text-center select-auto">
-                More <span className="mx-4 text-emerald-500">{genre}</span> games
+            <h2 className=" font-mono absolute top-0 left-0 justify-center flex text-white text-2xl xl:text-5xl font-extrabold text-transparent text-center select-auto">
+                More&nbsp;<span className=" text-emerald-500">{genre}</span>&nbsp;games
             </h2>
             <div className="flex relative items-center justify-center w-full md:space-x-4 mt-10">
                 <div ref={scrollRef} className="w-full items-center flex lg:scrollbar-thin scrollbar-thumb-emerald-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-14 px-9">

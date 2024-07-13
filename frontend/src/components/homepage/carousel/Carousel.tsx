@@ -3,8 +3,6 @@ import { ReactComponent as RightArrow } from '../../../icons/rightarrow.svg';
 import { Link } from 'react-router-dom';
 import { Carousel } from 'flowbite-react';
 import { Game } from '../../../types/types';
-import FavoriteButton from '../../favorite/FavoriteButton';
-import { shuffle } from '../../../actions/generalFunctionalities';
 import { useEffect, useState } from 'react';
 import { useGames } from '../../../contexts/GamesContext';
 
@@ -15,13 +13,13 @@ import { useGames } from '../../../contexts/GamesContext';
 const CarouselComponent = () => {
 
     const [shuffledGames, setShuffledGames] = useState<Game[]>([])
-    const {allGames} = useGames()
+    const {gamesData} = useGames()
 
     useEffect(() => {
-        if (allGames) {
-            setShuffledGames(shuffle(allGames))
+        if (gamesData?.popular) {
+            setShuffledGames(gamesData?.popular)
         }
-    }, [allGames, shuffledGames])
+    }, [gamesData])
 
     return (
         <section className="relative flex justify-center items-center">
@@ -50,11 +48,7 @@ const CarouselComponent = () => {
                                     <h2 className="absolute inset-x-0 bottom-0 text-white font-bold md:text-xl lg:text-3xl xl:text-3xl bg-black bg-opacity-40 p-2 rounded-b-lg">{game.title}</h2>
 
                                 </Link>
-                                <div className='absolute z-10 md:top-0 rounded-t-lg flex justify-end w-full h-12 '>
-                                    <div className=' w-24 hidden md:block bg-black bg-opacity-40 h-24'>
-                                        <FavoriteButton gameId={game.id} />
-                                    </div>
-                                </div>
+                                
                             </div>
 
                         </div>

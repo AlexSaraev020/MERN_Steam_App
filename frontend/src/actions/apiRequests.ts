@@ -1,16 +1,21 @@
 import axios from "axios";
 import { Game } from "../types/types";
 
-export const fetchGames = async (): Promise<Game[]> => {
+interface SortedGames {
+  popular: Game[];
+  latestReleases: Game[];
+}
+
+export const fetchGames = async (): Promise<SortedGames> => {
   try {
-    const response = await axios.get('http://localhost:3001/api/games');
+    const response = await axios.get<SortedGames>('http://localhost:3001/api/games');
     if (response.status === 200) {
-      return response.data as Game[];
+      return response.data as SortedGames;
     } else {
       throw new Error('Failed to fetch games');
     }
   } catch (err) {
     console.error('Error during API request:', err);
-    return [];
+    return { popular: [], latestReleases: [] };
   }
 };

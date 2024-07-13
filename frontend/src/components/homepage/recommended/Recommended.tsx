@@ -1,21 +1,14 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { Game } from "../../../types/types";
-import { shuffle } from "../../../actions/generalFunctionalities";
 import { useGames } from "../../../contexts/GamesContext";
 
 const Recommended = () => {
-    const [shuffledGames, setShuffledGames] = useState<Game[]>([]);
-    const { allGames } = useGames();
+    const { gamesData } = useGames();
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollDirection, setScrollDirection] = useState<'right' | 'left'>('right');
 
 
-    useEffect(() => {
-        if (allGames) {
-            setShuffledGames(shuffle(allGames));
-        }
-    }, [allGames]);
+    
 
     useEffect(() => {
         const scrollHandler = () => {
@@ -43,11 +36,11 @@ const Recommended = () => {
     return (
         <section className="relative flex flex-col items-center justify-center w-full mt-10 md:mb-10">
             <h2 className="font-mono relative w-fit h-auto py-4 justify-center flex bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 bg-clip-text text-2xl xl:text-5xl font-extrabold text-transparent text-center select-auto">
-                Recommended games
+                Latest releases
             </h2>
             <div className="flex relative items-center justify-center w-full md:space-x-4">
                 <div ref={scrollRef} className="w-11/12 md:w-10/12 lg:w-10/12 xl:w-9/12 items-center flex lg:scrollbar-thin scrollbar-thumb-emerald-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-14 px-9">
-                    {shuffledGames.slice(20, 31).map((game) => (
+                    {gamesData?.latestReleases?.slice(0, 20).map((game) => (
                         <Link
                             to={`/game/${game.id}`}
                             key={game.id}

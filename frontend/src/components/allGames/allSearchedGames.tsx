@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import NavigationMenu from "../Navigation/NavigationMenu";
 import { Game } from "../../types/types";
 import { useParams } from "react-router-dom";
-import { GamesContext } from "../../contexts/GamesContext";
+import { GamesContext, useGames } from "../../contexts/GamesContext";
 
 
 
@@ -11,16 +11,15 @@ import { GamesContext } from "../../contexts/GamesContext";
 const AllSearchedGames = () => {
     const [searchedGames, setSearchedGames] = useState<Game[]>([]);
     const { title } = useParams<{ title: string }>();
-    const gamesContext = useContext(GamesContext);
-    const games = gamesContext?.allGames
+    const {gamesData} = useGames();
 
 
     useEffect(() => {
-        if (title && games) {
-            const filteredGames = games.filter(item => item.title.toLocaleLowerCase().includes(title))
+        if (title && gamesData?.popular) {
+            const filteredGames = gamesData.popular.filter(item => item.title.toLocaleLowerCase().includes(title))
             setSearchedGames(filteredGames)
         }
-    }, [title, games]);
+    }, [title, gamesData?.popular]);
 
     const slicedGames = searchedGames.slice(0, 10);
 

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { ReactComponent as HomeSVG } from '../../icons/home.svg';
 import { ReactComponent as LogOutSVG } from '../../icons/logout.svg';
 import { ReactComponent as FavouritesSVG } from '../../icons/favorite.svg';
@@ -16,51 +16,55 @@ interface NavLinkType {
     label: string;
 }
 
-
-
 const NavigationMenu = ({ setIsMenuActive }: { setIsMenuActive: (isMenuActive: boolean) => void }) => {
     const navigate = useNavigate();
-    const { setUser, user } = useUser()
+    const { setUser, user } = useUser();
 
     const navLinks: NavLinkType[] = [
         { id: 1, to: '/', icon: <HomeSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Home' },
         { id: 2, to: '/allgames', icon: <StoreSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Catalogue' },
-        { id: 3, to: '/profile', icon: <ProfileSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Profile' },
-        { id: 4, to: `/allfavoritegames/${user?.userId}`, icon: <FavouritesSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />, label: 'Favorite' },
+        { id: 3, to: '/profile', icon: <ProfileSVG className="w-8 h-8 -mb-1 lg:h-7 lg:w-6 mr-1 sm:mr-2" />, label: 'Profile' },
+        { id: 4, to: `/allfavoritegames/${user?.userId}`, icon: <FavouritesSVG className="w-8 h-8 -mb-1 lg:h-7 lg:w-7 mr-1 sm:mr-2" />, label: 'Favorite' },
     ];
 
     const handleLogout = () => {
         Cookies.remove('token');
         localStorage.clear();
         setUser(undefined);
-        setIsMenuActive(false)
+        setIsMenuActive(false);
         setTimeout(() => {
             navigate('/login');
         }, 50);
     };
 
     const handleMenu = () => {
-        setIsMenuActive(false)
+        setIsMenuActive(false);
     };
 
     return (
         <div className='border-b-2 border-emerald-400 lg:border-0'>
             <ul className="space-y-5 lg:space-y-0 mb-4 mt-6 lg:space-x-10 flex flex-col lg:flex-row items-center justify-center text-2xl lg:text-md xl:text-lg 2xl:text-xl font-bold py-1 sm:py-2">
                 {navLinks.map((link) => (
-                    <li key={link.id} className='flex items-center justify-center'>
-
-                        <Link onClick={handleMenu} to={link.to} className='flex items-center justify-center'>
-                            <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
-                                {link.icon}
-                                {link.label}
-                            </button>
-                        </Link>
-
+                    <li key={link.id} className='flex items-center justify-center font-mono'>
+                        <NavLink
+                            onClick={handleMenu}
+                            to={link.to}
+                            className={({ isActive }) =>
+                                `flex items-start justify-center ${
+                                    isActive
+                                        ? 'text-emerald-500 shadow-glow shadow-green-500/70 -translate-y-1 scale-110'
+                                        : 'text-white'
+                                } backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48`
+                            }
+                        >
+                            {link.icon}
+                            {link.label}
+                        </NavLink>
                     </li>
                 ))}
                 <Link onClick={handleLogout} to='/' className='flex items-center justify-center'>
-                    <button className=" flex text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
-                        <LogOutSVG className="w-8 h-8 -mb-1 lg:h-6 lg:w-6 mr-1 sm:mr-2" />
+                    <button className="flex items-end text-white hover:text-emerald-500 backdrop-blur-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 rounded-md py-2 px-6 shadow-md shadow-zinc-700/60 hover:shadow-glow hover:shadow-green-500/70 hover:-translate-y-1 hover:scale-110 duration-700 w-48">
+                        <LogOutSVG className="w-8 h-8 lg:h-6 lg:w-6 mr-1 sm:mr-2" />
                         Log Out
                     </button>
                 </Link>

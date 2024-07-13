@@ -12,10 +12,12 @@ import NavigationMenu from "./components/Navigation/NavigationMenu";
 import { useEffect, useState } from "react";
 import { fetchGames } from "./actions/apiRequests";
 import { jwtDecode } from "jwt-decode";
-import { DecodedToken, Game } from "./types/types";
+import { DecodedToken } from "./types/types";
 import Cookies from "js-cookie";
 import AllFavoriteGames from "./components/allGames/AllFavoriteGames";
 import Footer from "./components/footer/Footer";
+
+
 
 
 const MainApp = () => {
@@ -23,7 +25,7 @@ const MainApp = () => {
     const hideNavOnRoutes = ["/login", "/register"];
     const shouldHideNav = hideNavOnRoutes.includes(location.pathname);
     const [isMenuActive, setIsMenuActive] = useState(false);
-    const { allGames, setAllGames } = useGames();
+    const { gamesData, setGamesData } = useGames();
     const { user, setUser } = useUser();
     const navigate = useNavigate();
 
@@ -38,22 +40,27 @@ const MainApp = () => {
         }
     }, [])
 
+
     useEffect(() => {
         const fetchAllGames = async () => {
             try {
                 const gamesResponse = await fetchGames();
-                if (setAllGames) {
-                    setAllGames(gamesResponse);
-                }
+                console.log(gamesResponse)
+                setGamesData(gamesResponse)
+                console.log(gamesData)
+
             } catch (err) {
                 console.error('Error during API request:', err);
             }
         };
+        fetchAllGames()
+        
 
-        if (!allGames || allGames.length === 0) {
-            fetchAllGames();
-        }
-    }, [allGames, setAllGames, user]);
+    }, [setGamesData]);
+
+    if (gamesData) {
+        console.log("Games data has been updated:", gamesData);
+    }
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -69,7 +76,7 @@ const MainApp = () => {
     return (
         <div className="bg-[#171717] ">
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
-            
+
             {!shouldHideNav &&
                 <div className="hidden min-[1146px]:block w-full mb-4 ">
                     <NavigationMenu setIsMenuActive={setIsMenuActive} />

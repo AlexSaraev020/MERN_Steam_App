@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Game } from "../../types/types";
 import { useGames } from "../../contexts/GamesContext";
@@ -8,15 +8,15 @@ import { useUser } from "../../contexts/UserContext";
 const AllGames = () => {
 
     const [slicedGames, setSlicedGames] = useState<Game[]>([]);
-    const { allGames } = useGames();
+    const { gamesData } = useGames();
     const { user } = useUser()
 
 
     useEffect(() => {
-        if (allGames) {
-            setSlicedGames(allGames.slice(0, 10));
+        if (gamesData?.popular) {
+            setSlicedGames(gamesData.popular.slice(0, 10));
         }
-    }, [allGames, user?.userId]);
+    }, [gamesData?.popular, user?.userId]);
 
     return (
         <div className="flex flex-col bg-inherit min-h-screen text-white w-full transition-opacity duration-500 ease-in-out animate-fadeIn">
@@ -47,6 +47,9 @@ const AllGames = () => {
                             </div>
                         </Link>
                     ))}
+                    <div>
+                        <button onClick={()=>gamesData?.popular? setSlicedGames(gamesData.popular.slice(10, 20)): console.error('No more games')}>next</button>
+                    </div>
                 </ul>
             </div>
         </div>

@@ -38,7 +38,7 @@ const Footer = () => {
 
 
     return (
-        <footer className="text-white border-t-2 w-full border-zinc-700 mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn">
+        <footer className="text-white border-t-2 w-full border-zinc-700 md:mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn">
             <div className=" mx-auto py-10 px-4 md:px-8 lg:px-12 xl:px-20 flex flex-col w-full items-center">
                 <div className="flex flex-col md:flex-row w-full ">
 

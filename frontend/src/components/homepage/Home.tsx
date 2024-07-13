@@ -1,8 +1,15 @@
+import { useEffect } from "react";
 import CarouselComponent from "./carousel/Carousel";
 import Recommended from "./recommended/Recommended";
+import { fetchGames } from "../../actions/apiRequests";
+import { useGames } from "../../contexts/GamesContext";
+import allGames from "../allGames/allGames";
 
 const Home = () => {
+    const { gamesData } = useGames()
+
     
+
 
     return (
         <div className="relative flex flex-col justify-center items-center transition-opacity duration-500 ease-in-out animate-fadeIn">

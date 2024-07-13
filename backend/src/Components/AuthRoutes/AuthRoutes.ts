@@ -1,7 +1,6 @@
 import { Express } from 'express';
 import UserModel from '../../Models/UserModel';
 import { generateToken } from '../../JWT/JWT';
-import { favoriteGame } from '../FetchGames/FetchGames';
 const bcrypt = require('bcrypt');
 
 
