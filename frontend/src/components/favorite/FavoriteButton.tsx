@@ -12,22 +12,22 @@ interface FavoriteButtonProps {
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
 
-    const { user } = useUser()
+    const { userId } = useUser()
     const { favoriteButton, setFavoriteButton } = useGames()    
 
     const handleFavorite = async () => {
         try {
-            if (!user) {
+            if (!userId) {
                 console.error('User is not defined');
                 alert('You must be logged in order to perform this action!')
                 return;
             }
 
             if (!favoriteButton) {
-                await axios.post('http://localhost:3001/favorite', { userId: user.userId, gameId });
+                await axios.post('http://localhost:3001/favorite', { userId: userId, gameId });
                 setFavoriteButton(!favoriteButton);
             } else {
-                await axios.delete('http://localhost:3001/rmfavorite', { data: { userId: user.userId, gameId } });
+                await axios.delete('http://localhost:3001/rmfavorite', { data: { userId: userId, gameId } });
                 setFavoriteButton(!favoriteButton);
             }
         } catch (error) {

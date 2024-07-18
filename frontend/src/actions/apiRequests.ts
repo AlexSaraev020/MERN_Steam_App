@@ -19,3 +19,4 @@ export const fetchGames = async (): Promise<SortedGames> => {
     return { popular: [], latestReleases: [] };
   }
 };
+

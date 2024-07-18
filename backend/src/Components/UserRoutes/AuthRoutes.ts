@@ -19,7 +19,7 @@ export function setupRoutes(app: Express) {
             } else {
                 const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(password, salt);
-                const newUser = await UserModel.create({ name, email, password: hashedPassword }); 
+                const newUser = await UserModel.create({ name, email, password: hashedPassword });
                 if (newUser) {
                     res.status(200).json(newUser);
                 } else {
@@ -40,14 +40,12 @@ export function setupRoutes(app: Express) {
             const user = await UserModel.findOne({ email });
             if (user) {
                 if (await bcrypt.compare(password, user.password)) {
-                    const token = generateToken({ userId: user.id.toString(),userName:user.name, email: user.email, favoriteGames: user.favoriteGames }, rememberMe);
-                    const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;  
+                    const token = generateToken({ userId: user.id.toString() });
                     res.cookie('token', token, {
                         httpOnly: true,
-                        maxAge: maxAge,
                         sameSite: 'strict'
                     });
-                    
+
                     res.json({
                         _id: user.id,
                         name: user.name,
@@ -56,7 +54,7 @@ export function setupRoutes(app: Express) {
                         rememberMe: rememberMe,
                         token: token,
                     });
-    
+
                 } else {
                     res.status(401).json({ message: 'Invalid credentials' });
                 }
@@ -74,7 +72,14 @@ export function setupRoutes(app: Express) {
         try {
             const user = await UserModel.findOne({ _id: userId });
             if (user) {
-                res.status(200).json({ userFavorite: user.favoriteGames });
+                res.status(200).json({
+                    userId: user.id,
+                    userFavorite: user.favoriteGames,
+                    name: user.name,
+                    email: user.email,
+                    description: user.description,
+                    image:user.userImage
+                });
             } else {
                 res.status(404).json({ message: 'User not found' });
             }
@@ -82,8 +87,8 @@ export function setupRoutes(app: Express) {
             res.status(500).json({ message: 'Internal server error', error });
         }
     });
-    
-    
+
+
 
     //Just for the moment
     app.get('/users', async (req, res) => {
@@ -95,5 +100,3 @@ export function setupRoutes(app: Express) {
         }
     });
 }
-
-

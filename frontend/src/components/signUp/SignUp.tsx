@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ReactComponent as Hide } from '../../icons/hide.svg';
+import { ReactComponent as Unhide } from '../../icons/unhide.svg';
 
 
 
@@ -13,6 +15,8 @@ function SignUp() {
     const [email, setEmail] = useState<string | undefined>(undefined)
     const [password, setPassword] = useState<string | undefined>(undefined)
     const navigate = useNavigate()
+    const [showPass, setShowPass] = useState<boolean>(false)
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -71,19 +75,25 @@ function SignUp() {
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
-                    <div className='w-10/12'>
+                    <div className='w-10/12 relative'>
                         <label htmlFor="password" className="flex text-sm sm:text-lg font-medium text-zinc-300 ml-1">
                             Password
                         </label>
                         <input
                             required
-                            type="password"
+                            type={showPass ? 'text' : 'password'}
                             id="password"
                             name="password"
                             className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="●●●●●●●●"
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <button type='button' onClick={() => setShowPass(!showPass)} className='absolute right-0 p-2'>
+                            {showPass ?
+                                <Hide className='w-7 h-7 fill-emerald-600 transition-opacity duration-500 ease-in-out animate-fadeIn' /> :
+                                <Unhide className='w-7 h-7 fill-zinc-600 transition-opacity duration-500 ease-in-out animate-fadeIn' />
+                            }
+                        </button>
                     </div>
                     <button
                         type="submit"

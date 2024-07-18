@@ -14,7 +14,7 @@ const GamePage = () => {
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([]);
     const [game, setGame] = useState<Game | undefined>(undefined);
     const { gamesData, setFavoriteButton } = useGames()
-    const { user } = useUser()
+    const { userId } = useUser()
     const getTheGame = useRef<HTMLAnchorElement>(null)
     const getTheGameButton = () =>{
         if(getTheGame.current){
@@ -29,8 +29,8 @@ const GamePage = () => {
         const getFavorite = async () => {
 
             try {
-                if (user && id) {
-                    const response = await axios.get(`http://localhost:3001/user/${user.userId}`);
+                if (userId && id) {
+                    const response = await axios.get(`http://localhost:3001/user/${userId}`);
                     const numberId = parseInt(id)
                     if (response.status === 200) {
                         const favoriteGameIds = response.data.userFavorite;
@@ -46,7 +46,7 @@ const GamePage = () => {
             }
         };
         getFavorite();
-    }, [game, id, setFavoriteButton, user])
+    }, [game, id, setFavoriteButton, userId])
 
 
     useEffect(() => {
@@ -60,15 +60,15 @@ const GamePage = () => {
 
 
     return (
-        <div className="flex flex-col min-h-screen relative text-white transition-opacity duration-500 ease-in-out animate-fadeIn mb-20">
+        <div className="flex flex-col min-h-screen relative text-white transition-opacity duration-500 ease-in-out animate-fadeIn mb-20 ">
             <div className="w-full flex items-center justify-center z-10">
                 <div className="rounded-t-lg w-11/12 md:w-[95%] bg-gradient-to-r from-zinc-900/10 via-emerald-900/10 to-zinc-900/10 lg:w-5/6 flex flex-col p-8 mt-4 border-2 rounded-xl border-emerald-500 shadow-glow shadow-emerald-500">
                     <div className="flex flex-col xl:flex-row w-full">
                         <div className="w-full xl:w-7/12 mb-4 xl:mb-0">
                             <img className="w-full rounded-xl shadow-md hover:scale-105 transition-transform duration-300" src={game?.thumbnail} alt={game?.title} />
                         </div>
-                        <div className="w-full xl:w-5/12 xl:pl-8 flex flex-col justify-between font-mono">
-                            <div className="space-y-4">
+                        <div className="w-full xl:w-5/12 xl:pl-8 flex flex-col justify-between font-mono ">
+                            <div className="space-y-4 ">
                                 <h2 className="text-2xl lg:text-4xl xl:text-5xl font-extrabold">{game?.title}</h2>
                                 <h3 className="text-sm xl:text-xl">Genre: <span className="text-emerald-500 font-bold">{game?.genre}</span></h3>
                                 <p className="text-sm xl:text-lg text-gray-400">{game?.short_description}</p>
@@ -88,7 +88,7 @@ const GamePage = () => {
                         </div>
                     </div>
                     <div className="block mt-8">
-                        <RecommendedByGenre genre={game?.genre} gamesByGenre={gamesByGenre} />
+                        <RecommendedByGenre genre={game?.genre} gameId={game?.id} gamesByGenre={gamesByGenre} />
                     </div>
                 </div>
             </div>

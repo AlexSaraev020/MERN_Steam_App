@@ -12,10 +12,12 @@ import NavigationMenu from "./components/Navigation/NavigationMenu";
 import { useEffect, useState } from "react";
 import { fetchGames } from "./actions/apiRequests";
 import { jwtDecode } from "jwt-decode";
-import { DecodedToken } from "./types/types";
+import { DecodedToken, User } from "./types/types";
 import Cookies from "js-cookie";
 import AllFavoriteGames from "./components/allGames/AllFavoriteGames";
 import Footer from "./components/footer/Footer";
+import ProfilePage from "./components/profilePage/ProfilePage";
+import axios from "axios";
 
 
 
@@ -25,56 +27,56 @@ const MainApp = () => {
     const hideNavOnRoutes = ["/login", "/register"];
     const shouldHideNav = hideNavOnRoutes.includes(location.pathname);
     const [isMenuActive, setIsMenuActive] = useState(false);
-    const { gamesData, setGamesData } = useGames();
-    const { user, setUser } = useUser();
+    const { setGamesData } = useGames();
+    const { user, userId, setUser , setUserId } = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = Cookies.get('token');
         if (!token) {
-            if (user?.userName !== "Guest") {
-
+            if (user?.name !== "Guest") {
                 navigate('/login')
             }
-
+        }else{
+            const decodedToken = jwtDecode<DecodedToken>(token);
+            setUserId(decodedToken.userId);
+            console.log(userId)
+            const getUpdatedUser = async () => {
+                try {
+                    if (userId) {
+                        const response = await axios.get(`http://localhost:3001/user/${userId}`);
+                        if (response.status === 200) {
+                            setUser(response.data)
+                            console.log(user)
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            };
+            getUpdatedUser();
         }
-    }, [])
+        
+    }, [userId])
 
 
     useEffect(() => {
         const fetchAllGames = async () => {
             try {
                 const gamesResponse = await fetchGames();
-                console.log(gamesResponse)
                 setGamesData(gamesResponse)
-                console.log(gamesData)
-
             } catch (err) {
                 console.error('Error during API request:', err);
             }
         };
         fetchAllGames()
-        
+
 
     }, [setGamesData]);
 
-    if (gamesData) {
-        console.log("Games data has been updated:", gamesData);
-    }
-
-    useEffect(() => {
-        const token = Cookies.get('token');
-        if (token) {
-            const decodedToken = jwtDecode<DecodedToken>(token);
-            if (setUser) {
-                setUser(decodedToken);
-            }
-
-        }
-    }, [setUser]);
 
     return (
-        <div className="bg-[#171717] ">
+        <div className="bg-[#171717] min-h-screen">
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
 
             {!shouldHideNav &&
@@ -89,6 +91,7 @@ const MainApp = () => {
                 <Route path="/allgames" element={<AllGames />} />
                 <Route path="/allfavoritegames/:user" element={<AllFavoriteGames />} />
                 <Route path="/searchbytitle/:title" element={<AllSearchedGames />} />
+                <Route path="/profile/:user" element={<ProfilePage />} />
             </Routes>
 
             {!shouldHideNav && <Footer />}

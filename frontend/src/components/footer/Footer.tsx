@@ -23,10 +23,10 @@ interface FooterRoutes {
 const Footer = () => {
 
     const footerLinks: FooterLinks[] = [
-        { id: 1, title: 'Instagram', icon: <Instagram className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: '#' },
-        { id: 2, title: 'Facebook', icon: <Facebook className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: '#' },
-        { id: 3, title: 'LinkedIn', icon: <LinkedIn className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: '#' },
-        { id: 4, title: 'Github', icon: <Github className='w-7 xl:w-9 fill-emerald-500 transition-all duration-500' />, href: '#' }
+        { id: 1, title: 'Instagram', icon: <Instagram className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: 'https://www.instagram.com/alexsaraev.15/' },
+        { id: 2, title: 'Facebook', icon: <Facebook className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: 'https://www.facebook.com/alexandru.saraev.3' },
+        { id: 3, title: 'LinkedIn', icon: <LinkedIn className='w-8 xl:w-10 fill-emerald-500 transition-all duration-500' />, href: 'https://www.linkedin.com/in/saraev-alexandru-5a3baa265/' },
+        { id: 4, title: 'Github', icon: <Github className='w-7 xl:w-9 fill-emerald-500 transition-all duration-500' />, href: 'https://github.com/AlexSaraev020?tab=repositories' }
     ]
     const footerRoutes: FooterRoutes[] = [
         { id: 1, title: 'Home', to: '/' },

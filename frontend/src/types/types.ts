@@ -2,6 +2,7 @@
 //Games Related
 
 export interface Game {
+    [x: string]: any;
     id: number;
     title: string;
     thumbnail: string;
@@ -19,17 +20,21 @@ export interface Game {
 //User Related
 
 export interface User {
-    userId: string;
-    userName: string;
+    name: string;
     email: string;
+    description: string;
+    image: string;
     favoriteGames: number[],
 }
+
 
 export interface DecodedToken {
     userId: string;
     userName: string;
     email: string;
-    favoriteGames: number[];
+    description: string;
+    image: string;
+    favoriteGames: number[],
 }
 
 

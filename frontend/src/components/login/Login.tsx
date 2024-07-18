@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/logo.svg';
+import { ReactComponent as Hide } from '../../icons/hide.svg';
+import { ReactComponent as Unhide } from '../../icons/unhide.svg';
 import background from '../../images/login.jpg';
 import { Link } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { jwtDecode } from 'jwt-decode';
-import { DecodedToken } from '../../types/types';
+import { DecodedToken, User } from '../../types/types';
 import Cookies from 'js-cookie';
 
 const Login = () => {
@@ -14,7 +16,8 @@ const Login = () => {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
     const [rememberMe, setRememberMe] = useState<boolean>(false);
-    const { setUser } = useUser()
+    const { setUserId, setUserImage } = useUser()
+    const [showPass, setShowPass] = useState<boolean>(false)
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -22,22 +25,20 @@ const Login = () => {
             navigate('/')
         }
     }, [])
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/login', { email, password, rememberMe });
-
-
             if (response.status === 200) {
                 document.cookie = `token=${response.data.token}; max-age=${rememberMe ? 7 * 24 * 60 * 60 : 60 * 60}; path=/`;
                 const token = Cookies.get('token');
                 if (token) {
-                    const decodedToken = jwtDecode<DecodedToken>(token);
-                    if (setUser) {
-                        setUser(decodedToken);
-                    }
+                    const decodedToken = jwtDecode<string>(token);
+                    setUserId(decodedToken);
+                    setUserImage(response.data.image);
                 }
-                if (response.data.name) {
+                if (response.data) {
                     navigate('/');
                 } else {
                     alert('Username not set correctly');
@@ -76,19 +77,25 @@ const Login = () => {
                         />
 
                     </div>
-                    <div className='w-10/12'>
+                    <div className='w-10/12 relative'>
                         <label htmlFor="password" className="flex text-sm sm:text-lg font-medium text-zinc-200 ml-1">
                             Password
                         </label>
                         <input
                             autoComplete="current-password"
-                            type="password"
+                            type={showPass ? 'text' : 'password'}
                             id="password"
                             name="password"
                             className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                             placeholder="●●●●●●●●"
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <button type='button' onClick={() => setShowPass(!showPass)} className='absolute right-0 p-2'>
+                            {showPass ?
+                                <Hide className='w-7 h-7 fill-emerald-600 transition-opacity duration-500 ease-in-out animate-fadeIn' /> :
+                                <Unhide className='w-7 h-7 fill-zinc-600 transition-opacity duration-500 ease-in-out animate-fadeIn' />
+                            }
+                        </button>
                     </div>
                     <div className='flex w-10/12 items-start mb-5'>
                         <div className="flex items-center">

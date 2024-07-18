@@ -5,15 +5,16 @@ import { useEffect, useRef, useState } from "react";
 interface GamesRecommendedByGenreProps {
     gamesByGenre: Game[];
     genre: string | undefined;
+    gameId: number | undefined;
 }
 
 
 
-const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGenre, genre }) => {
+const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGenre, genre , gameId }) => {
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollDirection, setScrollDirection] = useState<'right' | 'left'>('right');
-    const recommendedGames = gamesByGenre.slice(0, 20);
+    const recommendedGames = gamesByGenre.filter(game => game.id !== gameId).slice(0, 20);
 
     useEffect(() => {
         const scrollHandler = () => {
