@@ -6,6 +6,7 @@ import { ReactComponent as Hide } from '../../icons/hide.svg';
 import { ReactComponent as Unhide } from '../../icons/unhide.svg';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useThemes } from '../../contexts/ThemeContext';
 
 const ProfilePage = () => {
     const { user, userId, setUser } = useUser()
@@ -16,6 +17,7 @@ const ProfilePage = () => {
     const [image, setImage] = useState<string | undefined>(user?.image)
     const [edit, setEdit] = useState<boolean>(false)
     const [showPass, setShowPass] = useState<boolean>(false)
+    const { theme } = useThemes()
 
 
 
@@ -83,13 +85,13 @@ const ProfilePage = () => {
         console.log(image)
     }, [image])
     return (
-        <div className='min-h-[70vh] w-full flex text-white justify-center mt-20'>
-            <div className='min-h-full w-10/12 rounded-xl p-4 bg-[#1e1e1e]'>
+        <div className={`min-h-[70vh] w-full flex text-white justify-center mt-20`}>
+            <div className={`min-h-full w-10/12 rounded-xl p-4 bg-[#1e1e1e]`}>
                 <form onSubmit={handleSubmit} className='flex flex-col p-4'>
                     <div className='flex items-center'>
-                        {edit ?
+                        {edit ? (
                             <div className="flex items-center justify-center w-[20rem] h-[20rem]">
-                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-full border-2 border-emerald-500 border-dashed hover:scale-105 hover:shadow-glow hover:shadow-emerald-500 rounded-lg cursor-pointer bg-inherit hover:bg-[#222222] transition-all duration-500 ease-in-out animate-fadeIn">
+                                <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-full border-2 border-${theme}-500 border-dashed hover:scale-105 hover:shadow-glow hover:shadow-${theme}-500 rounded-lg cursor-pointer bg-inherit hover:bg-hover:bg-[#222222] transition-all duration-500 ease-in-out animate-fadeIn`}>
                                     {image ? (
                                         <img src={image} alt='Profile Pic' className='w-full h-full object-cover rounded-lg' />
                                     ) : (
@@ -104,59 +106,55 @@ const ProfilePage = () => {
                                     <input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} />
                                 </label>
                             </div>
-
-                            :
-                            <img src={image ? image : userPlaceholder} alt='Profile Pic' className=' max-w-[20rem] max-h-[20rem] rounded-xl border-4 border-emerald-500 shadow-glow hover:scale-105 transition-all duration-500 shadow-emerald-500' />
-                        }
+                        ) : (
+                            <img src={image ? image : userPlaceholder} alt='Profile Pic' className={`max-w-[20rem] max-h-[20rem] rounded-xl border-4 border-${theme}-500 shadow-glow hover:scale-105 transition-all duration-500 shadow-${theme}-500`} />
+                        )}
                         <div className='relative px-10 flex font-mono items-center lg:items-start justify-normal mt-8 lg:mt-0 flex-col h-[20rem] w-7/12 p-2'>
-                            {edit ?
+                            {edit ? (
                                 <div className='w-full'>
-                                    <label htmlFor="username" className="flex text-sm sm:text-lg font-medium mb-1 text-zinc-200 ml-1">
+                                    <label htmlFor="username" className={`flex text-sm sm:text-lg font-medium mb-1 text-white ml-1`}>
                                         Change username
                                     </label>
                                     <input
                                         id='username'
-                                        className='mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400 ease-in-out animate-fadeIn'
+                                        className={`mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-${theme}-text focus:border-${theme}-500 placeholder-${theme}-text placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-${theme}-400 ease-in-out animate-fadeIn`}
                                         value={name}
                                         type='text'
                                         onChange={(e) => setName(e.target.value)}
                                     />
                                 </div>
-
-                                :
-                                <h2 className=' text-4xl  text-zinc-300 '>{user?.name}</h2>
-                            }
-                            {edit ?
+                            ) : (
+                                <h2 className=' text-4xl text-zinc-300 '>{user?.name}</h2>
+                            )}
+                            {edit ? (
                                 <div className='w-full h-[10rem]'>
-                                    <label htmlFor="description" className="flex text-sm sm:text-lg font-medium mb-1 text-zinc-200 ml-1">
+                                    <label htmlFor="description" className={`flex text-sm sm:text-lg font-mono font-medium mb-1 text-white ml-1`}>
                                         Change description
                                     </label>
-                                    <textarea id='description' onChange={(e) => setDescription(e.target.value)} value={description} className='h-full mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400 ease-in-out animate-fadeIn'>
-
+                                    <textarea id='description' onChange={(e) => setDescription(e.target.value)} value={description} className={`h-full mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-${theme}-border border rounded-md bg-transparent font-semibold text-${theme}-text focus:border-${theme}-500 placeholder-${theme}-text placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-${theme}-400 ease-in-out animate-fadeIn`}>
                                     </textarea>
                                 </div>
-
-                                :
+                            ) : (
                                 <p className='text-md text-zinc-400 font-mono w-9/12 break-words max-lg:truncate'>
                                     {user?.description ? user.description : 'Write a description...'}
                                 </p>
-                            }
-
+                            )}
                         </div>
                         <div className='h-full w-2/12 flex flex-col space-y-6 justify-center items-center'>
-                            <button type='button' onClick={handleEdit} className='p-4 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md shadow-zinc-700 hover:shadow-glow hover:shadow-emerald-500 hover:text-emerald-500 transition-all duration-500 hover:scale-105'>
+                            <button type='button' onClick={handleEdit} className={`p-4 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md shadow-zinc-700 hover:shadow-glow hover:shadow-${theme}-500 hover:text-${theme}-500 transition-all duration-500 hover:scale-105`}>
                                 Edit profile
                             </button>
-                            {edit &&
-                                <button type='submit' className='p-4 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md hover:shadow-glow shadow-emerald-500/50 hover:shadow-emerald-500 text-emerald-500 transition-all duration-500 hover:scale-105 ease-in-out animate-fadeIn'>
+                            {edit && (
+                                <button type='submit' className={`p-4 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md hover:shadow-glow shadow-${theme}-600 hover:shadow-${theme}-500 text-${theme}-500 transition-all duration-500 hover:scale-105 ease-in-out animate-fadeIn`}>
                                     Save
-                                </button>}
+                                </button>
+                            )}
                         </div>
                     </div>
                     <div className='w-5/12 p-4'>
-                        {edit &&
+                        {edit && (
                             <div className='w-full '>
-                                <label htmlFor="email" className="flex text-sm sm:text-lg font-medium  text-zinc-200 ml-1">
+                                <label htmlFor="email" className={`flex text-sm sm:text-lg font-medium text-${theme}-text-alt ml-1`}>
                                     Email
                                 </label>
                                 <input
@@ -165,16 +163,15 @@ const ProfilePage = () => {
                                     id="email"
                                     value={email}
                                     name="email"
-                                    className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                                    className={`mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-${theme}-border border rounded-md mb-5 bg-transparent font-semibold text-${theme}-text focus:border-${theme}-500 placeholder-${theme}-text placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-${theme}-400`}
                                     placeholder="Enter your email"
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
-
                             </div>
-                        }
-                        {edit &&
+                        )}
+                        {edit && (
                             <div className='w-full relative'>
-                                <label htmlFor="password" className="flex text-sm sm:text-lg font-medium text-zinc-200 ml-1">
+                                <label htmlFor="password" className={`flex text-sm sm:text-lg font-medium text-${theme}-text-alt ml-1`}>
                                     Password
                                 </label>
                                 <input
@@ -182,27 +179,29 @@ const ProfilePage = () => {
                                     type={showPass ? 'text' : 'password'}
                                     id="password"
                                     name="password"
-                                    className="mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-emerald-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                                    className={`mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-${theme}-border border rounded-md mb-5 bg-transparent font-semibold text-${theme}-text focus:border-${theme}-500 placeholder-${theme}-text placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-${theme}-400`}
                                     placeholder="●●●●●●●●"
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                                 <button type='button' onClick={() => setShowPass(!showPass)} className='absolute right-0 p-2'>
-                                    {showPass ?
-                                        <Hide className='w-7 h-7 fill-emerald-600 transition-opacity duration-500 ease-in-out animate-fadeIn' /> :
-                                        <Unhide className='w-7 h-7 fill-zinc-600 transition-opacity duration-500 ease-in-out animate-fadeIn' />
-                                    }
+                                    {showPass ? (
+                                        <Hide className={`w-7 h-7 fill-${theme}-600 transition-opacity duration-500 ease-in-out animate-fadeIn`} />
+                                    ) : (
+                                        <Unhide className={`w-7 h-7 fill-${theme}-600 transition-opacity duration-500 ease-in-out animate-fadeIn`} />
+                                    )}
                                 </button>
                             </div>
-                        }
-                        {edit &&
-                            <button onClick={handleDelete} type='button' className='p-4 border-b-2 border-r-2 border-b-zinc-600 border-r-zinc-600 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md hover:shadow-glow shadow-red-500 hover:shadow-red-500 text-red-400 transition-all duration-500 hover:scale-105 ease-in-out animate-fadeIn'>
+                        )}
+                        {edit && (
+                            <button onClick={handleDelete} type='button' className={`p-4 rounded-lg w-40 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md hover:shadow-glow shadow-red-500 hover:shadow-red-500 text-red-400 transition-all duration-500 hover:scale-105 ease-in-out animate-fadeIn`}>
                                 Delete account
                             </button>
-                        }
+                        )}
                     </div>
                 </form>
             </div>
         </div>
+
     )
 }
 export default ProfilePage
