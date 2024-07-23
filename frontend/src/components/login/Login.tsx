@@ -17,7 +17,7 @@ const Login = () => {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
     const [rememberMe, setRememberMe] = useState<boolean>(false);
-    const { setUserId, setUserImage } = useUser();
+    const { setUserId } = useUser();
     const [showPass, setShowPass] = useState<boolean>(false);
 
     const { theme } = useThemes();
@@ -39,7 +39,6 @@ const Login = () => {
                 if (token) {
                     const decodedToken = jwtDecode<string>(token);
                     setUserId(decodedToken);
-                    setUserImage(response.data.image);
                 }
                 if (response.data) {
                     navigate('/');
@@ -61,9 +60,6 @@ const Login = () => {
     return (
         <div className={`h-screen relative`}>
             <div className="absolute right-4 z-10 top-4 flex space-x-2 items-center">
-                <h2 className={`font-mono text-${theme}-500 text-md`}>
-                    Change Theme
-                </h2>
                 <Themes />
             </div>
             <img className='h-full w-full absolute object-cover blur-sm ' alt='backgroundLogin' src={background} />

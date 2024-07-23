@@ -32,7 +32,7 @@ favoriteGame(app);
 
 
 app.get('/', (req, res) => {
-  res.send('Backendul funcționează');
+  res.send('Backend server listening');
 });
 
 app.listen(port , () => {

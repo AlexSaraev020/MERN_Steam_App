@@ -1,8 +1,7 @@
 import { Express } from 'express';
-import UserModel from '../../Models/UserModel';
+import UserModel from '../../Models/UserController';
 import { generateToken } from '../../JWT/JWT';
 const bcrypt = require('bcrypt');
-
 
 export function setupRoutes(app: Express) {
     app.post("/register", async (req, res) => {
@@ -10,10 +9,9 @@ export function setupRoutes(app: Express) {
             const { name, email, password } = req.body;
             const existingUser = await UserModel.findOne({ email });
             if (!name || !email || !password) {
-                res.status(400);
-                throw new Error('Complete all input fields');
+                res.status(400).json({ message:'You must complete all the required fields'});
             }
-
+            
             if (existingUser) {
                 res.status(400).json({ message: 'User already exists' });
             } else {
@@ -23,8 +21,7 @@ export function setupRoutes(app: Express) {
                 if (newUser) {
                     res.status(200).json(newUser);
                 } else {
-                    res.status(400);
-                    throw new Error('Invalid user data');
+                    res.status(400).json({message:'Invalid user data'});
                 }
 
             }
@@ -45,7 +42,6 @@ export function setupRoutes(app: Express) {
                         httpOnly: true,
                         sameSite: 'strict'
                     });
-
                     res.json({
                         _id: user.id,
                         name: user.name,
@@ -56,21 +52,20 @@ export function setupRoutes(app: Express) {
                     });
 
                 } else {
-                    res.status(401).json({ message: 'Invalid credentials' });
+                    res.status(400).json({ message: 'Incorrect password' });
                 }
             } else {
-                res.status(400).json({ message: 'User not found' });
+                res.status(404).json({ message: 'User not found' });
             }
         } catch (error) {
             res.status(500).json({ message: 'Internal server error' });
         }
     });
 
-
     app.get('/user/:userId', async (req, res) => {
         const { userId } = req.params;
         try {
-            const user = await UserModel.findOne({ _id: userId });
+            const user = await UserModel.findById( userId);
             if (user) {
                 res.status(200).json({
                     userId: user.id,
@@ -78,25 +73,12 @@ export function setupRoutes(app: Express) {
                     name: user.name,
                     email: user.email,
                     description: user.description,
-                    image:user.userImage
                 });
             } else {
                 res.status(404).json({ message: 'User not found' });
             }
         } catch (error) {
             res.status(500).json({ message: 'Internal server error', error });
-        }
-    });
-
-
-
-    //Just for the moment
-    app.get('/users', async (req, res) => {
-        try {
-            const users = await UserModel.find({});
-            res.json(users);
-        } catch (error) {
-            res.status(500).json({ message: 'Internal server error' });
         }
     });
 }

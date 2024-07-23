@@ -28,16 +28,6 @@ export interface User {
 }
 
 
-export interface DecodedToken {
-    userId: string;
-    userName: string;
-    email: string;
-    description: string;
-    image: string;
-    favoriteGames: number[],
-}
-
-
 //Nav Related
 
 export interface NavLinkType {

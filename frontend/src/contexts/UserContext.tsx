@@ -4,10 +4,8 @@ import { User } from "../types/types";
 interface UserContextType {
     user?: User | undefined;
     userId?: string;
-    userImage?: string | undefined;
-    setUserImage: (userImage: string|undefined) => void
     setUser: (user: User | undefined) => void;
-    setUserId: (userId: string) => void
+    setUserId: (userId: string | undefined) => void
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -15,9 +13,8 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | undefined>(undefined);
     const [userId, setUserId] = useState<string | undefined>(undefined);
-    const [userImage , setUserImage] = useState<string|undefined>(undefined);
     return (
-        <UserContext.Provider value={{userId , setUserId , user, setUser , userImage , setUserImage}}>
+        <UserContext.Provider value={{userId , setUserId , user, setUser}}>
         { children }
         </UserContext.Provider>
     );

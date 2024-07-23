@@ -12,15 +12,17 @@ import NavigationMenu from "./components/Navigation/NavigationMenu";
 import { useEffect, useState } from "react";
 import { fetchGames } from "./actions/apiRequests";
 import { jwtDecode } from "jwt-decode";
-import { DecodedToken, User } from "./types/types";
+import { User } from "./types/types";
 import Cookies from "js-cookie";
 import AllFavoriteGames from "./components/allGames/AllFavoriteGames";
 import Footer from "./components/footer/Footer";
 import ProfilePage from "./components/profilePage/ProfilePage";
 import axios from "axios";
+import { useThemes } from "./contexts/ThemeContext";
 
-
-
+interface DecodedUser {
+    userId: string | undefined;
+}
 
 const MainApp = () => {
     const location = useLocation();
@@ -28,26 +30,23 @@ const MainApp = () => {
     const shouldHideNav = hideNavOnRoutes.includes(location.pathname);
     const [isMenuActive, setIsMenuActive] = useState(false);
     const { setGamesData } = useGames();
-    const { user, userId, setUser , setUserId } = useUser();
+    const { userId, setUser, setUserId } = useUser();
     const navigate = useNavigate();
+    const { setTheme } = useThemes()
 
     useEffect(() => {
         const token = Cookies.get('token');
         if (!token) {
-            if (user?.name !== "Guest") {
-                navigate('/login')
-            }
-        }else{
-            const decodedToken = jwtDecode<DecodedToken>(token);
+            navigate('/login')
+        } else {
+            const decodedToken = jwtDecode<DecodedUser>(token);
             setUserId(decodedToken.userId);
-            console.log(userId)
             const getUpdatedUser = async () => {
                 try {
                     if (userId) {
                         const response = await axios.get(`http://localhost:3001/user/${userId}`);
                         if (response.status === 200) {
                             setUser(response.data)
-                            console.log(user)
                         }
                     }
                 } catch (error) {
@@ -56,9 +55,8 @@ const MainApp = () => {
             };
             getUpdatedUser();
         }
-        
-    }, [userId])
 
+    }, [userId])
 
     useEffect(() => {
         const fetchAllGames = async () => {
@@ -74,9 +72,16 @@ const MainApp = () => {
 
     }, [setGamesData]);
 
+    useEffect(() => {
+        const theme = localStorage.getItem('theme')
+        if (theme) {
+            setTheme(theme)
+        }
+    }, []);
+
 
     return (
-        <div className="bg-[#171717] min-h-screen">
+        <div className="bg-[#171717] min-h-screen relative ">
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
 
             {!shouldHideNav &&

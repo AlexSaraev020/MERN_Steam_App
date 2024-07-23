@@ -1,4 +1,3 @@
-import { useUser } from "../../contexts/UserContext";
 import CarouselComponent from "./carousel/Carousel";
 import Recommended from "./recommended/Recommended";
 

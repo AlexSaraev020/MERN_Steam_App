@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useRef } from "react";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Game } from "../../types/types";
@@ -10,26 +10,26 @@ import axios from "axios";
 import { useThemes } from "../../contexts/ThemeContext";
 
 const GamePage = () => {
-
     const { id } = useParams<{ id: string | undefined }>();
     const [gamesByGenre, setGamesByGenre] = useState<Game[]>([]);
     const [game, setGame] = useState<Game | undefined>(undefined);
     const { gamesData, setFavoriteButton } = useGames()
     const { userId } = useUser()
     const getTheGame = useRef<HTMLAnchorElement>(null)
-    const {theme} = useThemes()
+    const { theme } = useThemes()
+
+    useEffect(() => {
+
+    }, [])
+
     const getTheGameButton = () => {
         if (getTheGame.current) {
             getTheGame.current.click()
         }
     }
 
-
-
     useEffect(() => {
-
         const getFavorite = async () => {
-
             try {
                 if (userId && id) {
                     const response = await axios.get(`http://localhost:3001/user/${userId}`);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ReactComponent as Logo } from '../../icons/logo.svg';
 import { ReactComponent as Instagram } from '../../icons/instagram.svg';
 import { ReactComponent as Facebook } from '../../icons/facebook.svg';
@@ -41,7 +40,7 @@ const Footer = () => {
 
 
     return (
-        <footer className={`text-white border-t-2 w-full border-zinc-700 md:mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn`}>
+        <footer className={`text-white border-t-2 w-full mt-10 border-zinc-700 md:mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn`}>
             <div className={`mx-auto py-10 px-4 md:px-8 lg:px-12 xl:px-20 flex flex-col w-full items-center`}>
                 <div className={`flex flex-col md:flex-row w-full`}>
 
@@ -63,7 +62,7 @@ const Footer = () => {
                             <h2 className={`text-xl lg:text-2xl xl:text-3xl font-semibold text-${theme}-400 font-mono`}>Social links:</h2>
                             <div className={`flex space-x-3 lg:space-x-5`}>
                                 {footerLinks.map(link => (
-                                    <a key={link.id} href={link.href} target="_blank" rel="noreferrer" className={`text-gray-400 hover:text-${theme}-400 hover:scale-110 transition-all duration-300`}>
+                                    <a key={link.id} href={link.href} target="_blank" rel="noreferrer" className={`text-gray-400 hover:text-${theme}-400  hover:scale-110 transition-all duration-300`}>
                                         {link.icon}
                                     </a>
                                 ))}

@@ -13,6 +13,17 @@ module.exports = {
 
       },
       keyframes: {
+        blink: {
+          '0%': {
+            opacity: '0',
+          },
+          '50%': {
+            opacity: '1',
+          },
+          '100%': {
+            opacity: ' 0',
+          },
+        },
         fadeIn: {
           '0%': { opacity: 0 },
           '100%': { opacity: 1 },
@@ -25,6 +36,7 @@ module.exports = {
       animation: {
         fadeIn: 'fadeIn 0.5s ease-in-out',
         fadeOut: 'fadeOut 0.5s ease-in-out',
+        blink: 'blink 0.5s infinite both',
       },
     },
   },

@@ -54,6 +54,7 @@ function SignUp() {
                         <input
                             required
                             type="text"
+                            maxLength={30}
                             id="username"
                             name="name"
                             className={`mt-1 p-2 w-full text-sm sm:text-md transition-all duration-500 border-zinc-400 border rounded-md mb-5 bg-transparent font-semibold text-zinc-200 focus:border-${theme}-500 placeholder-zinc-200 placeholder-opacity-50 focus:outline-none focus:ring-1 focus:ring-${theme}-400`}

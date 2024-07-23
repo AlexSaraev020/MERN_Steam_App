@@ -7,7 +7,6 @@ export interface User extends Document {
     createdAt: Date;
     description?: string;
     favoriteGames?: number[];
-    userImage?: string;
 }
 
 const UserSchema: Schema<User> = new Schema({
@@ -17,7 +16,6 @@ const UserSchema: Schema<User> = new Schema({
     createdAt: { type: Date, default: new Date() },
     description: { type: String, required: false, default: "" },
     favoriteGames: { type: [Number], required: false, default: [] },
-    userImage: { type: String, required: false, default: "" }
 });
 
 

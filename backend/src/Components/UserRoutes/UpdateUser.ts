@@ -1,15 +1,12 @@
 import { Express } from 'express';
-import UserModel from '../../Models/UserModel';
+import UserModel from '../../Models/UserController';
 const bcrypt = require('bcrypt');
-
-
 
 export function updateUser(app: Express) {
     app.put('/userUpdate', async (req, res) => {
-        const { userId, userEmail, userName, userPassword, userImage, userDescription } = req.body;
+        const { userId, userEmail, userName, userPassword, userDescription } = req.body;
         try {
             let hashedPassword = null
-
             if (userPassword) {
                 const salt = await bcrypt.genSalt(10);
                 hashedPassword = await bcrypt.hash(userPassword, salt);
@@ -18,9 +15,7 @@ export function updateUser(app: Express) {
                 name: userName,
                 email: userEmail,
                 description: userDescription,
-                image: userImage
             }
-
             if (hashedPassword) {
                 updatedFields.password = hashedPassword
             }
@@ -29,7 +24,6 @@ export function updateUser(app: Express) {
                 updatedFields,
                 { new: true, runValidators: true },
             )
-
             res.status(200).json(user);
         } catch (error) {
             res.status(500).json({ message: 'Error updating user', error });
@@ -38,7 +32,6 @@ export function updateUser(app: Express) {
 
     app.delete('/deleteUser/:userId', async (req, res) => {
         const { userId } = req.params
-
         try {
             const deletedUser = await UserModel.findOneAndDelete({ _id: userId });
             if (!deletedUser) {
@@ -47,7 +40,6 @@ export function updateUser(app: Express) {
             res.status(200).json({ message: 'Your account has been deleted' });
         } catch (error) {
             res.status(500).json({ message: 'Error deleting user', error });
-
         }
     })
 }

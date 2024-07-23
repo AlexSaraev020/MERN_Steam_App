@@ -46,7 +46,7 @@ const CarouselComponent = () => {
                     {shuffledGames.slice(0, 10).map((game) => (
                         <div
                             key={game.id}
-                            className={`flex flex-col h-full items-center justify-center overflow-hidden`}
+                            className={`flex flex-col h-fit rounded-b-lg items-center justify-center overflow-hidden`}
                         >
                             <div className={`relative`}>
                                 <Link to={`/game/${game.id}`} className={`font-mono`}>

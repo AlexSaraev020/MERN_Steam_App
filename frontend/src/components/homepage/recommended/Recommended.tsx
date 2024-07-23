@@ -35,12 +35,12 @@ const Recommended = () => {
     }, [scrollDirection]);
 
     return (
-        <section className={`relative flex flex-col items-center justify-center w-full mt-10 md:mb-10`}>
+        <section className={`relative flex flex-col items-center justify-center w-full xl:mt-10 md:mb-10`}>
             <h2 className={`font-mono relative w-fit h-auto py-4 justify-center flex text-${theme}-500 text-2xl xl:text-5xl font-extrabold text-center select-auto`}>
                 Latest releases
             </h2>
             <div className={`flex relative items-center justify-center w-full md:space-x-4`}>
-                <div ref={scrollRef} className={`w-11/12 md:w-10/12 lg:w-10/12 xl:w-9/12 items-center flex lg:scrollbar-thin scrollbar-thumb-${theme}-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-14 px-9`}>
+                <div ref={scrollRef} className={`w-11/12 md:w-10/12 lg:w-10/12 xl:w-9/12 items-center flex lg:scrollbar-thin scrollbar-thumb-${theme}-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-10 xl:py-14 px-9`}>
                     {gamesData?.latestReleases?.slice(0, 20).map((game) => (
                         <Link
                             to={`/game/${game.id}`}
