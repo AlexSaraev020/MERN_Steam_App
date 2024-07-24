@@ -27,9 +27,6 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
-# Build artifacts
-dist/
-*.map
 
 # Test coverage output
 coverage/
