@@ -8,7 +8,7 @@ interface SortedGames {
 
 export const fetchGames = async (): Promise<SortedGames> => {
   try {
-    const response = await axios.get<SortedGames>('http://localhost:3001/api/games');
+    const response = await axios.get<SortedGames>('https://gamerslobby-api.onrender.com/api/games');
     if (response.status === 200) {
       return response.data as SortedGames;
     } else {

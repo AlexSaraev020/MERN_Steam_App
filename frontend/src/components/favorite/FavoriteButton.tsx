@@ -23,10 +23,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
             }
 
             if (!favoriteButton) {
-                await axios.post('http://localhost:3001/favorite', { userId: userId, gameId });
+                await axios.post('https://gamerslobby-api.onrender.com/favorite', { userId: userId, gameId });
                 setFavoriteButton(!favoriteButton);
             } else {
-                await axios.delete('http://localhost:3001/rmfavorite', { data: { userId: userId, gameId } });
+                await axios.delete('https://gamerslobby-api.onrender.com/rmfavorite', { data: { userId: userId, gameId } });
                 setFavoriteButton(!favoriteButton);
             }
         } catch (error) {

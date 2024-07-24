@@ -46,7 +46,7 @@ const ProfilePage = () => {
         const getFavorite = async () => {
             try {
                 if (userId) {
-                    const response = await axios.get(`http://localhost:3001/user/${userId}`);
+                    const response = await axios.get(`https://gamerslobby-api.onrender.com/user/${userId}`);
                     if (response.status === 200) {
                         const favoriteGameIds = response.data.userFavorite;
                         if (gamesData?.popular) {
@@ -90,7 +90,7 @@ const ProfilePage = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         try {
-            const response = await axios.put('http://localhost:3001/userUpdate', {
+            const response = await axios.put('https://gamerslobby-api.onrender.com/userUpdate', {
                 userId: userId,
                 userName: name,
                 userEmail: email,
@@ -109,7 +109,7 @@ const ProfilePage = () => {
     }
 
     const handleDelete = async () => {
-        const response = await axios.delete(`http://localhost:3001/deleteUser/${userId}`)
+        const response = await axios.delete(`https://gamerslobby-api.onrender.com/deleteUser/${userId}`)
 
         if (response.status === 200) {
             console.log('Your account deleted successfully')

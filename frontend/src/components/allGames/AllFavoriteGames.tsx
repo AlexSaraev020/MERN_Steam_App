@@ -31,7 +31,7 @@ const AllFavoriteGames = () => {
         const getFavorite = async () => {
             try {
                 if (userId) {
-                    const response = await axios.get(`http://localhost:3001/user/${userId}`);
+                    const response = await axios.get(`https://gamerslobby-api.onrender.com/user/${userId}`);
                     if (response.status === 200) {
                         const favoriteGameIds = response.data.userFavorite;
                         if (gamesData?.popular) {

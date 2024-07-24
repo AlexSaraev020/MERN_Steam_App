@@ -32,7 +32,7 @@ const Login = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/login', { email, password, rememberMe });
+            const response = await axios.post('https://gamerslobby-api.onrender.com/login', { email, password, rememberMe });
             if (response.status === 200) {
                 document.cookie = `token=${response.data.token}; max-age=${rememberMe ? 7 * 24 * 60 * 60 : 60 * 60}; path=/`;
                 const token = Cookies.get('token');

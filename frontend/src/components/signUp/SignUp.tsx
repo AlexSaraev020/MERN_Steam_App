@@ -20,7 +20,7 @@ function SignUp() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/register', { name, email, password });
+            const response = await axios.post('https://gamerslobby-api.onrender.com/register', { name, email, password });
             if (response.status === 200) {
                 navigate('/login');
             }
