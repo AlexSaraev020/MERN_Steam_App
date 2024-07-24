@@ -12,7 +12,7 @@ const cookieParser = require("cookie-parser");
 app.use(express.json());
 
 app.use(cors({
-  origin: "https://gamerslobby.vercel.app",
+  origin: "https://gamerslobby.onrender.com",
   methods: ["GET", "POST" , "DELETE" , "PUT"],
   credentials: true,
 }));
