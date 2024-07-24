@@ -28,7 +28,6 @@ Thumbs.db
 .env.production.local
 
 # Build artifacts
-build/
 dist/
 *.map
 
