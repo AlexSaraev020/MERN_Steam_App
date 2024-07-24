@@ -80,7 +80,7 @@ const GamePage = () => {
                                 <h3 className={`text-sm xl:text-lg`}>Release: <span className={`text-zinc-600 font-bold text-md`}>{game?.release_date}</span></h3>
                             </div>
                             <div className={`flex flex-col xl:flex-row items-start xl:items-center mt-4 space-y-2 xl:space-y-0 xl:space-x-4`}>
-                                <button onClick={getTheGameButton} className={` text-white flex items-center justify-center w-44 hover:text-${theme}-500 hover:scale-105 transition-all bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md shadow-zinc-800 border-2 border-zinc-700 hover:shadow-${theme}-500 font-medium rounded-lg text-lg xl:text-xl px-5 py-3 focus:outline-none duration-500`}>
+                                <button onClick={getTheGameButton} className={` text-white flex items-center justify-center w-44 hover:text-${theme}-500 hover:scale-105 transition-all bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 shadow-md shadow-zinc-800 border-2 border-zinc-700 hover:shadow-${theme}-500 font-medium rounded-lg text-sm md:text-lg xl:text-xl px-5 py-3 focus:outline-none duration-500`}>
                                     <a ref={getTheGame} href={game?.game_url} target="_blank" rel="noopener noreferrer">Get the game</a>
                                 </button>
                                 <div className={`w-12`}>
