@@ -14,7 +14,7 @@ const port = process.env.PORT || 3001;
 const cookieParser = require("cookie-parser");
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: "https://gamerslobby.onrender.com",
+    origin: "https://gamerslobby.vercel.app",
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
 }));

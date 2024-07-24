@@ -3,6 +3,7 @@ import MainApp from "./MainApp";
 import { UserProvider } from "./contexts/UserContext";
 import { GamesProvider } from "./contexts/GamesContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                     </GamesProvider>
                 </UserProvider>
             </BrowserRouter>
+            <SpeedInsights />
         </div>
     );
 }
