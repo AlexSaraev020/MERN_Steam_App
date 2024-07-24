@@ -10,7 +10,7 @@ const AuthRoutes_1 = require("./Components/UserRoutes/AuthRoutes");
 const FetchGames_1 = require("./Components/FetchGames/FetchGames");
 const UpdateUser_1 = require("./Components/UserRoutes/UpdateUser");
 const app = (0, express_1.default)();
-const port = 3001;
+const port = process.env.PORT || 3001;
 const cookieParser = require("cookie-parser");
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({

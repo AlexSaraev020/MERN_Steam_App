@@ -6,7 +6,7 @@ import { favoriteGame , fetchGames } from './Components/FetchGames/FetchGames';
 import { updateUser } from './Components/UserRoutes/UpdateUser';
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001
 const cookieParser = require("cookie-parser");
 
 app.use(express.json());
