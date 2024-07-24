@@ -59,7 +59,7 @@ const Login = () => {
 
     return (
         <div className={`h-screen relative`}>
-            <div className="absolute right-4 z-10 top-4 flex space-x-2 items-center">
+            <div className="absolute left-4 z-10 top-4 flex space-x-2 items-center">
                 <Themes />
             </div>
             <img className='h-full w-full absolute object-cover blur-sm ' alt='backgroundLogin' src={background} />
