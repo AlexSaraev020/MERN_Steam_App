@@ -6,7 +6,9 @@ import { ReactComponent as Hide } from '../../icons/hide.svg';
 import { ReactComponent as Unhide } from '../../icons/unhide.svg';
 import Themes from '../themeSelector/Themes';
 import { useThemes } from '../../contexts/ThemeContext';
-import background from '../../images/login.jpg';
+import background from '../../images/login.webp';
+import { registerUser } from '../../actions/apiRequests';
+import { FailAlert } from '../errorAlerts/FailAlert';
 
 function SignUp() {
     const [name, setName] = useState<string | undefined>(undefined);
@@ -14,36 +16,29 @@ function SignUp() {
     const [password, setPassword] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
     const [showPass, setShowPass] = useState<boolean>(false);
+    const [close, setClose] = useState<boolean>(false)
+    const [error, setError] = useState<string | undefined>(undefined)
+    const [message, setMessage] = useState<string | undefined>(undefined);
 
     const { theme } = useThemes();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('https://gamerslobby-api.onrender.com/register', { name, email, password });
-            if (response.status === 200) {
-                navigate('/login');
-            }
-        } catch (error) {
-            console.error(error);
-        }
+        await registerUser({ email, password, name, navigate , setClose,setError,setMessage })
     };
 
     return (
         <div className='h-screen relative'>
-            <div className="absolute right-4 z-10 top-4 flex space-x-2 items-center">
-                <h2 className={`font-mono text-${theme}-500 text-md`}>
-                    Change Theme
-                </h2>
+            <div className="absolute left-4 z-10 top-4 flex space-x-2 items-center">
                 <Themes />
             </div>
             <img className='h-full w-full absolute object-cover blur-sm' alt='backgroundLogin' src={background} />
             <div className="absolute inset-0 bg-zinc-950 opacity-80"></div>
             <form onSubmit={handleSubmit} className='absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out animate-fadeIn'>
-                <div className={`w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12 shadow-glow shadow-${theme}-500 border-${theme}-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80`}>
+                <div className={`w-10/12 sm:w-8/12 md:w-6/12 lg:w-5/12 xl:w-4/12 2xl:w-3/12 shadow-glow shadow-${theme}-500 border-${theme}-400 border-opacity-50 border-[0.2rem] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80`}>
                     <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 space-x-1'>
                         <SvgIcon className={`h-12 w-12 sm:h-14 sm:w-14 stroke-${theme}-500`} />
-                        <h2 className={`text-white text-[30px] sm:text-[35px] font-bold`}>
+                        <h2 className={`text-white text-[1.5rem] sm:text-[2.5rem] font-bold`}>
                             Create account
                         </h2>
                     </div>
@@ -113,6 +108,14 @@ function SignUp() {
                         </div>
                     </div>
                 </div>
+                <div className='mt-10 w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12'>
+                    <FailAlert
+                        message={message}
+                        error={error}
+                        close={close}
+                        setClose={setClose}
+                    />
+                    </div>
             </form>
         </div>
     );

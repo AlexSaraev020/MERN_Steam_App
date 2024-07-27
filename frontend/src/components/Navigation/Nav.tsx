@@ -56,17 +56,17 @@ const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive
     };
     return (
         <nav className={`transition-opacity sticky top-0 z-40 bg-inherit w-full duration-500 ease-in-out animate-fadeIn`}>
-            <div className={`flex items-center  justify-center w-full p-2 sm:p-10 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h-[70px]`}>
-                <Link to="/" className={`flex items-center space-x-1 absolute left-4 top-4`}>
+            <div className={`flex items-start justify-between w-full p-2 sm:px-10 sm:py-4 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h`}>
+                <Link to="/" className={`flex items-center space-x-1 left-4 top-4`}>
                     <LogoSite className={`h-8 w-8 sm:h-10 sm:w-10 stroke-${theme}-500`} />
                     <h2 className={`text-white text-lg sm:text-2xl md:text-3xl font-bold`}>
                         Gamers<span className={`text-${theme}-500`}>Lobby</span>
                     </h2>
                 </Link>
-                <div className={`hidden lg:block`}>
+                <div className={`hidden lg:block mt-2`}>
                     <SearchInput setIsMenuActive={setIsMenuActive} />
                 </div>
-                <div className={`absolute right-6 lg:flex items-center space-x-4 hidden`}>
+                <div className={` right-6 lg:flex items-center space-x-4 hidden`}>
                     <Themes />
                     <Link to={`/profile/${userId}`} className={`space-x-2 px-2  border-2  border-${theme}-500 shadow-glow-sm shadow-${theme}-500 rounded-md flex items-center justify-center transition-all duration-500 hover:scale-105`}>
                         <h2 className={`text-${theme}-500 font-mono lg:max-w-52 truncate text-2xl font-bold`}>
@@ -75,7 +75,7 @@ const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive
                     </Link>
                 </div>
             </div>
-            <div className={`absolute right-4 block lg:hidden z-50 top-4`}>
+            <div className={` right-4 absolute block lg:hidden z-50 top-4`}>
                 <Hamburger handleClick={handleClick} isMenuActive={isMenuActive} />
             </div>
             {isMenuActive &&

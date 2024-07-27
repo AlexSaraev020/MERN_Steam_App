@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Game } from "../types/types";
+import { GamesData } from "../types/types";
 
 interface GamesContextType {
     gamesData: GamesData | null;
@@ -10,10 +11,7 @@ interface GamesContextType {
     setFavoriteButton: (button: boolean) => void;
 }
 
-interface GamesData {
-    popular: Game[];
-    latestReleases: Game[];
-}
+
 
 export const GamesContext = createContext<GamesContextType | undefined>(undefined)
 

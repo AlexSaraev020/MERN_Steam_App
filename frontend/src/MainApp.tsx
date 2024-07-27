@@ -11,18 +11,12 @@ import { useGames } from "./contexts/GamesContext";
 import NavigationMenu from "./components/Navigation/NavigationMenu";
 import { useEffect, useState } from "react";
 import { fetchGames } from "./actions/apiRequests";
-import { jwtDecode } from "jwt-decode";
-import { User } from "./types/types";
-import Cookies from "js-cookie";
 import AllFavoriteGames from "./components/allGames/AllFavoriteGames";
 import Footer from "./components/footer/Footer";
 import ProfilePage from "./components/profilePage/ProfilePage";
-import axios from "axios";
 import { useThemes } from "./contexts/ThemeContext";
+import { fetchUser } from "./actions/apiRequests";
 
-interface DecodedUser {
-    userId: string | undefined;
-}
 
 const MainApp = () => {
     const location = useLocation();
@@ -34,28 +28,19 @@ const MainApp = () => {
     const navigate = useNavigate();
     const { setTheme } = useThemes()
 
-    useEffect(() => {
-        const token = Cookies.get('token');
-        if (!token) {
-            navigate('/login')
-        } else {
-            const decodedToken = jwtDecode<DecodedUser>(token);
-            setUserId(decodedToken.userId);
-            const getUpdatedUser = async () => {
-                try {
-                    if (userId) {
-                        const response = await axios.get(`https://gamerslobby-api.onrender.com/user/${userId}`);
-                        if (response.status === 200) {
-                            setUser(response.data)
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                }
-            };
-            getUpdatedUser();
-        }
+    useEffect(()=>{
+        window.scrollTo(0, 0)
+    }, [location])
 
+    useEffect(() => {
+        const getUser = async()=>{
+            try {
+                await fetchUser({navigate, setUserId , setUser , userId})
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        getUser()
     }, [userId])
 
     useEffect(() => {
@@ -81,7 +66,7 @@ const MainApp = () => {
 
 
     return (
-        <div className="bg-[#171717] min-h-screen relative ">
+        <div className="bg-darkGray-600 min-h-screen relative ">
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
 
             {!shouldHideNav &&

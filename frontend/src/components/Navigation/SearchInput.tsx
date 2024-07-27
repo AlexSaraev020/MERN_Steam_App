@@ -32,7 +32,7 @@ const SearchInput = ({ setIsMenuActive }: { setIsMenuActive: (isMenuActive: bool
         e.preventDefault();
         try {
             if (enteredText) {
-                navigate(`/searchbytitle/${enteredText}`);
+                navigate(`/searchbytitle/${enteredText.toLocaleLowerCase()}`);
                 setEnteredText('')
                 setIsMenuActive(false)
             } else {

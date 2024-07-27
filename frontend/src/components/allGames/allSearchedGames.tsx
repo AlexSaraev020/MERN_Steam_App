@@ -72,7 +72,7 @@ const AllSearchedGames = () => {
 
                 </div>
                 :
-                <ul className={`w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-[#1e1e1e] border-2 border-${theme}-500 shadow-glow-sm shadow-${theme}-500 rounded-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration pb-10`}>
+                <ul className={`w-11/12 sm:w-9/12 space-y-20 sm:space-y-8 bg-darkGray-500 border-2 border-${theme}-500 shadow-glow-sm shadow-${theme}-500 rounded-xl flex flex-col justify-center items-center border-2 border-zinc-800 transition ease-in-out duration pb-10`}>
                     {slicedGames.slice(nextStart, nextEnd).map((game) => (
                         <div key={game.id} className={`flex flex-col pb-4 sm:flex-row justify-between items-center sm:items-end w-11/12 shadow-glow-sm shadow-zinc-700 hover:shadow-${theme}-500 transition duration-500 p-2 sm:p-4 delay-100 hover:scale-105 bg-neutral-900 w-10/12 sm:w-11/12 rounded-xl space-y-4 sm:space-y-0 sm:space-x-3 mt-6 sm:mt-10 ease-in-out animate-fadeIn`}>
                             <Link to={`/game/${game.id}`} className="flex flex-col sm:flex-row w-full space-y-4 sm:space-y-0 sm:space-x-4">

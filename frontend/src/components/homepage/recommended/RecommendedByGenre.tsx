@@ -19,25 +19,23 @@ const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGen
     const {theme} = useThemes()
 
     useEffect(() => {
-        const scrollHandler = () => {
-            if (scrollRef.current) {
-                const container = scrollRef.current;
-                if (scrollDirection === 'right') {
-                    container.scrollLeft += 1;
-                    if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
-                        setScrollDirection('left');
-                    }
-                } else {
-                    container.scrollLeft -= 1;
-                    if (container.scrollLeft <= 0) {
-                        setScrollDirection('right');
+        const scrollHandler = () => {  
+                if (scrollRef.current && recommendedGames.length > 2) {
+                    const container = scrollRef.current;
+                    if (scrollDirection === 'right') {
+                        container.scrollLeft += 1;
+                        if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+                            setScrollDirection('left');
+                        }
+                    } else {
+                        container.scrollLeft -= 1;
+                        if (container.scrollLeft <= 0) {
+                            setScrollDirection('right');
+                        }
                     }
                 }
-            }
         };
-
         const interval = setInterval(scrollHandler, 20);
-
         return () => clearInterval(interval);
     }, [scrollDirection]);
     return (
@@ -46,14 +44,14 @@ const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGen
                 More&nbsp;<span className={`text-${theme}-500`}>{genre}</span>&nbsp;games
             </h2>
             <div className="flex relative items-center justify-center w-full md:space-x-4 mt-10">
-                <div ref={scrollRef} className={`w-full items-center flex lg:scrollbar-thin scrollbar-thumb-${theme}-500 scrollbar-track-${theme}-800 overflow-x-scroll space-x-4 py-14 px-9`}>
+                <div ref={scrollRef} className={`w-full items-center flex lg:scrollbar-thin scrollbar-thumb-${theme}-500 scrollbar-track-zinc-800 overflow-x-scroll space-x-4 py-14 px-9`}>
                     {recommendedGames.map((game) => (
                         <Link
                             to={`/game/${game.id}`}
                             key={game.id}
                             className={`relative flex-none w-full md:w-6/12 lg:w-6/12 xl:w-6/12 hover:border-2 hover:border-${theme}-500 hover:shadow-glow hover:shadow-${theme}-500 transition-all duration-500 hover:z-10 hover:-translate-y-6 hover:scale-105 rounded-2xl`}
                         >
-                            <div className="relative w-full flex flex-col justify-end overflow-hidden h-36 sm:h-48 md:h-56 lg:h-56 xl:h-72 rounded-2xl p-2">
+                            <div className="relative w-full bg-black flex flex-col justify-end overflow-hidden h-36 sm:h-48 md:h-56 lg:h-56 xl:h-72 rounded-2xl p-2">
                                 <img src={game.thumbnail} alt={game.title} className="absolute inset-0 h-full w-full object-cover" />
                                 <div className={`absolute inset-0 bg-gradient-to-t from-${theme}-950 via-gray-900/40`}></div>
                                 <h3 className="z-10 mt-3 text-lg font-bold text-white truncate">{game.title}</h3>

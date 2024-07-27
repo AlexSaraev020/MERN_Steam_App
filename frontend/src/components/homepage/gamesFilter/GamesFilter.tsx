@@ -17,7 +17,6 @@ interface GamesFilterProps {
 
 const GamesFilter: React.FC<GamesFilterProps> = ({ genres, handleFilterGenre, gamesGenre }) => {
 
-
     return (
         <div>
             <section className="my-8 mx-auto w-[99%] sm:w-[90%] md:w-[95%] lg:w-[95%] xl:w-[95%] 2xl:w-[80%]">

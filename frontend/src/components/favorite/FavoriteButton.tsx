@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useUser } from '../../contexts/UserContext';
 import { useGames } from '../../contexts/GamesContext';
 import { useThemes } from '../../contexts/ThemeContext';
+import { rmFavorite } from '../../actions/apiRequests';
+import { addFavorite } from '../../actions/apiRequests';
 
 interface FavoriteButtonProps {
     gameId: number | undefined;
@@ -23,11 +25,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
             }
 
             if (!favoriteButton) {
-                await axios.post('https://gamerslobby-api.onrender.com/favorite', { userId: userId, gameId });
-                setFavoriteButton(!favoriteButton);
+                await addFavorite({userId , gameId, setFavoriteButton , favoriteButton})
             } else {
-                await axios.delete('https://gamerslobby-api.onrender.com/rmfavorite', { data: { userId: userId, gameId } });
-                setFavoriteButton(!favoriteButton);
+                await rmFavorite({userId , gameId, setFavoriteButton , favoriteButton})
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
@@ -49,8 +49,6 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ gameId }) => {
             </svg>
             <h2 className='text-lg xl:text-xl'>Favorite</h2>
         </button>
-
-
     );
 };
 

@@ -24,7 +24,7 @@ export function updateUser(app: Express) {
                 updatedFields,
                 { new: true, runValidators: true },
             )
-            res.status(200).json(user);
+            res.status(200).json({user , message:'User updated successfully'});
         } catch (error) {
             res.status(500).json({ message: 'Error updating user', error });
         }

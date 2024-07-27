@@ -47,7 +47,6 @@ const NavigationMenu = ({ setIsMenuActive }: { setIsMenuActive: (isMenuActive: b
 
 
     const handleLogout = () => {
-        
         Cookies.remove('token');
         setUser(undefined);
         setIsMenuActive(false);

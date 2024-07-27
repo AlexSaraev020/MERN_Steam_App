@@ -15,6 +15,11 @@ export interface Game {
     game_url: string;
 }
 
+export interface GamesData {
+    popular: Game[];
+    latestReleases: Game[];
+}
+
 
 
 //User Related

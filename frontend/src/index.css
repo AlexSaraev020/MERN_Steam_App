@@ -2,37 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .triangle-up {
-    width: 0;
-    height: 0;
-    border-left: 1rem solid transparent;
-    border-right: 1rem solid transparent;
-    border-bottom: 1.5rem solid currentColor;
-  }
-  .triangle-down {
-    width: 0;
-    height: 0;
-    border-left: 1rem solid transparent;
-    border-right: 1rem solid transparent;
-    border-top: 1.5rem solid currentColor;
-  }
-  .triangle-left {
-    width: 0;
-    height: 0;
-    border-top: 1rem solid transparent;
-    border-bottom: 1rem solid transparent;
-    border-right: 1.5rem solid currentColor;
-  }
-  .triangle-right {
-    width: 0;
-    height: 0;
-    border-top: 1rem solid transparent;
-    border-bottom: 1rem solid transparent;
-    border-left: 1.5rem solid currentColor;
-  }
+:root {
+  --primary: #1a1a1a;
+  --secondary: #333333;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--primary);
+}
+
+*::-webkit-scrollbar {
+  width: 15px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 14px;
+  border: 3px solid var(--primary);
+}
 
 body {
   margin: 0;

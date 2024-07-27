@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { ReactComponent as SvgIcon } from '../../icons/logo.svg';
 import { ReactComponent as Hide } from '../../icons/hide.svg';
 import { ReactComponent as Unhide } from '../../icons/unhide.svg';
-import background from '../../images/login.jpg';
+import background from '../../images/login.webp';
 import { Link } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
-import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import Themes from '../themeSelector/Themes';
 import { useThemes } from '../../contexts/ThemeContext';
+import { loginUser } from '../../actions/apiRequests';
+import { FailAlert } from '../errorAlerts/FailAlert';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -19,6 +19,10 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState<boolean>(false);
     const { setUserId } = useUser();
     const [showPass, setShowPass] = useState<boolean>(false);
+    const [close, setClose] = useState<boolean>(false)
+    const [error, setError] = useState<string | undefined>(undefined)
+    const [message, setMessage] = useState<string | undefined>(undefined);
+
 
     const { theme } = useThemes();
 
@@ -31,31 +35,8 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('https://gamerslobby-api.onrender.com/login', { email, password, rememberMe });
-            if (response.status === 200) {
-                document.cookie = `token=${response.data.token}; max-age=${rememberMe ? 7 * 24 * 60 * 60 : 60 * 60}; path=/`;
-                const token = Cookies.get('token');
-                if (token) {
-                    const decodedToken = jwtDecode<string>(token);
-                    setUserId(decodedToken);
-                }
-                if (response.data) {
-                    navigate('/');
-                } else {
-                    alert('Username not set correctly');
-                }
-            } else {
-                alert('User not found');
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            alert('User not found');
-        }
+        await loginUser({ email, password, rememberMe, setUserId, navigate , setError,setClose , setMessage })
     };
-
-    
-    
 
     return (
         <div className={`h-screen relative`}>
@@ -65,10 +46,10 @@ const Login = () => {
             <img className='h-full w-full absolute object-cover blur-sm ' alt='backgroundLogin' src={background} />
             <div className={`absolute inset-0 bg-zinc-950 opacity-80`}></div>
             <form onSubmit={handleSubmit} className={`absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out animate-fadeIn`}>
-                <div className={`w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12 shadow-glow shadow-${theme}-500 border-${theme}-400 border-opacity-50 border-[3.5px] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80`}>
+                <div className={`w-10/12 sm:w-8/12 md:w-6/12 lg:w-5/12 xl:w-4/12 2xl:w-3/12 shadow-glow shadow-${theme}-500 border-${theme}-400 border-opacity-50 border-[0.2rem] flex flex-col items-center justify-center rounded-xl bg-zinc-900 bg-opacity-80`}>
                     <div className='flex items-center justify-center mx-auto mt-10 mb-2 sm:mb-8 space-x-1'>
                         <SvgIcon className={`h-12 w-12 sm:h-14 sm:w-14 stroke-${theme}-500`} />
-                        <h2 className={`text-zinc-200 text-[30px] sm:text-[45px] font-bold`}>
+                        <h2 className={`text-zinc-200 text-[1.5rem] sm:text-[2.5rem] font-bold`}>
                             Gamers<span className={`text-${theme}-500`}>Lobby</span>
                         </h2>
                     </div>
@@ -118,8 +99,8 @@ const Login = () => {
                                 <span className="absolute inset-0 flex items-center justify-center">
                                     {rememberMe && (
                                         <svg className={`w-5 h-5 fill-${theme}-500`} fill='none' xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="verified">
-                                        <path d="M186.301 339.893L96 249.461l-32 30.507L186.301 402 448 140.506 416 110z"></path>
-                                    </svg>
+                                            <path d="M186.301 339.893L96 249.461l-32 30.507L186.301 402 448 140.506 416 110z"></path>
+                                        </svg>
                                     )}
                                 </span>
                             </label>
@@ -145,7 +126,7 @@ const Login = () => {
                                     Sign Up
                                 </Link>
                             </div>
-                            <div className={`sm:mt-0 w-[4.5rem] flex justify-center sm:w-fit shadow-md sm:shadow-none shadow-zinc-500 px-2 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
+                            <div className={`sm:mt-0 w-1/12 flex justify-center sm:w-fit shadow-md sm:shadow-none shadow-zinc-500 px-6 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
                                 <Link
                                     to={`/`}
                                     className={`text-zinc-400 text-sm sm:text-md font-bold sm:hover:underline`}
@@ -155,6 +136,14 @@ const Login = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+                <div className='mt-10 w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12'>
+                    <FailAlert
+                        message={message}
+                        error={error}
+                        close={close}
+                        setClose={setClose}
+                    />
                 </div>
             </form>
         </div>

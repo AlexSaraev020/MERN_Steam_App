@@ -5,6 +5,7 @@ import { ReactComponent as Github } from '../../icons/github.svg';
 import { ReactComponent as LinkedIn } from '../../icons/linkedin.svg';
 import { Link } from 'react-router-dom';
 import { useThemes } from '../../contexts/ThemeContext';
+import { useUser } from '../../contexts/UserContext';
 
 
 interface FooterLinks {
@@ -23,6 +24,7 @@ interface FooterRoutes {
 const Footer = () => {
 
     const { theme } = useThemes()
+    const {userId} = useUser()
 
     const footerLinks: FooterLinks[] = [
         { id: 1, title: 'Instagram', icon: <Instagram className={`w-8 xl:w-10 fill-${theme}-500 transition-all duration-500`} />, href: 'https://www.instagram.com/alexsaraev.15/' },
@@ -34,7 +36,7 @@ const Footer = () => {
         { id: 1, title: 'Home', to: '/' },
         { id: 2, title: 'All Games', to: '/allgames' },
         { id: 3, title: 'Favorite', to: '/allfavoritegames/:user' },
-        { id: 4, title: 'Profile', to: '/profile' }
+        { id: 4, title: 'Profile', to: `/profile/${userId}` }
     ]
 
 

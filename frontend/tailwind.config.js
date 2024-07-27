@@ -10,7 +10,6 @@ module.exports = {
       boxShadow: {
         'glow': "0 0px 20px rgba(255,255, 255, 0.35)",
         'glow-sm': "0 0px 10px rgba(255,255, 255, 0.35)",
-
       },
       keyframes: {
         blink: {
@@ -38,6 +37,12 @@ module.exports = {
         fadeOut: 'fadeOut 0.5s ease-in-out',
         blink: 'blink 0.5s infinite both',
       },
+      colors: {
+        'darkGray': {
+          500:'#1e1e1e',
+          600:'#171717'
+        },
+      }
     },
   },
   plugins: [
