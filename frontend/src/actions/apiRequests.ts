@@ -147,8 +147,7 @@ export const updateUser = async ({ userId, name, email, password, description, s
     });
 
     if (response.status === 200) {
-      console.log(response)
-      setUser(response.data)
+      setUser(response.data.user)
       setClose(true)
       setMessage(response.data.message)
     }

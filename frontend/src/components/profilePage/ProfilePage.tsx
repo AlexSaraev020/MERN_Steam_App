@@ -112,8 +112,8 @@ const ProfilePage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='w-full flex items-center justify-center'>
-                        <div className='w-11/12 lg:w-10/12 mt-10' >
+                    <div className='w-full flex flex-col items-center justify-center'>
+                        <div className='w-11/12 md:w-7/12 lg:w-4/12 mt-10' >
                             <SuccessAlert message={message} close={close} setClose={setClose} />
                         </div>
                         <Recommended categoryName={'Your favorite games'} theme={theme} gamesData={favoriteGames} />
