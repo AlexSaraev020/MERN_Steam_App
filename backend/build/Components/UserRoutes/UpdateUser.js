@@ -33,7 +33,7 @@ function updateUser(app) {
                 updatedFields.password = hashedPassword;
             }
             const user = yield UserController_1.default.findByIdAndUpdate(userId, updatedFields, { new: true, runValidators: true });
-            res.status(200).json(user);
+            res.status(200).json({ user, message: 'User updated successfully' });
         }
         catch (error) {
             res.status(500).json({ message: 'Error updating user', error });
