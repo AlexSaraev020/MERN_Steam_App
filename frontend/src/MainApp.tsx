@@ -20,6 +20,7 @@ import { fetchUser } from "./actions/apiRequests";
 
 const MainApp = () => {
     const location = useLocation();
+    const {pathname} = useLocation();
     const hideNavOnRoutes = ["/login", "/register"];
     const shouldHideNav = hideNavOnRoutes.includes(location.pathname);
     const [isMenuActive, setIsMenuActive] = useState(false);
@@ -28,14 +29,10 @@ const MainApp = () => {
     const navigate = useNavigate();
     const { setTheme } = useThemes()
 
-    useEffect(()=>{
-        window.scrollTo(0, 0)
-    }, [location])
-
     useEffect(() => {
-        const getUser = async()=>{
+        const getUser = async () => {
             try {
-                await fetchUser({navigate, setUserId , setUser , userId})
+                await fetchUser({ navigate, setUserId, setUser, userId })
             } catch (error) {
                 console.error(error)
             }
@@ -63,6 +60,12 @@ const MainApp = () => {
             setTheme(theme)
         }
     }, []);
+    
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [pathname]);
+    
+
 
 
     return (

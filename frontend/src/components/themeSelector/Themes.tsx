@@ -36,10 +36,10 @@ const Themes = () => {
             </h2>
             <button
                 onClick={toggleDropdown}
-                className={`px-4 py-4 order-1 lg:order-2 cursor-pointer bg-${theme}-500 hover:text-${theme}-500 shadow-glow hover:scale-110 transition-all duration-500 shadow-${theme}-500 border-2 border-${theme}-500 rounded-full w-fit`}
+                className={`px-4 py-4 order-1 cursor-pointer bg-${theme}-500 hover:text-${theme}-500 shadow-glow hover:scale-110 transition-all duration-500 shadow-${theme}-500 border-2 border-${theme}-500 rounded-full w-fit`}
             >
             </button>
-            <div className={`absolute top-full -right-12 lg:right-0 mt-2 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 border-2 border-${theme}-500 shadow-glow shadow-${theme}-500 rounded-md overflow-hidden z-10 transform transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+            <div className={`absolute top-full -right-12 mt-2 bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 border-2 border-${theme}-500 shadow-glow shadow-${theme}-500 rounded-md overflow-hidden z-10 transform transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
                 <ul className="px-4 py-2 space-y-2 flex flex-col items-start">
                     {themes.map(themeItem => (
                         <li key={themeItem.id} className={`p-2 flex transition-all hover:shadow-glow-sm border border-zinc-500 bg-gradient-to-tr from-zinc-900 via-zinc-800 to bg-zinc-900 hover:shadow-${themeItem.hoverShadow}-500 hover:border-${themeItem.hoverBorder}-500 rounded-xl items-center w-full`}>

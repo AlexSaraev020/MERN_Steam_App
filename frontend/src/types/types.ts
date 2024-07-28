@@ -2,7 +2,6 @@
 //Games Related
 
 export interface Game {
-    [x: string]: any;
     id: number;
     title: string;
     thumbnail: string;

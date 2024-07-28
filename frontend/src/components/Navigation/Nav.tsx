@@ -55,7 +55,7 @@ const Nav = ({ setIsMenuActive, isMenuActive }: { setIsMenuActive: (isMenuActive
         setIsMenuActive(!isMenuActive);
     };
     return (
-        <nav className={`transition-opacity sticky top-0 z-40 bg-inherit w-full duration-500 ease-in-out animate-fadeIn`}>
+        <nav className={`transition-opacity h-20 sticky top-0 z-40 bg-inherit w-full duration-500 ease-in-out animate-fadeIn`}>
             <div className={`flex items-start justify-between w-full p-2 sm:px-10 sm:py-4 z-40 ${!isMenuActive ? 'relative' : 'absolute'} h`}>
                 <Link to="/" className={`flex items-center space-x-1 left-4 top-4`}>
                     <LogoSite className={`h-8 w-8 sm:h-10 sm:w-10 stroke-${theme}-500`} />

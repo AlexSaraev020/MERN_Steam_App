@@ -20,7 +20,7 @@ const RecommendedByGenre: React.FC<GamesRecommendedByGenreProps> = ({ gamesByGen
 
     useEffect(() => {
         const scrollHandler = () => {  
-                if (scrollRef.current && recommendedGames.length > 2) {
+                if (scrollRef.current) {
                     const container = scrollRef.current;
                     if (scrollDirection === 'right') {
                         container.scrollLeft += 1;

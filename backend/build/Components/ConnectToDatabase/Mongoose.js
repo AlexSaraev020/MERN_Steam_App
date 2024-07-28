@@ -14,10 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectToDatabase = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const MongoDBLink = process.env.MONGODB_LINK;
 function connectToDatabase() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose_1.default.connect('mongodb+srv://User:ryJsY7PfAiCeYQbs@cluster0.nxsteee.mongodb.net/gamerslobby?retryWrites=true&w=majority&appName=Cluster0');
+            if (!MongoDBLink) {
+                throw new Error('MONGODB_LINK environment variable is not defined');
+            }
+            yield mongoose_1.default.connect(MongoDBLink);
             console.log('Connected to MongoDB');
         }
         catch (error) {

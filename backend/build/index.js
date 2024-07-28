@@ -9,6 +9,8 @@ const Mongoose_1 = require("./Components/ConnectToDatabase/Mongoose");
 const AuthRoutes_1 = require("./Components/UserRoutes/AuthRoutes");
 const FetchGames_1 = require("./Components/FetchGames/FetchGames");
 const UpdateUser_1 = require("./Components/UserRoutes/UpdateUser");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
 const cookieParser = require("cookie-parser");

@@ -6,7 +6,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
     return (
-        <div className="App h-screen">
+        <div className="App">
             <BrowserRouter>
                 <UserProvider>
                     <GamesProvider>

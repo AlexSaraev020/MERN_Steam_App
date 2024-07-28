@@ -114,11 +114,11 @@ const Login = () => {
                         Login
                     </button>
                     <div className='flex flex-col sm:flex-row sm:items-center sm:justify-start w-10/12 mb-10'>
-                        <label htmlFor="password" className={`flex text-sm sm:text-md font-sm text-white`}>
+                        <label htmlFor="password" className={`flex text-xs sm:text-md font-sm text-white`}>
                             Don’t have an account yet?
                         </label>
                         <div className='flex mt-4 sm:mt-0 items-center space-x-5 sm:space-x-0 sm:justify-center'>
-                            <div className={`sm:mt-0 w-[4.5rem] sm:w-fit shadow-md sm:shadow-none shadow-${theme}-500 px-2 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
+                            <div className={`sm:mt-0 shadow-md sm:shadow-none shadow-${theme}-500  px-4 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
                                 <Link
                                     to='/register'
                                     className={`text-${theme}-500 text-sm sm:text-md font-bold sm:hover:underline`}
@@ -126,7 +126,7 @@ const Login = () => {
                                     Sign Up
                                 </Link>
                             </div>
-                            <div className={`sm:mt-0 w-1/12 flex justify-center sm:w-fit shadow-md sm:shadow-none shadow-zinc-500 px-6 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
+                            <div className={`sm:mt-0 flex justify-center sm:w-fit shadow-md sm:shadow-none shadow-zinc-500 px-6 py-1 rounded-md bg-gradient-to-tr sm:bg-none from-zinc-900 via-zinc-800 to-zinc-900`}>
                                 <Link
                                     to={`/`}
                                     className={`text-zinc-400 text-sm sm:text-md font-bold sm:hover:underline`}

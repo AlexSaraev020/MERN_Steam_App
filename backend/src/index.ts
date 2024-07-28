@@ -4,7 +4,9 @@ import { connectToDatabase } from './Components/ConnectToDatabase/Mongoose';
 import { setupRoutes } from './Components/UserRoutes/AuthRoutes';
 import { favoriteGame , fetchGames } from './Components/FetchGames/FetchGames';
 import { updateUser } from './Components/UserRoutes/UpdateUser';
+import dotenv from 'dotenv'
 
+dotenv.config()
 const app = express();
 const port = process.env.PORT || 3001
 const cookieParser = require("cookie-parser");
