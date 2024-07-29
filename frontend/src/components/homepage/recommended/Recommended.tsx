@@ -50,7 +50,7 @@ const Recommended:React.FC<RecommendedProps> = ({categoryName,theme,gamesData}) 
                                             className={`relative flex-none w-11/12 md:w-7/12 lg:w-5/12 hover:border-2 hover:border-${theme}-500 hover:shadow-glow hover:shadow-${theme}-500 transition-all duration-500 hover:z-10 hover:-translate-y-6 hover:scale-105 rounded-2xl`}
                                         >
                                             <div className={`relative w-full flex flex-col justify-end overflow-hidden h-36 sm:h-52 md:h-56 lg:h-56 xl:h-72 rounded-2xl p-2`}>
-                                                <img src={game.thumbnail} alt={game.title} className={`absolute inset-0 h-full w-full object-cover`} />
+                                                <img src={game.thumbnail} alt={game.title} className={`absolute inset-0 h-full w-full object-fill`} />
                                                 <div className={`absolute inset-0 bg-gradient-to-t from-zinc-950 via-gray-900/40`}></div>
                                                 <h3 className={`z-10 mt-3 text-lg font-bold text-white truncate`}>{game.title}</h3>
                                                 <div className={`z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300`}>{game.genre}</div>

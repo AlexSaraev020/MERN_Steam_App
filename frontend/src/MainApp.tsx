@@ -73,7 +73,7 @@ const MainApp = () => {
             {!shouldHideNav && <Nav setIsMenuActive={setIsMenuActive} isMenuActive={isMenuActive} />}
 
             {!shouldHideNav &&
-                <div className="hidden min-[1146px]:block w-full mb-4 ">
+                <div className="hidden min-[1024px]:block w-full mb-4 ">
                     <NavigationMenu setIsMenuActive={setIsMenuActive} />
                 </div>}
             <Routes>
