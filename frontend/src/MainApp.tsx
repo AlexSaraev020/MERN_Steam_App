@@ -87,7 +87,7 @@ const MainApp = () => {
                 <Route path="/profile/:user" element={<ProfilePage />} />
             </Routes>
 
-            {!shouldHideNav && <Footer />}
+            {!shouldHideNav && <Footer isMenuActive={isMenuActive}  />}
         </div>
     );
 }

@@ -21,7 +21,7 @@ interface FooterRoutes {
     to: string;
 }
 
-const Footer = () => {
+const Footer = ({isMenuActive} : {isMenuActive:boolean}) => {
 
     const { theme } = useThemes()
     const {userId} = useUser()
@@ -42,7 +42,7 @@ const Footer = () => {
 
 
     return (
-        <footer className={`text-white border-t-2 w-full mt-10 border-zinc-700 md:mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn`}>
+        <footer className={`text-white ${isMenuActive? 'hidden' : 'block'} border-t-2 w-full mt-10 border-zinc-700 md:mt-20 transition-opacity duration-500 ease-in-out animate-fadeIn`}>
             <div className={`mx-auto py-10 px-4 md:px-8 lg:px-12 xl:px-20 flex flex-col w-full items-center`}>
                 <div className={`flex flex-col md:flex-row w-full`}>
 
