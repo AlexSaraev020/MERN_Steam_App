@@ -1,7 +1,8 @@
-import { GENRES, PRICE_BANDS, SORTS, type Genre, type PriceBand, type SortKey } from '../data/games';
+import { GENRES, SORTS, type Genre, type SortKey } from '../data/games';
 
-export type Filters = { genre: Genre | null; band: PriceBand; sort: SortKey };
-export const DEFAULT_FILTERS: Filters = { genre: null, band: 'all', sort: 'score' };
+/* No price filter: every title the catalogue serves is free to play. */
+export type Filters = { genre: Genre | null; sort: SortKey };
+export const DEFAULT_FILTERS: Filters = { genre: null, sort: 'new' };
 
 type Props = {
   value: Filters;
@@ -12,7 +13,7 @@ type Props = {
 
 /* Shared by Home and All games so both filter bars behave identically. */
 export default function FilterBar({ value, onChange, idPrefix }: Props) {
-  const active = value.genre !== null || value.band !== 'all';
+  const active = value.genre !== null;
 
   return (
     <div className="flex flex-col gap-[var(--g-s4)]">
@@ -33,21 +34,7 @@ export default function FilterBar({ value, onChange, idPrefix }: Props) {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-[var(--g-s4)] justify-between">
-        <div className="arc-rail flex-1 min-w-0" role="group" aria-label="Price filter">
-          {PRICE_BANDS.map((b) => (
-            <button
-              key={b.key}
-              type="button"
-              className="arc-chip"
-              aria-pressed={value.band === b.key}
-              onClick={() => onChange({ ...value, band: b.key })}
-            >
-              {b.label}
-            </button>
-          ))}
-        </div>
-
+      <div className="flex flex-wrap items-center gap-[var(--g-s4)] justify-end">
         <div className="flex items-end gap-[var(--g-s3)]">
           <label className="arc-label" htmlFor={`${idPrefix}-sort`}>Sort</label>
           <select

@@ -1,7 +1,5 @@
 import type { CSSProperties } from 'react';
-import {
-  type Game, compactInt, finalPrice, formatInt,
-} from '../data/games';
+import { type Game } from '../data/games';
 import { HeartIcon } from './icons';
 
 /** What a screen needs: the whole favourites list plus the two card actions. */
@@ -24,8 +22,7 @@ type Props = Omit<CardActions, 'favourites'> & {
 export default function GameCard({
   game, favourite, onToggleFavourite, onOpen, index, variant = 'grid',
 }: Props) {
-  const price = finalPrice(game.price, game.discount);
-  const hue = { ['--g-hue']: game.hue } as CSSProperties;
+  const hue = { '--g-hue': game.hue } as CSSProperties;
 
   return (
     <article
@@ -63,11 +60,6 @@ export default function GameCard({
               {game.title}
             </button>
           </h3>
-          {game.discount > 0 && (
-            <span className="arc-num arc-num-md text-[color:var(--g-acc-hi)]">
-              −{game.discount}<span className="arc-unit">%</span>
-            </span>
-          )}
         </div>
 
         <ul className="flex flex-wrap gap-[6px]" aria-label="Genres">
@@ -76,18 +68,12 @@ export default function GameCard({
 
         <div className="flex items-end justify-between gap-[var(--g-s3)] pt-[var(--g-s2)] border-t border-[var(--g-rule-soft)]">
           <p className="arc-meta arc-nowrap">
-            <span className="arc-num arc-num-md text-[color:var(--g-fg-2)]">{compactInt(game.players)}</span>
-            <span className="arc-unit ml-[6px]">playing</span>
+            <span className="arc-num arc-num-md text-[color:var(--g-fg-2)]">{game.platform}</span>
+            <span className="arc-unit ml-[6px]">runs on</span>
           </p>
           <p className="arc-num arc-num-lg text-right">
-            {game.price === 0
-              ? <span>Free</span>
-              : <>
-                  <span className="text-[color:var(--g-fg)]">${price.toFixed(2)}</span>
-                  {game.discount > 0 && (
-                    <span className="arc-unit block line-through decoration-[var(--g-acc)]">${game.price.toFixed(2)}</span>
-                  )}
-                </>}
+            <span>Free</span>
+            <span className="arc-unit block">to play</span>
           </p>
         </div>
       </div>
@@ -97,10 +83,9 @@ export default function GameCard({
 
 /* Dense list row used by the All games list view. */
 export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: Props) {
-  const price = finalPrice(game.price, game.discount);
   return (
     <li className="arc-row grid-cols-[72px_1fr_auto] lg:grid-cols-[96px_1.4fr_auto_auto] lg:gap-[var(--g-s6)]">
-      <div className="arc-crt arc-art" style={{ ['--g-hue']: game.hue } as CSSProperties}>
+      <div className="arc-crt arc-art" style={{ '--g-hue': game.hue } as CSSProperties}>
         {game.cover
           ? <img src={game.cover} alt={`Cover art for ${game.title}`} width={460} height={215} loading="lazy" />
           : <span className="arc-art-code">{String((index ?? -1) + 1).padStart(2, '0')}</span>}
@@ -117,12 +102,12 @@ export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: P
           </button>
         </h3>
         <p className="arc-meta mt-[4px]">
-          {game.genres.join(' / ')} · <span className="arc-num arc-num-md text-[color:var(--g-fg-2)]">{formatInt(game.players)}</span> playing
+          {game.genres.join(' / ')} · <span className="arc-num arc-num-md text-[color:var(--g-fg-2)]">{game.platform}</span>
         </p>
       </div>
 
       <p className="hidden lg:block arc-num arc-num-md text-[color:var(--g-fg-3)] text-right">
-        {game.score}<span className="arc-unit ml-[4px]">score</span>
+        {game.released.slice(0, 4)}<span className="arc-unit ml-[4px]">released</span>
       </p>
 
       <div className="flex items-center gap-[var(--g-s2)] justify-end">
@@ -136,10 +121,7 @@ export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: P
           <HeartIcon className="w-5 h-5" filled={favourite} />
         </button>
         <p className="arc-num arc-num-md w-[86px] text-right">
-          {game.price === 0 ? <span>Free</span> : <>
-            {game.discount > 0 && <span className="arc-unit mr-[6px] text-[color:var(--g-acc-hi)]">−{game.discount}%</span>}
-            <span>${price.toFixed(2)}</span>
-          </>}
+          <span>Free</span>
         </p>
       </div>
     </li>

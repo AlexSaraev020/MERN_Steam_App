@@ -2,9 +2,7 @@ import { type CSSProperties } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import GameCard, { type CardActions } from '../components/GameCard';
 import { ChevronLeftIcon, HeartIcon } from '../components/icons';
-import {
-  type Game, formatDate, finalPrice, formatInt, scoreBand,
-} from '../data/games';
+import { type Game, formatDate } from '../data/games';
 
 type Props = CardActions & {
   game: Game;
@@ -12,21 +10,20 @@ type Props = CardActions & {
   onNavigate: (route: Route) => void;
 };
 
-const SPEC_ROWS = [
-  ['Operating system', 'os'],
-  ['Processor', 'cpu'],
-  ['Memory', 'memory'],
-  ['Graphics', 'gpu'],
-  ['Storage', 'storage'],
-] as const;
-
+/* Everything here is a field the catalogue actually serves. The pass that had
+   reviews, playtime, aggregate score and system requirements is gone: the backend
+   publishes none of those, and invented ones read as data. */
 export default function GamePage({ game, games, favourites, onToggleFavourite, onOpen, onNavigate }: Props) {
-  const price = finalPrice(game.price, game.discount);
   const isFavourite = favourites.includes(game.id);
-  const total = game.counts.positive + game.counts.mixed + game.counts.negative;
-  const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
   const similar = games.filter((g) => g.id !== game.id && g.genres.some((x) => game.genres.includes(x))).slice(0, 6);
-  const hue = { ['--g-hue']: game.hue } as CSSProperties;
+  const hue = { '--g-hue': game.hue } as CSSProperties;
+
+  const facts = [
+    { label: 'Developer', value: game.developer },
+    { label: 'Publisher', value: game.publisher },
+    { label: 'Runs on', value: game.platform },
+    { label: 'Released', value: formatDate(game.released) },
+  ];
 
   return (
     <main id="main" className="flex flex-col gap-[var(--g-s7)] pb-[var(--g-s9)]">
@@ -35,7 +32,7 @@ export default function GamePage({ game, games, favourites, onToggleFavourite, o
           <ChevronLeftIcon className="w-5 h-5" />
           All games
         </button>
-        <p className="arc-kicker">Title file · {game.id.toUpperCase()}</p>
+        <p className="arc-kicker">Title file · {game.id}</p>
       </div>
 
       {/* ---------------------------------------------------------- cover */}
@@ -54,21 +51,12 @@ export default function GamePage({ game, games, favourites, onToggleFavourite, o
 
       <div className="flex flex-col lg:flex-row gap-[var(--g-s6)] px-[var(--g-s4)] md:px-[var(--g-s6)]">
         <div className="flex-1 min-w-0 flex flex-col gap-[var(--g-s6)]">
-          {/* price + action block, oversized numerals */}
-          <section className="arc-panel arc-hatch p-[var(--g-s5)] flex flex-wrap items-end justify-between gap-[var(--g-s5)]" aria-label="Purchase panel">
+          {/* every title in this catalogue is free to play */}
+          <section className="arc-panel arc-hatch p-[var(--g-s5)] flex flex-wrap items-end justify-between gap-[var(--g-s5)]" aria-label="Access panel">
             <div>
-              <p className="arc-kicker">{game.price === 0 ? 'Free to play' : 'Price now'}</p>
-              <p className="arc-num text-[clamp(44px,6vw,72px)] mt-[var(--g-s1)]">
-                {game.price === 0
-                  ? 'Free'
-                  : <>${price.toFixed(2)}{game.discount > 0 && <span className="arc-unit ml-[10px] line-through decoration-[var(--g-acc)]">${game.price.toFixed(2)}</span>}</>}
-              </p>
+              <p className="arc-kicker">Free to play</p>
+              <p className="arc-num text-[clamp(44px,6vw,72px)] mt-[var(--g-s1)]">Free</p>
             </div>
-            {game.discount > 0 && (
-              <p className="arc-num arc-num-xl text-[color:var(--g-acc-hi)]">
-                −{game.discount}<span className="arc-unit ml-[6px]">off</span>
-              </p>
-            )}
             <div className="flex flex-wrap items-center gap-[var(--g-s2)]">
               <button
                 type="button"
@@ -93,100 +81,39 @@ export default function GamePage({ game, games, favourites, onToggleFavourite, o
             </ul>
           </section>
 
-          {/* live numbers */}
-          <section className="arc-stagger grid grid-cols-2 lg:grid-cols-4 gap-[var(--g-s5)]" aria-label="Live stats">
-            {[
-              { label: 'Playing now', value: formatInt(game.players), accent: true },
-              { label: 'Reviews', value: formatInt(game.reviews) },
-              { label: 'Average playtime', value: `${game.avgHours}`, unit: 'hrs' },
-              { label: 'Aggregate score', value: `${game.score}`, unit: '/100' },
-            ].map((s) => (
+          <section className="arc-stagger grid grid-cols-2 lg:grid-cols-4 gap-[var(--g-s5)]" aria-label="Title credits">
+            {facts.map((s) => (
               <div key={s.label} className="arc-stat">
-                <p className={`arc-num arc-num-xl ${s.accent ? 'text-[color:var(--g-acc-hi)]' : ''}`}>
-                  {s.value}{s.unit && <span className="arc-unit ml-[6px]">{s.unit}</span>}
-                </p>
+                <p className="arc-h3 text-[color:var(--g-fg)] break-words">{s.value}</p>
                 <p className="arc-kicker mt-[4px]">{s.label}</p>
               </div>
             ))}
           </section>
-
-          {/* ------------------------------------------------ system requirements */}
-          <section aria-label="System requirements" className="flex flex-col gap-[var(--g-s3)]">
-            <h2 className="arc-h2 flex items-center gap-[var(--g-s3)]">
-              <span className="arc-slash" aria-hidden="true" />
-              System requirements
-            </h2>
-
-            {/* md+ : three-column table. Small screens: stacked pairs, same data. */}
-            <table className="hidden md:table w-full border-collapse">
-              <thead>
-                <tr className="border-b border-[color:var(--g-rule)]">
-                  <th scope="col" className="arc-kicker text-left py-[var(--g-s3)] pr-[var(--g-s4)] font-normal">Component</th>
-                  <th scope="col" className="arc-kicker text-left py-[var(--g-s3)] pr-[var(--g-s4)] font-normal">Minimum</th>
-                  <th scope="col" className="arc-kicker text-left py-[var(--g-s3)] font-normal">Recommended</th>
-                </tr>
-              </thead>
-              <tbody>
-                {SPEC_ROWS.map(([label, key]) => (
-                  <tr key={key} className="border-b border-[color:var(--g-rule-soft)]">
-                    <th scope="row" className="arc-meta text-left py-[var(--g-s3)] pr-[var(--g-s4)] font-normal">{label}</th>
-                    <td className="arc-body py-[var(--g-s3)] pr-[var(--g-s4)]">{game.min[key]}</td>
-                    <td className="arc-body py-[var(--g-s3)] text-[color:var(--g-fg)]">{game.rec[key]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <dl className="md:hidden flex flex-col gap-[var(--g-s4)]">
-              {SPEC_ROWS.map(([label, key]) => (
-                <div key={key} className="arc-panel p-[var(--g-s4)]">
-                  <dt className="arc-meta">{label}</dt>
-                  <dd className="arc-body mt-[var(--g-s1)]"><span className="arc-kicker mr-[8px]">Min</span>{game.min[key]}</dd>
-                  <dd className="arc-body mt-[var(--g-s1)] text-[color:var(--g-fg)]"><span className="arc-kicker mr-[8px]">Rec</span>{game.rec[key]}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
         </div>
 
-        {/* --------------------------------------------------------- reviews */}
-        <aside aria-label="Reviews summary" className="lg:w-[360px] flex flex-col gap-[var(--g-s4)]">
-          <div className="arc-panel p-[var(--g-s5)]">
-            <p className="arc-kicker">Reviewer signal</p>
-            <p className="arc-num text-[clamp(48px,7vw,80px)] mt-[var(--g-s1)]">
-              {game.score}<span className="arc-unit ml-[8px]">/100</span>
+        <aside aria-label="Catalogue entry" className="lg:w-[360px] flex flex-col gap-[var(--g-s4)]">
+          <div className="arc-panel p-[var(--g-s5)] flex flex-col gap-[var(--g-s3)]">
+            <p className="arc-kicker">Where this entry came from</p>
+            <p className="arc-body">
+              The backend mirrors the free-to-play catalogue at freetogame.com and adds nothing to it.
+              Every link below is a page on that site — the feed carries no address for the developer's
+              own site.
+              {/* shortcut: checked 60 of 416 game_url values, all freetogame.com. If a source ever
+                  publishes the studio's homepage, relabel this list. */}
             </p>
-            <p className="arc-h3 mt-[var(--g-s2)] text-[color:var(--g-acc-hi)]">{scoreBand(game.score)}</p>
-
-            <div className="mt-[var(--g-s5)] flex h-[14px] w-full overflow-hidden" aria-hidden="true">
-              <span className="bg-[var(--g-acc)]" style={{ width: `${pct(game.counts.positive)}%` }} />
-              <span className="bg-[#a1a1aa]" style={{ width: `${pct(game.counts.mixed)}%` }} />
-              <span className="bg-[#52525b] shadow-[inset_0_0_0_1px_#a1a1aa]" style={{ width: `${pct(game.counts.negative)}%` }} />
-            </div>
-            <ul className="mt-[var(--g-s3)] flex flex-col gap-[var(--g-s1)]">
-              {[
-                ['Positive', game.counts.positive],
-                ['Mixed', game.counts.mixed],
-                ['Negative', game.counts.negative],
-              ].map(([label, n]) => (
-                <li key={label as string} className="flex items-baseline justify-between gap-[var(--g-s3)]">
-                  <span className="arc-meta">{label}</span>
-                  <span className="arc-num arc-num-md arc-nowrap">{formatInt(n as number)}<span className="arc-unit ml-[6px]">{pct(n as number).toFixed(0)}%</span></span>
-                </li>
-              ))}
+            <ul className="flex flex-col gap-[var(--g-s2)] pt-[var(--g-s2)]">
+              <li>
+                <a className="arc-open underline decoration-[var(--g-acc)] text-[color:var(--g-fg)]" href={game.profileUrl} target="_blank" rel="noopener noreferrer">
+                  Catalogue profile
+                </a>
+              </li>
+              <li>
+                <a className="arc-open underline decoration-[var(--g-acc)] text-[color:var(--g-fg)]" href={game.gameUrl} target="_blank" rel="noopener noreferrer">
+                  Play page
+                </a>
+              </li>
             </ul>
           </div>
-
-          <ul className="flex flex-col gap-[var(--g-s3)]">
-            {game.quotes.map((q) => (
-              <li key={q.author} className="arc-panel p-[var(--g-s4)] flex flex-col gap-[var(--g-s2)]">
-                <blockquote className="arc-body">“{q.text}”</blockquote>
-                <p className="arc-meta">
-                  {q.author} · {q.hours} hrs · {formatInt(q.helpful)} found helpful
-                </p>
-              </li>
-            ))}
-          </ul>
         </aside>
       </div>
 

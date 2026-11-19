@@ -2,7 +2,7 @@ import { useState, type CSSProperties, type FormEvent } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import { type CardActions } from '../components/GameCard';
 import { CheckIcon, HeartIcon } from '../components/icons';
-import { GAME_BY_ID, type Game, GENRES, type Genre, type Profile as ProfileData, formatDate } from '../data/games';
+import { type Game, GENRES, type Genre, type Profile as ProfileData, formatDate } from '../data/games';
 
 type Props = CardActions & {
   profile: ProfileData;
@@ -29,7 +29,7 @@ export default function Profile({ profile, games, favourites, onToggleFavourite,
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
-  const favouriteGames = favourites.map((id) => GAME_BY_ID[id]).filter(Boolean);
+  const favouriteGames = games.filter((g) => favourites.includes(g.id));
   const stats = [
     { label: 'Games owned', value: profile.owned.length },
     { label: 'Favourites', value: favourites.length },
@@ -57,7 +57,7 @@ export default function Profile({ profile, games, favourites, onToggleFavourite,
         <div className="flex items-end gap-[var(--g-s5)]">
           <div
             className="arc-crt relative grid place-items-center w-[92px] h-[92px] shrink-0 bg-[var(--g-panel)] shadow-[inset_0_0_0_1px_var(--g-acc),0_0_28px_-6px_rgba(239,68,68,.55)]"
-            style={{ ['--g-hue']: 348 } as CSSProperties}
+            style={{ '--g-hue': 348 } as CSSProperties}
             aria-hidden="true"
           >
             <span className="arc-num text-[40px] text-[color:var(--g-fg)]">{profile.initials}</span>
@@ -203,7 +203,7 @@ export default function Profile({ profile, games, favourites, onToggleFavourite,
               <ul className="flex flex-col gap-[var(--g-s3)]">
                 {favouriteGames.map((g, i) => (
                   <li key={g.id} className="arc-row grid-cols-[72px_1fr_auto] gap-[var(--g-s4)]">
-                    <div className="arc-crt arc-art" style={{ ['--g-hue']: g.hue } as CSSProperties}>
+                    <div className="arc-crt arc-art" style={{ '--g-hue': g.hue } as CSSProperties}>
                       {g.cover
                         ? <img src={g.cover} alt={`Cover art for ${g.title}`} width={460} height={215} loading="lazy" />
                         : <span className="arc-art-code">{String(i + 1).padStart(2, '0')}</span>}

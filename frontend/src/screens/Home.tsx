@@ -4,8 +4,7 @@ import FilterBar, { DEFAULT_FILTERS, type Filters } from '../components/FilterBa
 import GameCard, { type CardActions } from '../components/GameCard';
 import { ChevronLeftIcon, ChevronRightIcon, HeartIcon } from '../components/icons';
 import {
-  applyFilters, compactInt, finalPrice, formatDate, formatInt,
-  FEATURED_GENRES, FEATURED_IDS, GAME_BY_ID, type Genre, type Game, scoreBand,
+  applyFilters, formatDate, formatInt, type Genre, type Game,
 } from '../data/games';
 
 type Props = CardActions & {
@@ -29,7 +28,8 @@ const CAROUSEL_MS = 7000;
 
 export default function Home({ games, favourites, onToggleFavourite, onOpen, onNavigate }: Props) {
   const reduced = useReducedMotion();
-  const featured = useMemo(() => FEATURED_IDS.map((id) => GAME_BY_ID[id]).filter(Boolean), []);
+  /* Featured = the three newest releases the catalogue reports. */
+  const featured = useMemo(() => games.slice(0, 3), [games]);
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -46,7 +46,12 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
   const recommendations = useMemo(() => applyFilters(games, filters), [games, filters]);
 
-  const totalOnline = useMemo(() => games.reduce((sum, g) => sum + g.players, 0), [games]);
+  /* The three genre rails are whichever genres the catalogue actually holds most. */
+  const genreRails = useMemo(() => {
+    const count = new Map<Genre, number>();
+    for (const g of games) for (const x of g.genres) count.set(x, (count.get(x) ?? 0) + 1);
+    return Array.from(count.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([genre]) => genre);
+  }, [games]);
   const hero = featured[Math.min(slide, featured.length - 1)];
 
   return (
@@ -65,14 +70,14 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
         }}
         className="relative"
       >
-        <div className="arc-crt arc-art arc-art-wide !aspect-auto min-h-[420px] lg:min-h-[520px]" style={{ ['--g-hue']: hero.hue } as CSSProperties}>
+        <div className="arc-crt arc-art arc-art-wide !aspect-auto min-h-[420px] lg:min-h-[520px]" style={{ '--g-hue': hero.hue } as CSSProperties}>
           <div className="arc-beam" aria-hidden="true" />
           <div className="absolute inset-0 z-[4] bg-[linear-gradient(to_top,rgba(0,0,0,.92)_0%,rgba(0,0,0,.55)_45%,rgba(0,0,0,.25)_100%)]" aria-hidden="true" />
 
           <div key={hero.id} className="arc-rise relative z-[5] h-full flex flex-col justify-end gap-[var(--g-s4)] p-[var(--g-s5)] md:p-[var(--g-s7)] md:pb-[var(--g-s8)]">
             <p className="arc-kicker">
               Featured {String(slide + 1).padStart(2, '0')} / {String(featured.length).padStart(2, '0')}
-              <span className="arc-unit ml-[10px]">Released {formatDate(hero.released)}</span>
+              <span className="arc-unit ml-[10px]">{hero.publisher}</span>
             </p>
             <h1 className="arc-title-hero max-w-[14ch]">{hero.title}</h1>
             <p className="arc-lead arc-clamp-2 max-w-[52ch]">{hero.tagline}</p>
@@ -83,21 +88,16 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
             <div className="arc-stagger flex flex-wrap items-end gap-x-[var(--g-s7)] gap-y-[var(--g-s4)] pt-[var(--g-s3)]">
               <div className="arc-stat">
-                <p className="arc-num arc-num-xl">
-                  {hero.price === 0 ? 'Free' : <>
-                    {hero.discount > 0 && <span className="arc-unit mr-[8px] text-[color:var(--g-acc-hi)]">−{hero.discount}%</span>}
-                    <span>${finalPrice(hero.price, hero.discount).toFixed(2)}</span>
-                  </>}
-                </p>
-                <p className="arc-kicker mt-[4px]">Price now</p>
+                <p className="arc-num arc-num-xl">Free</p>
+                <p className="arc-kicker mt-[4px]">Free to play</p>
               </div>
               <div className="arc-stat">
-                <p className="arc-num arc-num-xl text-[color:var(--g-acc-hi)]">{formatInt(hero.players)}</p>
-                <p className="arc-kicker mt-[4px]">Playing now</p>
+                <p className="arc-num arc-num-xl text-[color:var(--g-acc-hi)]">{hero.platform}</p>
+                <p className="arc-kicker mt-[4px]">Runs on</p>
               </div>
               <div className="arc-stat">
-                <p className="arc-num arc-num-xl">{hero.score}<span className="arc-unit ml-[6px]">/100</span></p>
-                <p className="arc-kicker mt-[4px]">{scoreBand(hero.score)}</p>
+                <p className="arc-num arc-num-xl">{formatDate(hero.released)}</p>
+                <p className="arc-kicker mt-[4px]">Released</p>
               </div>
             </div>
 
@@ -162,7 +162,7 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
         {recommendations.length === 0 ? (
           <p className="arc-panel p-[var(--g-s5)] arc-body">
-            No titles match <span className="text-[color:var(--g-acc-hi)]">{filters.genre ?? filters.band}</span>.
+            No titles match <span className="text-[color:var(--g-acc-hi)]">{filters.genre ?? 'that filter'}</span>.
             Clear a filter, or browse every title from <button type="button" className="arc-open underline decoration-[var(--g-acc)] text-[color:var(--g-fg)]" onClick={() => onNavigate('games')}>All games</button>.
           </p>
         ) : (
@@ -176,8 +176,9 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
       {/* ------------------------------------------ recommended by genre rails */}
       <section aria-label="Recommended by genre" className="flex flex-col gap-[var(--g-s7)] px-[var(--g-s4)] md:px-[var(--g-s6)]">
-        {FEATURED_GENRES.map((g) => {
-          const rail = games.filter((x) => x.genres.includes(g)).slice(0, 6);
+        {genreRails.map((g) => {
+          const inGenre = games.filter((x) => x.genres.includes(g));
+          const rail = inGenre.slice(0, 6);
           return (
             <div key={g} className="flex flex-col gap-[var(--g-s4)]">
               <div className="flex flex-wrap items-end justify-between gap-[var(--g-s3)]">
@@ -187,8 +188,8 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
                 </h2>
                 <div className="flex items-center gap-[var(--g-s5)]">
                   <p className="arc-num arc-num-md arc-nowrap">
-                    {compactInt(games.filter((x) => x.genres.includes(g)).reduce((s, x) => s + x.players, 0))}
-                    <span className="arc-unit ml-[8px]">in this genre</span>
+                    {formatInt(inGenre.length)}
+                    <span className="arc-unit ml-[8px]">titles in this genre</span>
                   </p>
                   <button type="button" className="arc-btn" onClick={() => onNavigate('games', g)}>
                     See all {g}
@@ -206,8 +207,8 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
         <div className="arc-panel arc-hatch p-[var(--g-s6)] flex flex-wrap items-end justify-between gap-[var(--g-s5)]">
           <div>
-            <p className="arc-kicker">Total signal in the lobby</p>
-            <p className="arc-num text-[clamp(40px,6vw,72px)] mt-[var(--g-s2)]">{formatInt(totalOnline)}</p>
+            <p className="arc-kicker">Titles in the catalogue</p>
+            <p className="arc-num text-[clamp(40px,6vw,72px)] mt-[var(--g-s2)]">{formatInt(games.length)}</p>
           </div>
           <button type="button" className="arc-btn arc-btn--solid" onClick={() => onNavigate('games')}>
             Browse all {games.length} titles
