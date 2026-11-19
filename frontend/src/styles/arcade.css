@@ -1,0 +1,582 @@
+/* ============================================================================
+   arcade.css — Gamers Lobby redesign, single shared layer.
+
+   Import at the TOP of src/index.css (before the @tailwind directives):
+     @import './styles/arcade.css';
+
+   Contains: design tokens, CRT scanline + grain texture, kinetic card motion,
+   keyframes, and the app's custom dark scrollbars. Components use Tailwind
+   utilities for layout/spacing and these classes for type, texture and motion.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap");
+
+:root {
+  /* ---- identity carried over from the current app ---- */
+  --g-ink: #000000;
+  --g-base: #0a0a0a;        /* near-black page ground */
+  --g-panel: #18181b;       /* zinc-800 */
+  --g-panel-2: #1a1a1a;     /* the custom #1a1a1a surface */
+  --g-rule: #3f3f46;        /* zinc-700 hairline */
+  --g-rule-soft: #27272a;   /* zinc-800 hairline */
+  --g-fg: #f4f4f5;
+  --g-fg-2: #e4e4e7;        /* zinc-200 body text */
+  --g-fg-3: #a1a1aa;        /* zinc-400 — labels and meta only */
+  --g-acc: #ef4444;         /* red-500 — the only accent */
+  --g-acc-hi: #f87171;      /* red-400 — hover */
+
+  /* ---- type: condensed display + Barlow body (two faces, one superfamily) ---- */
+  --g-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --g-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+
+  --g-t-hero: clamp(46px, 8.4vw, 104px);
+  --g-t-xl: clamp(30px, 4.4vw, 56px);      /* game titles, oversized numerals */
+  --g-t-lg: clamp(22px, 2.8vw, 34px);      /* section titles */
+  --g-t-md: clamp(18px, 1.5vw, 22px);      /* card titles, lead body */
+  --g-t-body: 17px;
+  --g-t-sm: 14px;
+  --g-t-xs: 12px;
+
+  /* ---- 4 / 8 spacing rhythm ---- */
+  --g-s1: 4px;  --g-s2: 8px;  --g-s3: 12px; --g-s4: 16px;
+  --g-s5: 24px; --g-s6: 32px; --g-s7: 48px; --g-s8: 64px; --g-s9: 96px;
+
+  /* ---- glow: the existing white bloom, upgraded ---- */
+  --g-glow: 0 0 0 1px rgba(255, 255, 255, .07), 0 10px 40px -12px rgba(255, 255, 255, .18);
+  --g-glow-hot: 0 0 0 1px rgba(239, 68, 68, .55), 0 14px 44px -14px rgba(255, 255, 255, .26);
+
+  /* ---- motion ---- */
+  --g-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --g-ease-in: cubic-bezier(.4, 0, 1, 1);
+  --g-dur: 220ms;
+
+  /* ---- diagonal / offset grid ---- */
+  --g-skew: -14deg;
+  --g-shift: 28px;
+  --g-chamfer: 12px;          /* cut corner size */
+  --g-capsule: 460 / 215;     /* matches the real capsule art ratio — no crop */
+}
+
+/* ------------------------------------------------------------------ app root */
+.arc-app {
+  background: var(--g-base);
+  color: var(--g-fg-2);
+  font-family: var(--g-body);
+  font-size: var(--g-t-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------- custom dark scrollbars */
+.arc-app,
+.arc-app * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--g-rule) var(--g-base);
+}
+.arc-app ::-webkit-scrollbar { width: 10px; height: 10px; }
+.arc-app ::-webkit-scrollbar-track { background: var(--g-base); }
+.arc-app ::-webkit-scrollbar-thumb {
+  background: var(--g-rule-soft);
+  border: 2px solid var(--g-base);
+  border-radius: 0;
+}
+.arc-app ::-webkit-scrollbar-thumb:hover { background: var(--g-rule); }
+.arc-app ::selection { background: var(--g-acc); color: var(--g-ink); }
+
+/* ------------------------------------------------------------------ texture */
+
+/* Any textured surface anchors its scanlines and grain to itself. */
+.arc-crt { position: relative; }
+
+/* Text that behaves as a button: no browser link styling reaches product UI. */
+.arc-open {
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Numerals, prices and their units never wrap. */
+.arc-nowrap { white-space: nowrap; }
+.arc-stat { min-width: 0; }
+
+/* Scanlines and film grain live in one static layer so .arc-art can keep
+   ::before for its diagonal hatch. Texture, not motion: it survives
+   prefers-reduced-motion unchanged. */
+.arc-crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, .05) 0 1px,
+      rgba(0, 0, 0, 0) 1px 3px
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.26'/%3E%3C/svg%3E");
+  background-size: auto, 140px 140px;
+}
+
+/* Travelling scan beam (motion). */
+.arc-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 38%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(239, 68, 68, 0) 0%, rgba(239, 68, 68, .10) 45%, rgba(255, 255, 255, .06) 55%, rgba(239, 68, 68, 0) 100%);
+  animation: arcBeam 9s linear infinite;
+}
+
+/* Diagonal hairline hatch for panels and auth backdrop. */
+.arc-hatch {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, .05) 0 1px,
+    rgba(0, 0, 0, 0) 1px 12px
+  );
+}
+
+/* Red slash marker used on section titles and the active nav item. */
+.arc-slash {
+  display: inline-block;
+  width: 4px;
+  height: 1em;
+  background: var(--g-acc);
+  transform: skewX(var(--g-skew));
+  box-shadow: 0 0 14px -2px rgba(239, 68, 68, .65);
+}
+
+/* ---------------------------------------------------------------- typography */
+.arc-kicker {
+  font-family: var(--g-display);
+  font-size: var(--g-t-xs);
+  font-weight: 600;
+  letter-spacing: .1em;          /* all-caps floor */
+  text-transform: uppercase;
+  color: var(--g-fg-3);
+  line-height: 1.5;
+}
+.arc-title-hero {
+  font-family: var(--g-display);
+  font-size: var(--g-t-hero);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: .06em;         /* uppercase display keeps caps tracking */
+  text-transform: uppercase;
+  color: var(--g-fg);
+}
+.arc-title {
+  font-family: var(--g-display);
+  font-size: var(--g-t-xl);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-fg);
+}
+.arc-h2 {
+  font-family: var(--g-display);
+  font-size: var(--g-t-lg);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--g-fg);
+}
+.arc-h3 {
+  font-family: var(--g-display);
+  font-size: var(--g-t-md);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--g-fg);
+}
+.arc-num {                 /* oversized numerals: prices, counts, hours */
+  font-family: var(--g-display);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--g-fg);
+  white-space: nowrap;
+}
+.arc-num-xl { font-size: var(--g-t-xl); }
+.arc-num-lg { font-size: var(--g-t-lg); }
+.arc-num-md { font-size: var(--g-t-md); }
+.arc-unit {              /* unit sits with its numeral, never wrapped */
+  font-family: var(--g-display);
+  font-weight: 600;
+  font-size: .55em;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-fg-3);
+}
+.arc-label {
+  font-family: var(--g-body);
+  font-size: var(--g-t-sm);
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: var(--g-fg-2);
+}
+.arc-meta {
+  font-family: var(--g-body);
+  font-size: var(--g-t-xs);
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-fg-3);
+}
+.arc-lead { font-size: var(--g-t-md); line-height: 1.6; color: var(--g-fg-2); }
+.arc-body { font-size: var(--g-t-body); line-height: 1.6; color: var(--g-fg-2); }
+
+/* Clamped data text (descriptions, reviews) — authored copy is never clamped. */
+.arc-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.arc-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ------------------------------------------------------------------ chrome */
+
+/* Chamfered filled control: red-500 fill, black text on hover/focus. */
+.arc-btn {
+  --g-chamfer: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--g-s2);
+  min-height: 44px;
+  padding: 10px 20px;
+  font-family: var(--g-display);
+  font-size: var(--g-t-sm);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--g-fg);
+  background: var(--g-panel);
+  box-shadow: inset 0 0 0 1px var(--g-rule);
+  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, var(--g-chamfer) 100%, 0 calc(100% - var(--g-chamfer)));
+  cursor: pointer;
+  transition: background var(--g-dur) var(--g-ease-out), color var(--g-dur), box-shadow var(--g-dur), filter var(--g-dur);
+}
+@media (hover: hover) {
+  .arc-btn:hover:not(:disabled) {
+    background: var(--g-acc);
+    color: var(--g-ink);
+    box-shadow: inset 0 0 0 1px var(--g-acc-hi);
+    filter: drop-shadow(0 0 14px rgba(239, 68, 68, .45));
+  }
+}
+.arc-btn:focus-visible {
+  outline: none;
+  background: var(--g-acc);
+  color: var(--g-ink);
+  box-shadow: inset 0 0 0 2px var(--g-fg);
+  filter: drop-shadow(0 0 14px rgba(239, 68, 68, .5));
+}
+.arc-btn--solid { background: var(--g-acc); color: var(--g-ink); box-shadow: inset 0 0 0 1px var(--g-acc-hi); }
+.arc-btn--solid:hover:not(:disabled) { background: var(--g-acc-hi); color: var(--g-ink); }
+.arc-btn:disabled {
+  background: var(--g-panel-2);
+  color: var(--g-fg-3);
+  box-shadow: inset 0 0 0 1px var(--g-rule-soft);
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* Ghost control for icon-only buttons (carousel arrows). */
+.arc-icon-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--g-fg-2);
+  background: rgba(26, 26, 26, .82);
+}
+
+/* Genre / filter chip. */
+.arc-chip {
+  --g-chamfer: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--g-s1);
+  min-height: 40px;
+  padding: 8px 14px;
+  font-family: var(--g-display);
+  font-size: var(--g-t-sm);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--g-fg-2);
+  background: var(--g-panel-2);
+  box-shadow: inset 0 0 0 1px var(--g-rule-soft);
+  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, 0 calc(100% - var(--g-chamfer)));
+  cursor: pointer;
+  transition: background var(--g-dur) var(--g-ease-out), color var(--g-dur), box-shadow var(--g-dur);
+}
+.arc-chip[aria-pressed="true"],
+.arc-chip[aria-checked="true"] {
+  background: var(--g-acc);
+  color: var(--g-ink);
+  box-shadow: inset 0 0 0 1px var(--g-acc-hi);
+}
+@media (hover: hover) {
+  .arc-chip:hover { box-shadow: inset 0 0 0 1px var(--g-acc); color: var(--g-fg); }
+  .arc-chip[aria-pressed="true"]:hover, .arc-chip[aria-checked="true"]:hover { color: var(--g-ink); }
+}
+.arc-chip:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--g-fg); }
+
+/* Tag = read-only genre marker. */
+.arc-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: var(--g-body);
+  font-size: var(--g-t-xs);
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-fg-3);
+  box-shadow: inset 0 0 0 1px var(--g-rule);
+}
+
+/* Form field: label always visible, error beside the field. */
+.arc-field {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  font-family: var(--g-body);
+  font-size: var(--g-t-body);
+  color: var(--g-fg);
+  background: var(--g-panel-2);
+  border: 1px solid var(--g-rule);
+  border-radius: 0;
+  transition: border-color var(--g-dur) var(--g-ease-out), box-shadow var(--g-dur);
+}
+.arc-field::placeholder { color: #71717a; }
+.arc-field:focus {
+  outline: none;
+  border-color: var(--g-acc);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, .35), 0 0 22px -6px rgba(239, 68, 68, .5);
+}
+.arc-field[aria-invalid="true"] { border-color: var(--g-acc-hi); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .35); }
+.arc-error {
+  font-size: var(--g-t-sm);
+  line-height: 1.5;
+  color: var(--g-acc-hi);
+}
+.arc-ok { font-size: var(--g-t-sm); line-height: 1.5; color: #86efac; }
+
+/* Hairline rules and panels. */
+.arc-hair { border: 1px solid var(--g-rule-soft); }
+.arc-hair-b { border-bottom: 1px solid var(--g-rule); }
+.arc-panel {
+  background: var(--g-panel-2);
+  border: 1px solid var(--g-rule-soft);
+}
+
+/* Horizontal rails keep the visible dark scrollbar — it is part of the identity. */
+.arc-rail {
+  display: flex;
+  gap: var(--g-s4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--g-s3);
+}
+.arc-rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+/* ------------------------------------------------------------------- cards */
+
+.arc-card {
+  position: relative;
+  display: block;
+  text-align: left;
+  background: var(--g-panel-2);
+  border: 1px solid var(--g-rule-soft);
+  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, var(--g-chamfer) 100%, 0 calc(100% - var(--g-chamfer)));
+  transition: transform var(--g-dur) var(--g-ease-out), border-color var(--g-dur), filter var(--g-dur);
+}
+@media (hover: hover) {
+  .arc-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--g-acc);
+    filter: drop-shadow(0 10px 26px rgba(255, 255, 255, .14)) drop-shadow(0 0 16px rgba(239, 68, 68, .35));
+  }
+  .arc-card:hover .arc-art::before { transform: translateY(-6%); }
+  .arc-card:hover .arc-card-title { transform: translateX(-4px); color: var(--g-fg); }
+}
+.arc-card:focus-within,
+.arc-card:has(.arc-open:focus-visible) {
+  border-color: var(--g-acc);
+  filter: drop-shadow(0 0 18px rgba(239, 68, 68, .45));
+}
+.arc-card-title {
+  font-family: var(--g-display);
+  font-size: var(--g-t-md);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--g-fg-2);
+  transition: transform var(--g-dur) var(--g-ease-out), color var(--g-dur);
+}
+
+/* Cover plate. Ratio comes from the real capsule ratio, so dropped-in art is
+   never cropped. Generated art fills the same plate when cover is absent. */
+.arc-art {
+  position: relative;
+  aspect-ratio: var(--g-capsule);
+  overflow: hidden;
+  background:
+    linear-gradient(115deg, hsl(var(--g-hue, 0) 62% 24%) 0%, hsl(calc(var(--g-hue, 0) + 45) 70% 9%) 58%, var(--g-base) 100%);
+  border-bottom: 1px solid var(--g-rule-soft);
+}
+.arc-art::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: repeating-linear-gradient(
+    115deg,
+    hsl(var(--g-hue, 0) 90% 62% / .18) 0 2px,
+    rgba(0, 0, 0, 0) 2px 16px
+  );
+  transition: transform 280ms var(--g-ease-out);
+}
+.arc-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* deliberate uniform crop: 2.14:1 plate vs 2.14:1 capsule */
+}
+.arc-art-title {
+  position: absolute;
+  left: 14px;
+  bottom: 10px;
+  right: 14px;
+  font-family: var(--g-display);
+  font-size: clamp(20px, 2vw, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .8);
+}
+.arc-art-code {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-family: var(--g-display);
+  font-size: var(--g-t-xs);
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: rgba(255, 255, 255, .6);
+}
+
+/* Wide cinematic plate for hero / game page backdrops — cover-crop is intentional. */
+.arc-art-wide { aspect-ratio: 16 / 7; }
+@media (max-width: 767px) { .arc-art-wide { aspect-ratio: 4 / 3; } }
+
+/* Heart control — colour alone is never the cue: aria-pressed + filled glyph. */
+.arc-heart {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--g-fg-2);
+  background: rgba(10, 10, 10, .66);
+  box-shadow: inset 0 0 0 1px var(--g-rule);
+  cursor: pointer;
+  transition: color 160ms var(--g-ease-out), box-shadow 160ms, background 160ms, transform 160ms var(--g-ease-out);
+}
+.arc-heart:hover { color: var(--g-acc-hi); box-shadow: inset 0 0 0 1px var(--g-acc); }
+.arc-heart:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--g-fg); }
+.arc-heart[aria-pressed="true"] { color: var(--g-acc); box-shadow: inset 0 0 0 1px var(--g-acc); }
+.arc-heart[aria-pressed="true"] svg { fill: currentColor; animation: arcPop 260ms var(--g-ease-out); }
+
+/* List row (dense view of All games). */
+.arc-row {
+  display: grid;
+  align-items: center;
+  gap: var(--g-s4);
+  padding: var(--g-s3) var(--g-s4);
+  background: var(--g-panel-2);
+  border: 1px solid var(--g-rule-soft);
+  transition: border-color var(--g-dur), background var(--g-dur), transform var(--g-dur) var(--g-ease-out);
+}
+@media (hover: hover) {
+  .arc-row:hover { border-color: var(--g-acc); background: var(--g-panel); transform: translateX(4px); }
+}
+
+/* Diagonal offset grid: alternate tiles drop by one shift. Mobile keeps a
+   straight single column so the reading order stays clean. */
+@media (min-width: 768px) {
+  .arc-offset > *:nth-child(even) { margin-top: var(--g-shift); }
+}
+
+/* ------------------------------------------------------------------- motion */
+.arc-rise { animation: arcRise 360ms var(--g-ease-out) both; }
+.arc-stagger > * { animation: arcRise 360ms var(--g-ease-out) both; }
+.arc-stagger > :nth-child(1) { animation-delay: 0ms; }
+.arc-stagger > :nth-child(2) { animation-delay: 40ms; }
+.arc-stagger > :nth-child(3) { animation-delay: 80ms; }
+.arc-stagger > :nth-child(4) { animation-delay: 120ms; }
+.arc-stagger > :nth-child(5) { animation-delay: 160ms; }
+.arc-stagger > :nth-child(6) { animation-delay: 200ms; }
+.arc-stagger > :nth-child(7) { animation-delay: 240ms; }
+.arc-stagger > :nth-child(8) { animation-delay: 280ms; }
+.arc-stagger > :nth-child(n + 9) { animation-delay: 320ms; }
+
+.arc-flicker { animation: arcFlicker 6s steps(1, end) infinite; }
+.arc-pulse { animation: arcPulse 2.4s ease-in-out infinite; }
+
+@keyframes arcBeam {
+  0% { transform: translateY(-45%); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(240%); opacity: 0; }
+}
+@keyframes arcRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes arcPop {
+  0% { transform: scale(.7); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes arcPulse {
+  0%, 100% { opacity: .35; }
+  50% { opacity: 1; }
+}
+@keyframes arcFlicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: .55; }
+  98% { opacity: 1; }
+  99% { opacity: .7; }
+}
+
+/* Reduced motion: texture stays, movement stops. */
+@media (prefers-reduced-motion: reduce) {
+  .arc-beam { display: none; }
+  .arc-rise, .arc-stagger > *, .arc-flicker, .arc-pulse,
+  .arc-heart[aria-pressed="true"] svg { animation: none !important; }
+  .arc-card:hover { transform: none; }
+  .arc-row:hover { transform: none; }
+  .arc-app *, .arc-app *::before, .arc-app *::after { transition-duration: 1ms !important; }
+}
+
+/* Focus order helper: skip link target. */
+.arc-skip:focus { outline: 2px solid var(--g-acc); outline-offset: 3px; }
