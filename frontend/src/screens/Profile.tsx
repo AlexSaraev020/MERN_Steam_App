@@ -1,238 +1,260 @@
-import { useState, type CSSProperties, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import { type CardActions } from '../components/GameCard';
-import { CheckIcon, HeartIcon } from '../components/icons';
-import { type Game, GENRES, type Genre, type Profile as ProfileData, formatDate } from '../data/games';
+import GameCard from '../components/GameCard';
+import HoursControl from '../components/HoursControl';
+import { CheckIcon, CogIcon } from '../components/icons';
+import { type Game, formatHours, type Playtime, totalHours } from '../data/games';
+import { type ServerUser } from '../actions/apiRequests';
+
+type SaveResult = { ok: true; data: any } | { ok: false; message: string };
 
 type Props = CardActions & {
-  profile: ProfileData;
+  account: ServerUser;
   games: Game[];
-  onSaveProfile: (next: ProfileData) => void;
+  playtime: Playtime;
+  onAddPlaytime: (id: string, hours: number) => void;
+  onSaveAccount: (next: { name: string; bio: string }) => Promise<SaveResult>;
+  onSignOut: () => void;
   onNavigate: (route: Route) => void;
 };
 
 type Errors = Partial<Record<'gamertag' | 'bio', string>>;
 
+const TAG_MIN = 3;
+const TAG_MAX = 16;
 const BIO_MAX = 160;
 
-const validate = (draft: ProfileData): Errors => {
+const validate = (draft: { name: string; bio: string }): Errors => {
   const errors: Errors = {};
-  const tag = draft.gamertag.trim();
-  if (tag.length < 3 || tag.length > 16) errors.gamertag = 'Gamertag must be 3–16 characters. Trim it or add more letters.';
+  const tag = draft.name.trim();
+  if (tag.length < TAG_MIN || tag.length > TAG_MAX) errors.gamertag = `Gamertag must be ${TAG_MIN}–${TAG_MAX} characters. Trim it or add more letters.`;
   else if (!/^[A-Za-z0-9_.-]+$/.test(tag)) errors.gamertag = 'Gamertag allows letters, numbers, dot, dash and underscore only.';
   if (draft.bio.length > BIO_MAX) errors.bio = `Bio is ${draft.bio.length} characters — ${draft.bio.length - BIO_MAX} over the limit. Shorten it.`;
   return errors;
 };
 
-export default function Profile({ profile, games, favourites, onToggleFavourite, onOpen, onSaveProfile, onNavigate }: Props) {
-  const [draft, setDraft] = useState<ProfileData>(profile);
+/* Two grids, both on data the app really holds: playtime logged in this browser and
+   favourites stored on the account. The editor behind the cog stays closed until you
+   ask for it, so the profile reads as a shelf instead of a form. */
+export default function Profile({
+  account, games, favourites, playtime, onAddPlaytime, onToggleFavourite, onOpen,
+  onSaveAccount, onSignOut, onNavigate,
+}: Props) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ name: account.name, bio: account.bio });
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [serverError, setServerError] = useState('');
 
+  const byId = new Map(games.map((g) => [g.id, g]));
+  const played = Object.entries(playtime)
+    .map(([id, hours]) => ({ game: byId.get(id), hours }))
+    .filter((row): row is { game: Game; hours: number } => !!row.game)
+    .sort((a, b) => b.hours - a.hours);
   const favouriteGames = games.filter((g) => favourites.includes(g.id));
+  const initials = account.name.slice(0, 2).toUpperCase() || '——';
+
   const stats = [
-    { label: 'Games owned', value: profile.owned.length },
-    { label: 'Favourites', value: favourites.length },
-    { label: 'Hours this week', value: profile.weeklyHours },
+    { label: 'Hours logged', value: formatHours(totalHours(playtime)) },
+    { label: 'Titles played', value: String(played.length).padStart(2, '0') },
+    { label: 'Favourites', value: String(favouriteGames.length).padStart(2, '0') },
   ];
 
-  const onBlurField = () => setErrors(validate(draft));
+  const openEditor = () => {
+    setDraft({ name: account.name, bio: account.bio });
+    setErrors({});
+    setServerError('');
+    setStatus('idle');
+    setEditing(true);
+  };
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const next = validate(draft);
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     setStatus('saving');
-    window.setTimeout(() => {
-      onSaveProfile({ ...draft, gamertag: draft.gamertag.trim() });
-      setStatus('saved');
-    }, 700);
+    setServerError('');
+    const result = await onSaveAccount({ name: draft.name.trim(), bio: draft.bio });
+    if (!result.ok) { setStatus('idle'); setServerError(result.message); return; }
+    setStatus('saved');
   };
 
   return (
-    <main id="main" className="flex flex-col gap-[var(--g-s7)] pb-[var(--g-s9)]">
+    <main id="main" className="arc-main">
       {/* ------------------------------------------------------------ header */}
-      <header className="arc-crt relative arc-panel !bg-[var(--g-panel-2)] px-[var(--g-s5)] md:px-[var(--g-s7)] py-[var(--g-s6)] flex flex-wrap items-end gap-[var(--g-s6)]">
-        <div className="flex items-end gap-[var(--g-s5)]">
-          <div
-            className="arc-crt relative grid place-items-center w-[92px] h-[92px] shrink-0 bg-[var(--g-panel)] shadow-[inset_0_0_0_1px_var(--g-acc),0_0_28px_-6px_rgba(239,68,68,.55)]"
-            style={{ '--g-hue': 348 } as CSSProperties}
-            aria-hidden="true"
-          >
-            <span className="arc-num text-[40px] text-[color:var(--g-fg)]">{profile.initials}</span>
-          </div>
+      <header className="arc-wrap arc-profile-head">
+        <div className="arc-profile-id">
+          <div className="arc-avatar" aria-hidden="true">{initials}</div>
           <div>
-            <p className="arc-kicker">Account · {profile.id.toUpperCase()} · joined {formatDate(profile.joined)}</p>
-            <h1 className="arc-title mt-[var(--g-s1)]">{profile.gamertag}</h1>
-            <p className="arc-body max-w-[56ch] mt-[var(--g-s2)]">{profile.bio}</p>
-            <p className="arc-meta mt-[var(--g-s2)]">
-              Favourite genre: <span className="text-[color:var(--g-fg)]">{profile.favouriteGenre}</span> ·
-              Library is <span className="text-[color:var(--g-fg)]">{profile.publicLibrary ? 'public' : 'private'}</span>
-            </p>
+            <p className="arc-meta">Account</p>
+            <h1 className="arc-title">{account.name}</h1>
+            {account.bio && <p className="arc-body">{account.bio}</p>}
           </div>
         </div>
 
-        <ul className="arc-stagger grid grid-cols-3 gap-[var(--g-s5)] md:ml-auto">
-          {stats.map((s) => (
-            <li key={s.label} className="arc-stat">
-              <p className="arc-num text-[clamp(34px,4.4vw,60px)] text-[color:var(--g-acc-hi)]">
-                {String(s.value).padStart(2, '0')}
-              </p>
-              <p className="arc-kicker mt-[4px]">{s.label}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="arc-profile-actions">
+          <ul className="arc-stats">
+            {stats.map((s) => (
+              <li key={s.label} className="arc-stat">
+                <span className="arc-num arc-num-xl arc-num--warm">{s.value}</span>
+                <span className="arc-meta">{s.label}</span>
+              </li>
+            ))}
+          </ul>
+          <div>
+            <button
+              type="button"
+              className="arc-btn"
+              aria-expanded={editing}
+              aria-controls="pf-editor"
+              onClick={() => (editing ? setEditing(false) : openEditor())}
+            >
+              <CogIcon className="arc-icon" />
+              {editing ? 'Close editor' : 'Edit profile'}
+            </button>
+            <button type="button" className="arc-btn" onClick={onSignOut}>Sign out</button>
+          </div>
+        </div>
       </header>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-[1fr_420px] gap-[var(--g-s6)] px-[var(--g-s4)] md:px-[var(--g-s6)]">
-        {/* ----------------------------------------------------------- edit form */}
-        <section aria-label="Edit profile" className="arc-panel p-[var(--g-s5)] md:p-[var(--g-s6)]">
-          <h2 className="arc-h2 flex items-center gap-[var(--g-s3)] mb-[var(--g-s5)]">
-            <span className="arc-slash" aria-hidden="true" />
-            Edit profile
-          </h2>
-
-          <form className="flex flex-col gap-[var(--g-s5)]" onSubmit={onSubmit} noValidate>
-            <div>
-              <label className="arc-label block mb-[6px]" htmlFor="pf-tag">Gamertag</label>
-              <input
-                id="pf-tag"
-                name="gamertag"
-                className="arc-field"
-                value={draft.gamertag}
-                maxLength={24}
-                aria-invalid={errors.gamertag ? true : undefined}
-                aria-describedby={errors.gamertag ? 'pf-tag-error' : undefined}
-                onChange={(e) => { setDraft({ ...draft, gamertag: e.target.value }); setStatus('idle'); }}
-                onBlur={onBlurField}
-              />
-              {errors.gamertag && <p id="pf-tag-error" className="arc-error mt-[6px]">{errors.gamertag}</p>}
-            </div>
-
-            <div>
-              <div className="flex items-baseline justify-between gap-[var(--g-s3)] mb-[6px]">
-                <label className="arc-label" htmlFor="pf-bio">Bio</label>
-                <span className={`arc-meta ${draft.bio.length > BIO_MAX ? 'text-[color:var(--g-acc-hi)]' : ''}`}>
-                  {draft.bio.length} / {BIO_MAX}
-                </span>
+      {/* ------------------------------------------------------- edit form, behind the cog */}
+      {editing && (
+        <section id="pf-editor" aria-label="Edit profile" className="arc-wrap">
+          <div className="arc-panel">
+            <h2 className="arc-h2">Edit profile</h2>
+            <form className="arc-stack--tight" onSubmit={onSubmit} noValidate>
+              <div className="arc-field-block">
+                <label className="arc-label" htmlFor="pf-tag">Gamertag</label>
+                <input
+                  id="pf-tag" name="gamertag" className="arc-field" value={draft.name} maxLength={24}
+                  aria-invalid={errors.gamertag ? true : undefined}
+                  aria-describedby={errors.gamertag ? 'pf-tag-error' : undefined}
+                  onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setStatus('idle'); }}
+                  onBlur={() => setErrors(validate(draft))}
+                />
+                {errors.gamertag && <p id="pf-tag-error" className="arc-error">{errors.gamertag}</p>}
               </div>
-              <textarea
-                id="pf-bio"
-                name="bio"
-                rows={3}
-                className="arc-field !h-auto min-h-[92px] resize-y"
-                value={draft.bio}
-                aria-invalid={errors.bio ? true : undefined}
-                aria-describedby={errors.bio ? 'pf-bio-error' : 'pf-bio-help'}
-                onChange={(e) => { setDraft({ ...draft, bio: e.target.value }); setStatus('idle'); }}
-                onBlur={onBlurField}
-              />
-              {errors.bio
-                ? <p id="pf-bio-error" className="arc-error mt-[6px]">{errors.bio}</p>
-                : <p id="pf-bio-help" className="arc-meta mt-[6px]">Shown on your profile card. 160 characters max.</p>}
-            </div>
 
-            <div className="grid gap-[var(--g-s4)] sm:grid-cols-2">
-              <div>
-                <label className="arc-label block mb-[6px]" htmlFor="pf-genre">Favourite genre</label>
-                <select
-                  id="pf-genre"
-                  className="arc-field"
-                  value={draft.favouriteGenre}
-                  onChange={(e) => setDraft({ ...draft, favouriteGenre: e.target.value as Genre })}
-                >
-                  {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
-                </select>
-              </div>
-              <div>
-                <span className="arc-label block mb-[6px]">Library visibility</span>
-                <div className="flex gap-[var(--g-s2)]" role="group" aria-label="Library visibility">
-                  {[true, false].map((v) => (
-                    <button
-                      key={String(v)}
-                      type="button"
-                      className="arc-chip"
-                      aria-pressed={draft.publicLibrary === v}
-                      onClick={() => setDraft({ ...draft, publicLibrary: v })}
-                    >
-                      {v ? 'Public' : 'Private'}
-                    </button>
-                  ))}
+              <div className="arc-field-block">
+                <div className="arc-backbar">
+                  <label className="arc-label" htmlFor="pf-bio">Bio</label>
+                  <span className={`arc-meta ${draft.bio.length > BIO_MAX ? 'arc-strong' : ''}`}>
+                    {draft.bio.length} / {BIO_MAX}
+                  </span>
                 </div>
+                <textarea
+                  id="pf-bio" name="bio" rows={3} className="arc-field arc-field--area" value={draft.bio}
+                  aria-invalid={errors.bio ? true : undefined}
+                  aria-describedby={errors.bio ? 'pf-bio-error' : 'pf-bio-help'}
+                  onChange={(e) => { setDraft({ ...draft, bio: e.target.value }); setStatus('idle'); }}
+                  onBlur={() => setErrors(validate(draft))}
+                />
+                {errors.bio
+                  ? <p id="pf-bio-error" className="arc-error">{errors.bio}</p>
+                  : <p id="pf-bio-help" className="arc-help">Shown on your profile card. 160 characters max.</p>}
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-[var(--g-s3)] pt-[var(--g-s2)] border-t border-[color:var(--g-rule-soft)]">
-              <button type="submit" className="arc-btn arc-btn--solid" disabled={status === 'saving'}>
-                {status === 'saving' ? 'Saving…' : 'Save profile'}
-              </button>
-              <button
-                type="button"
-                className="arc-btn"
-                disabled={status === 'saving'}
-                onClick={() => { setDraft(profile); setErrors({}); setStatus('idle'); }}
-              >
-                Discard changes
-              </button>
-              {status === 'saved' && (
-                <p className="arc-ok flex items-center gap-[var(--g-s1)]" role="status">
-                  <CheckIcon className="w-5 h-5" /> Profile updated.
-                </p>
-              )}
-            </div>
-          </form>
+              <div className="arc-auth-actions">
+                <button type="submit" className="arc-btn arc-btn--solid" disabled={status === 'saving'}>
+                  {status === 'saving' ? 'Saving…' : 'Save profile'}
+                </button>
+                <button
+                  type="button" className="arc-btn" disabled={status === 'saving'}
+                  onClick={() => { setDraft({ name: account.name, bio: account.bio }); setErrors({}); setStatus('idle'); setServerError(''); }}
+                >
+                  Discard changes
+                </button>
+                {status === 'saved' && (
+                  <p className="arc-ok" role="status">
+                    <CheckIcon className="arc-icon arc-icon--sm" /> Saved on the account.
+                  </p>
+                )}
+                {serverError && <p className="arc-error" role="alert">The server refused the save: {serverError}</p>}
+              </div>
+            </form>
+          </div>
         </section>
+      )}
 
-        {/* ------------------------------------------------------- favourites rail */}
-        <section aria-label="Favourite games" className="min-w-0">
-          <h2 className="arc-h2 flex items-center gap-[var(--g-s3)] mb-[var(--g-s4)]">
-            <span className="arc-slash" aria-hidden="true" />
-            Favourites
-            <span className="arc-num arc-num-md ml-auto">{String(favouriteGames.length).padStart(2, '0')}</span>
-          </h2>
+      <div className="arc-wrap arc-stack">
+        {/* ------------------------------------------------------------- played */}
+        <section aria-label="Games played">
+          <div className="arc-section-head">
+            <h2 className="arc-h2">Games played</h2>
+            {played.length > 0 && (
+              <p className="arc-count">
+                <span className="arc-num arc-num-md">{String(played.length).padStart(2, '0')}</span>
+                <span className="arc-unit">titles logged on this device</span>
+              </p>
+            )}
+          </div>
 
-          {favouriteGames.length === 0 ? (
-            <p className="arc-panel p-[var(--g-s5)] arc-body">
-              You have no favourites yet — the rail is empty because nothing is hearted. Tap the heart on any card in{' '}
-              <button type="button" className="arc-open underline decoration-[var(--g-acc)] text-[color:var(--g-fg)]" onClick={() => onNavigate('games')}>All games</button>{' '}
-              to fill it.
+          {played.length === 0 ? (
+            <p className="arc-panel arc-body arc-empty">
+              No hours logged yet. Open any title and log its hours, and it builds up here.
             </p>
           ) : (
-            <>
-              <ul className="flex flex-col gap-[var(--g-s3)]">
-                {favouriteGames.map((g, i) => (
-                  <li key={g.id} className="arc-row grid-cols-[72px_1fr_auto] gap-[var(--g-s4)]">
-                    <div className="arc-crt arc-art" style={{ '--g-hue': g.hue } as CSSProperties}>
-                      {g.cover
-                        ? <img src={g.cover} alt={`Cover art for ${g.title}`} width={460} height={215} loading="lazy" />
-                        : <span className="arc-art-code">{String(i + 1).padStart(2, '0')}</span>}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="arc-h3">
-                        <button type="button" className="arc-open text-left truncate max-w-full hover:text-[color:var(--g-acc-hi)] focus-visible:outline-none focus-visible:text-[color:var(--g-acc-hi)]" onClick={() => onOpen(g.id)}>
-                          {g.title}
-                        </button>
-                      </h3>
-                      <p className="arc-meta mt-[4px]">{g.genres.join(' / ')}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="arc-heart !static"
-                      aria-pressed="true"
-                      aria-label={`Remove ${g.title} from favourites`}
-                      onClick={() => onToggleFavourite(g.id)}
-                    >
-                      <HeartIcon className="w-5 h-5" filled />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className="arc-meta mt-[var(--g-s3)]">
-                {games.length} titles in the catalogue · {profile.owned.length} owned
-              </p>
-            </>
+            <ul className="arc-grid arc-grid--pair">
+              {played.map((row, i) => (
+                <li key={row.game.id} className="arc-shelf">
+                  <GameCard
+                    game={row.game} variant="grid" index={i}
+                    favourite={favourites.includes(row.game.id)}
+                    onToggleFavourite={onToggleFavourite} onOpen={onOpen}
+                  />
+                  <HoursControl
+                    hours={row.hours}
+                    onAdd={(h) => onAddPlaytime(row.game.id, h)}
+                    label={row.game.title}
+                  />
+                </li>
+              ))}
+            </ul>
           )}
+        </section>
+
+        {/* ---------------------------------------------------------- favourites */}
+        <section aria-label="Favourite games">
+          <div className="arc-section-head">
+            <h2 className="arc-h2">Favourites</h2>
+            {favouriteGames.length > 0 && (
+              <p className="arc-count">
+                <span className="arc-num arc-num-md">{String(favouriteGames.length).padStart(2, '0')}</span>
+                <span className="arc-unit">saved on the account</span>
+              </p>
+            )}
+          </div>
+
+          {favouriteGames.length === 0 ? (
+            <p className="arc-panel arc-body arc-empty">
+              Nothing hearted yet on this account. Heart any title in{' '}
+              <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games')}>Search game</button>{' '}
+              and it lands here and stays after a reload.
+            </p>
+          ) : (
+            <ul className="arc-grid arc-grid--pair">
+              {favouriteGames.map((g, i) => (
+                <li key={g.id} className="arc-shelf">
+                  <GameCard
+                    game={g} variant="grid" index={i}
+                    favourite
+                    onToggleFavourite={onToggleFavourite} onOpen={onOpen}
+                  />
+                  <HoursControl
+                    hours={playtime[g.id] ?? 0}
+                    onAdd={(h) => onAddPlaytime(g.id, h)}
+                    label={`${g.title} favourite`}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="arc-meta">
+            Favourites are saved on the account · hours logged on this device
+          </p>
         </section>
       </div>
     </main>

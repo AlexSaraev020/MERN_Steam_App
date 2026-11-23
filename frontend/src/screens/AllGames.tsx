@@ -3,7 +3,7 @@ import { type Route } from '../components/ArcadeNav';
 import FilterBar, { DEFAULT_FILTERS, type Filters } from '../components/FilterBar';
 import GameCard, { GameRow, type CardActions } from '../components/GameCard';
 import { GridIcon, RowsIcon, SearchIcon } from '../components/icons';
-import { applyFilters, type Game, formatInt } from '../data/games';
+import { applyFilters, genreFacets, type Game } from '../data/games';
 
 type Props = CardActions & {
   games: Game[];
@@ -25,37 +25,40 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
   const searching = query.trim().length > 0;
 
   return (
-    <main id="main" className="flex flex-col gap-[var(--g-s6)] pb-[var(--g-s9)]">
-      <header className="flex flex-wrap items-end justify-between gap-[var(--g-s5)] px-[var(--g-s4)] md:px-[var(--g-s6)] pt-[var(--g-s5)]">
+    <main id="main" className="arc-main">
+      <header className="arc-wrap arc-page-head">
         <div>
-          <p className="arc-kicker">Catalogue · 02</p>
-          <h1 className="arc-title mt-[var(--g-s1)]">All games</h1>
+          <p className="arc-meta">Free-to-play catalogue</p>
+          <h1 className="arc-title">Search game</h1>
         </div>
-        <p className="arc-num text-[clamp(38px,5vw,64px)]">
-          {String(results.length).padStart(3, '0')}
-          <span className="arc-unit ml-[10px]">of {String(games.length).padStart(3, '0')} titles</span>
-        </p>
+        {/* Same rule as the Store: a count only when something is actually filtered. */}
+        {(filters.genre || searching) && (
+          <p className="arc-count">
+            <span className="arc-num arc-num-xl arc-num--warm">{String(results.length).padStart(3, '0')}</span>
+            <span className="arc-unit">titles</span>
+          </p>
+        )}
       </header>
 
-      <section aria-label="Search and view" className="flex flex-wrap items-end gap-[var(--g-s4)] px-[var(--g-s4)] md:px-[var(--g-s6)]">
-        <div className="flex-1 min-w-[240px]">
-          <label className="arc-label block mb-[6px]" htmlFor="all-search">Search titles</label>
-          <div className="relative">
-            <SearchIcon className="w-5 h-5 absolute left-[12px] top-1/2 -translate-y-1/2 text-[color:var(--g-fg-3)] pointer-events-none" />
+      <section aria-label="Search and view" className="arc-wrap arc-search-bar">
+        <div className="arc-search-field">
+          <label className="arc-label" htmlFor="all-search">Search titles</label>
+          <div className="arc-field-shell">
+            <SearchIcon className="arc-icon" />
             <input
               id="all-search"
               type="search"
-              className="arc-field !pl-[40px]"
-              placeholder="Type a title — Enter to filter"
+              className="arc-field arc-field--icon"
+              placeholder="Type a title — filters as you type"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="flex items-end gap-[var(--g-s3)]">
+        <div className="arc-view-toggle">
           <span className="arc-label" id="all-view-label">View</span>
-          <div className="flex gap-[var(--g-s2)]" role="group" aria-labelledby="all-view-label">
+          <div className="arc-view-group" role="group" aria-labelledby="all-view-label">
             <button
               type="button"
               className="arc-btn arc-icon-btn"
@@ -63,7 +66,7 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
               aria-label="Grid view"
               onClick={() => setView('grid')}
             >
-              <GridIcon className="w-5 h-5" />
+              <GridIcon className="arc-icon" />
             </button>
             <button
               type="button"
@@ -72,47 +75,55 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
               aria-label="List view"
               onClick={() => setView('list')}
             >
-              <RowsIcon className="w-5 h-5" />
+              <RowsIcon className="arc-icon" />
             </button>
           </div>
         </div>
       </section>
 
-      <section aria-label="Browse filters" className="px-[var(--g-s4)] md:px-[var(--g-s6)]">
-        <FilterBar value={filters} onChange={setFilters} idPrefix="all" />
+      <section aria-label="Browse filters" className="arc-wrap">
+        <FilterBar value={filters} onChange={setFilters} genres={genreFacets(games)} idPrefix="all" />
       </section>
 
       {results.length === 0 ? (
-        <section className="arc-panel arc-hatch mx-[var(--g-s4)] md:mx-[var(--g-s6)] p-[var(--g-s6)] flex flex-col gap-[var(--g-s4)]">
-          <h2 className="arc-h2">Nothing in this slice</h2>
-          <p className="arc-body max-w-[60ch]">
-            {searching
-              ? <>No title matches <span className="text-[color:var(--g-acc-hi)]">“{query.trim()}”</span>. Try a shorter fragment, or drop the genre filter.</>
-              : <>This genre and price band is empty. Widen the price band or clear the genre filter to see the rest of the {formatInt(games.length)} titles in the lobby.</>}
-          </p>
-          <div className="flex flex-wrap gap-[var(--g-s2)]">
-            <button type="button" className="arc-btn" onClick={() => { setQuery(''); setFilters({ ...DEFAULT_FILTERS, sort: filters.sort }); }}>
-              Clear search and filters
-            </button>
-            <button type="button" className="arc-btn arc-btn--solid" onClick={() => onNavigate('home')}>
-              Back to Home
-            </button>
+        <section className="arc-wrap">
+          <div className="arc-panel arc-stack arc-empty">
+            <h2 className="arc-h2">Nothing in this slice</h2>
+            <p className="arc-body">
+              {searching
+                ? <>No title matches <span className="arc-strong">“{query.trim()}”</span>. Try a shorter fragment, or clear the genre filter.</>
+                : <>No title in the catalogue carries that genre right now. Clear the genre filter to see every title.</>}
+            </p>
+            <div className="arc-view-group">
+              <button type="button" className="arc-btn" onClick={() => { setQuery(''); setFilters({ ...DEFAULT_FILTERS, sort: filters.sort }); }}>
+                Clear search and filters
+              </button>
+              <button type="button" className="arc-btn arc-btn--solid" onClick={() => onNavigate('home')}>
+                Back to Store
+              </button>
+            </div>
           </div>
         </section>
       ) : view === 'grid' ? (
-        <ul className="arc-offset arc-stagger grid gap-[var(--g-s5)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 px-[var(--g-s4)] md:px-[var(--g-s6)] list-none">
-          {results.map((g, i) => (
-            <li key={g.id}>
-              <GameCard game={g} index={i} favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <h2 className="arc-h2 arc-wrap">Results</h2>
+          <ul className="arc-wrap arc-grid arc-stagger">
+            {results.map((g, i) => (
+              <li key={g.id}>
+                <GameCard game={g} index={i} favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
-        <ul className="arc-stagger flex flex-col gap-[var(--g-s2)] px-[var(--g-s4)] md:px-[var(--g-s6)] list-none">
-          {results.map((g, i) => (
-            <GameRow key={g.id} game={g} index={i} favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
-          ))}
-        </ul>
+        <>
+          <h2 className="arc-h2 arc-wrap">Results</h2>
+          <ul className="arc-wrap arc-list arc-stagger">
+            {results.map((g, i) => (
+              <GameRow key={g.id} game={g} index={i} favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
+            ))}
+          </ul>
+        </>
       )}
     </main>
   );

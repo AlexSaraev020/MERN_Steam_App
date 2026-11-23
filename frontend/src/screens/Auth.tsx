@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { CloseIcon, PlayIcon } from '../components/icons';
-import { compactInt, formatInt } from '../data/games';
+import { CloseIcon } from '../components/icons';
+import { loginAccount, registerAccount, rememberToken, toServerUser, type ServerUser } from '../actions/apiRequests';
 
 type Mode = 'login' | 'signup';
 type Values = { gamertag: string; email: string; password: string; confirm: string; terms: boolean };
@@ -33,22 +33,21 @@ const LABELS: Record<keyof Errors, string> = {
 };
 
 type Props = {
-  online: number;
-  titles: number;
   signedIn: boolean;
   gamertag: string;
-  onSignIn: () => void;
+  onSignIn: (account: ServerUser) => void;
   onSignOut: () => void;
   onBrowse: () => void;
+  onOpenProfile: () => void;
 };
 
-export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onSignOut, onBrowse }: Props) {
+export default function Auth({ signedIn, gamertag, onSignIn, onSignOut, onBrowse, onOpenProfile }: Props) {
   const [mode, setMode] = useState<Mode>('login');
   const [values, setValues] = useState<Values>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Touched>({});
   const [reveal, setReveal] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending'>('idle');
 
   const set = (patch: Partial<Values>) => { setValues((v) => ({ ...v, ...patch })); setStatus('idle'); };
   const touch = (key: keyof Values) => { setTouched((t) => ({ ...t, [key]: true })); setErrors(validate(mode, values)); };
@@ -60,67 +59,74 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
     setMode(next); setErrors({}); setTouched({}); setStatus('idle');
   };
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const next = validate(mode, values);
     setErrors(next);
     setTouched({ gamertag: true, email: true, password: true, confirm: true, terms: true });
     if (Object.keys(next).length > 0) return;
+
+    const email = values.email.trim();
     setStatus('sending');
-    window.setTimeout(() => {
-      setStatus('done');
-      window.setTimeout(onSignIn, 900);
-    }, 800);
+    const first = mode === 'login'
+      ? await loginAccount({ email, password: values.password, rememberMe: true })
+      : await registerAccount({ name: values.gamertag.trim(), email, password: values.password });
+    /* /register answers with the account, not a session — sign it in right away. */
+    const result = first.ok && mode === 'signup'
+      ? await loginAccount({ email, password: values.password, rememberMe: true })
+      : first;
+
+    if (!result.ok) {
+      setStatus('idle');
+      const field: keyof Errors = /password/i.test(result.message) ? 'password' : 'email';
+      setErrors({ ...next, [field]: result.message });
+      setTouched({ gamertag: true, email: true, password: true, confirm: true, terms: true });
+      return;
+    }
+    rememberToken(result.data.token);
+    onSignIn(toServerUser(result.data));
   };
 
   const focusField = (key: keyof Errors) => document.getElementById(`auth-${key}`)?.focus();
 
   return (
-    <main id="main" className="grid lg:grid-cols-[1.05fr_.95fr] gap-0 pb-[var(--g-s9)]">
-      {/* ------------------------------------------------ dramatic left panel */}
-      <section className="arc-crt arc-hatch relative bg-[var(--g-panel)] min-h-[240px] lg:min-h-[calc(100vh-96px)] flex flex-col justify-between p-[var(--g-s5)] md:p-[var(--g-s7)]">
-        <div className="arc-beam" aria-hidden="true" />
-        <p className="arc-kicker relative z-[5]">Lobby access · 04</p>
-        <div className="relative z-[5] flex flex-col gap-[var(--g-s3)]">
-          <h1 className="arc-title-hero max-w-[12ch]">
-            <span className="arc-flicker">Enter</span> the lobby
-          </h1>
-          <p className="arc-lead max-w-[46ch]">
-            {titles} titles, one library, no storefront noise. Sign in to keep your favourites, your hours and your
-            wishlist on every device you play on.
+    <main id="main" className="arc-auth">
+      {/* ------------------------------------------------ the promise, plainly */}
+      <section className="arc-auth-aside" aria-label="What signing in gives you">
+        <div className="arc-auth-copy">
+          <p className="arc-eyebrow">Free-to-play catalogue</p>
+          <h1 className="arc-title-hero">Enter the lobby</h1>
+          <p className="arc-lead">
+            Free-to-play only, one library, no storefront noise. Sign in and the titles you heart are waiting for you
+            next time.
           </p>
         </div>
-        <div className="arc-stagger relative z-[5] flex flex-wrap items-end gap-x-[var(--g-s7)] gap-y-[var(--g-s4)] pt-[var(--g-s4)]">
-          <div className="arc-stat">
-            <p className="arc-num text-[clamp(38px,5vw,64px)] text-[color:var(--g-acc-hi)]">{formatInt(online)}</p>
-            <p className="arc-kicker mt-[4px]">In the lobby now</p>
-          </div>
-          <div className="arc-stat">
-            <p className="arc-num text-[clamp(38px,5vw,64px)]">{String(titles).padStart(3, '0')}</p>
-            <p className="arc-kicker mt-[4px]">Titles available</p>
-          </div>
-          <div className="arc-stat">
-            <p className="arc-num text-[clamp(38px,5vw,64px)]">{compactInt(online * 4)}</p>
-            <p className="arc-kicker mt-[4px]">Sessions this week</p>
-          </div>
+        {/* Only what the catalogue can back. Sessions, hours and live player counts
+            are not in this feed, so they are not on this page. */}
+        <div className="arc-stats">
+          <p className="arc-stat">
+            <span className="arc-num arc-num--hero arc-num--warm">Free</span>
+            <span className="arc-meta">every title in here</span>
+          </p>
         </div>
       </section>
 
       {/* ------------------------------------------------------------- form */}
-      <section className="bg-[var(--g-base)] p-[var(--g-s5)] md:p-[var(--g-s7)] flex flex-col gap-[var(--g-s5)]">
+      <section className="arc-auth-form" aria-label="Account">
         {signedIn ? (
-          <div className="arc-panel arc-hatch p-[var(--g-s6)] flex flex-col gap-[var(--g-s5)]">
-            <p className="arc-kicker">Session active</p>
+          <div className="arc-panel arc-stack--tight">
+            <p className="arc-meta">Session active</p>
             <h2 className="arc-title">You are in, {gamertag}</h2>
-            <p className="arc-body max-w-[48ch]">Favourites, hours and library visibility are synced to this account.</p>
-            <div className="flex flex-wrap gap-[var(--g-s2)]">
-              <button type="button" className="arc-btn arc-btn--solid" onClick={onSignIn}>Open profile</button>
+            <p className="arc-body">Your favourites and your profile text are saved on the account, so they
+              are here again the next time you open this on any device you sign in on.</p>
+            <div className="arc-view-group">
+              <button type="button" className="arc-btn arc-btn--solid" onClick={onOpenProfile}>Open profile</button>
               <button type="button" className="arc-btn" onClick={onSignOut}>Sign out</button>
             </div>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-[var(--g-s2)]" role="group" aria-label="Account action">
+            <div className="arc-view-group" role="group" aria-label="Account action">
               <button type="button" className="arc-btn" aria-pressed={mode === 'login'} onClick={() => switchMode('login')}>
                 Sign in
               </button>
@@ -129,19 +135,16 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
               </button>
             </div>
 
-            <h2 className="arc-h2 flex items-center gap-[var(--g-s3)]">
-              <span className="arc-slash" aria-hidden="true" />
-              {mode === 'login' ? 'Welcome back' : 'New player'}
-            </h2>
+            <h2 className="arc-h2">{mode === 'login' ? 'Welcome back' : 'New player'}</h2>
 
             {errorList.length > 1 && Object.keys(touched).length > 0 && (
-              <div className="arc-panel p-[var(--g-s4)] flex flex-col gap-[var(--g-s2)]" role="alert">
-                <p className="arc-kicker text-[color:var(--g-acc-hi)]">{errorList.length} fields need fixing</p>
-                <ul className="flex flex-col gap-[var(--g-s1)]">
+              <div className="arc-panel arc-error-summary" role="alert">
+                <p className="arc-error">{errorList.length} fields need fixing</p>
+                <ul className="arc-list">
                   {errorList.map(([key, msg]) => (
                     <li key={key}>
-                      <button type="button" className="arc-open text-left arc-body underline decoration-[var(--g-acc)] text-[color:var(--g-fg)]" onClick={() => focusField(key)}>
-                        {LABELS[key]} — {msg}
+                      <button type="button" className="arc-open arc-link" onClick={() => focusField(key)}>
+                        {LABELS[key]}: {msg}
                       </button>
                     </li>
                   ))}
@@ -149,7 +152,7 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
               </div>
             )}
 
-            <form className="flex flex-col gap-[var(--g-s4)]" onSubmit={onSubmit} noValidate>
+            <form className="arc-stack--tight" onSubmit={onSubmit} noValidate>
               {mode === 'signup' && (
                 <Field id="auth-gamertag" label="Gamertag" error={showError('gamertag')}>
                   <input
@@ -160,7 +163,7 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
                     onChange={(e) => set({ gamertag: e.target.value })}
                     onBlur={() => touch('gamertag')}
                   />
-                  {!showError('gamertag') && <p id="auth-gamertag-help" className="arc-meta mt-[6px]">3–16 characters. Letters, numbers, dot, dash, underscore.</p>}
+                  {!showError('gamertag') && <p id="auth-gamertag-help" className="arc-help">3–16 characters. Letters, numbers, dot, dash, underscore.</p>}
                 </Field>
               )}
 
@@ -176,11 +179,11 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
               </Field>
 
               <Field id="auth-password" label="Password" error={showError('password')}>
-                <div className="relative">
+                <div className="arc-field-shell">
                   <input
                     id="auth-password" type={reveal ? 'text' : 'password'}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    className="arc-field !pr-[64px]"
+                    className="arc-field arc-field--reveal"
                     value={values.password} placeholder="At least 8 characters"
                     aria-invalid={showError('password') ? true : undefined}
                     aria-describedby={showError('password') ? 'auth-password-error' : undefined}
@@ -189,7 +192,7 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
                   />
                   <button
                     type="button"
-                    className="arc-open absolute right-[6px] top-1/2 -translate-y-1/2 px-[10px] py-[8px] arc-meta"
+                    className="arc-reveal"
                     aria-pressed={reveal}
                     aria-label={reveal ? 'Hide password' : 'Show password'}
                     onClick={() => setReveal((r) => !r)}
@@ -214,9 +217,9 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
 
               {mode === 'signup' && (
                 <div>
-                  <label className="flex items-start gap-[var(--g-s3)] cursor-pointer">
+                  <label className="arc-auth-row" htmlFor="auth-terms">
                     <input
-                      id="auth-terms" type="checkbox" className="w-[22px] h-[22px] accent-[var(--g-acc)] mt-[2px]"
+                      id="auth-terms" type="checkbox" className="arc-checkbox"
                       checked={values.terms}
                       aria-invalid={showError('terms') ? true : undefined}
                       aria-describedby={showError('terms') ? 'auth-terms-error' : undefined}
@@ -225,23 +228,18 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
                     />
                     <span className="arc-label">I accept the terms of service and the privacy policy.</span>
                   </label>
-                  {showError('terms') && <p id="auth-terms-error" className="arc-error mt-[6px]">{showError('terms')}</p>}
+                  {showError('terms') && <p id="auth-terms-error" className="arc-error">{showError('terms')}</p>}
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-[var(--g-s3)] pt-[var(--g-s3)] border-t border-[color:var(--g-rule-soft)]">
+              <div className="arc-auth-actions">
                 <button type="submit" className="arc-btn arc-btn--solid" disabled={status === 'sending'}>
                   {status === 'sending' ? 'Checking…' : mode === 'login' ? 'Enter the lobby' : 'Create account'}
                 </button>
                 <button type="button" className="arc-btn" onClick={onBrowse}>
-                  <CloseIcon className="w-5 h-5" />
+                  <CloseIcon className="arc-icon" />
                   Browse without an account
                 </button>
-                {status === 'done' && (
-                  <p className="arc-ok flex items-center gap-[var(--g-s1)]" role="status">
-                    <PlayIcon className="w-5 h-5" /> Access granted. Opening your lobby…
-                  </p>
-                )}
               </div>
             </form>
           </>
@@ -253,10 +251,10 @@ export default function Auth({ online, titles, signedIn, gamertag, onSignIn, onS
 
 function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
   return (
-    <div>
-      <label className="arc-label block mb-[6px]" htmlFor={id}>{label}</label>
+    <div className="arc-field-block">
+      <label className="arc-label" htmlFor={id}>{label}</label>
       {children}
-      {error && <p id={`${id}-error`} className="arc-error mt-[6px]">{error}</p>}
+      {error && <p id={`${id}-error`} className="arc-error">{error}</p>}
     </div>
   );
 }

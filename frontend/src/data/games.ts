@@ -11,13 +11,16 @@
 
 export type Genre = string;
 
-/* The genre words the catalogue uses, ordered by how many titles carry them.
-   shortcut: read off today's payload; switch to deriving it from the fetched
-   games if the backend ever starts serving a different mix. */
-export const GENRES: Genre[] = [
-  'MMORPG', 'Shooter', 'Strategy', 'Card Game', 'MOBA', 'Sports', 'Fighting',
-  'RPG', 'Battle Royale', 'MMO', 'Social',
-];
+/* Genre chips derived from the fetched catalogue, most titles first. The old
+   hardcoded list carried 11 words while the feed uses 15 after aliasing, so ten
+   genres could not be filtered at all. */
+export const genreFacets = (games: Game[]): Genre[] => {
+  const count = new Map<Genre, number>();
+  for (const g of games) for (const x of g.genres) count.set(x, (count.get(x) ?? 0) + 1);
+  return Array.from(count.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([genre]) => genre);
+};
 
 const GENRE_ALIASES: Record<string, Genre> = {
   'Action': 'Action', 'Action Game': 'Action', 'Action RPG': 'Action',
@@ -111,32 +114,6 @@ export function applyFilters(games: Game[], f: FilterValue): Game[] {
   return [...list].sort(COMPARATORS[f.sort]);
 }
 
-/* The account plate is still the design study: the backend has the same
-   endpoints the old app used (register / login / user/:id / favorite), but the
-   redesigned Profile screen is not talking to them yet. */
-export type Profile = {
-  id: string;
-  gamertag: string;
-  initials: string;
-  bio: string;
-  favouriteGenre: Genre;
-  publicLibrary: boolean;
-  joined: string;
-  weeklyHours: number;
-  owned: string[];      // game ids, so "owned" is a real count
-};
-
-export const PROFILE: Profile = {
-  id: '',
-  gamertag: 'visitor',
-  initials: '——',
-  bio: '',
-  favouriteGenre: 'MMORPG',
-  publicLibrary: true,
-  joined: '',
-  weeklyHours: 0,
-  owned: [],
-};
 
 export const formatInt = (value: number): string => value.toLocaleString('en-US');
 
@@ -149,3 +126,58 @@ export const formatDate = (iso: string): string => {
     ? iso
     : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
+
+/** The wide plate behind the featured panel: 1200x675 instead of the 365x206 capsule.
+    shortcut: checked 120 of 416 titles, 3 had no wide plate — Home falls back to the capsule. */
+export const wideCover = (cover: string): string => cover.replace('/thumbnail.', '/background.');
+
+/* What the catalogue's per-title endpoint adds on top of the list: a long
+   description, its own screenshots and minimum system requirements. The status
+   field is served too but reads "Live" for every one of 93 titles checked
+   (including titles that shut down years ago), so the UI does not show it. */
+export type GameDetails = {
+  id: number;
+  description?: string;
+  screenshots?: { id: number; image: string }[];
+  minimum_system_requirements?: Record<string, string> | null;
+};
+
+/** Blank-line separated source text into paragraphs. The source separates with CRLF CRLF,
+    which a plain \n{2,} never matches. */
+export const paragraphs = (text: string): string[] =>
+  text.split(/(?:\r\n|\r|\n){2,}/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+
+/** Only the spec lines the source filled: 31 of 39 sampled titles have any, and the
+    values carry stray spaces and "?" placeholders. */
+const SPEC_LABELS: Record<string, string> = { os: 'OS', processor: 'Processor', memory: 'Memory', graphics: 'Graphics', storage: 'Storage' };
+
+export const specRows = (specs?: Record<string, string> | null): { label: string; value: string }[] =>
+  Object.entries(specs ?? {})
+    .map(([key, value]) => ({
+      label: SPEC_LABELS[key] ?? key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()),
+      value: String(value ?? '').trim(),
+    }))
+    .filter((row) => row.value.length > 1 && row.value !== '?');
+
+/* Playtime per title, keyed by whoever is signed in. The user record has no playtime
+   column — that needs a backend field plus a Render redeploy — so the log lives in this
+   browser. shortcut: localStorage, move it to /userUpdate when the field exists. */
+export type Playtime = Record<string, number>;
+
+const playKey = (who: string) => `gamerslobby-playtime-${who}`;
+
+export const loadPlaytime = (who: string): Playtime => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(playKey(who)) ?? '{}');
+    return raw && typeof raw === 'object' ? raw as Playtime : {};
+  } catch { return {}; }
+};
+
+export const savePlaytime = (who: string, log: Playtime): void => {
+  localStorage.setItem(playKey(who), JSON.stringify(log));
+};
+
+export const totalHours = (log: Playtime): number =>
+  Object.values(log).reduce((sum, h) => sum + h, 0);
+
+export const formatHours = (h: number): string => (Number.isInteger(h) ? String(h) : h.toFixed(1));

@@ -5,6 +5,7 @@ import { User } from "../types/types";
 import { NavigateFunction } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GamesData } from "../types/types";
+import { GameDetails } from "../data/games";
 
 const apiUrl = process.env.REACT_APP_SERVER_LINK;
 
@@ -16,19 +17,82 @@ interface SortedGames {
   latestReleases: Game[];
 }
 
+/* The catalogue lives on Render's free instance, which hibernates when nobody asks for
+   it: the first request then answers 503 (x-render-routing: hibernate-wake-error) and the
+   next one, a few seconds later, is fine. So: ask twice, and only a 200 that really is
+   the catalogue counts — a 200 carrying the SPA's own HTML used to leave the page stuck
+   in its loading skeleton forever. */
+const EMPTY_GAMES: SortedGames = { popular: [], latestReleases: [] };
+
 export const fetchGames = async (): Promise<SortedGames> => {
-  try {
-    const response = await axios.get<SortedGames>(`${apiUrl}/api/games`);
-    if (response.status === 200) {
-      return response.data as SortedGames;
-    } else {
-      throw new Error('Failed to fetch games');
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const { data } = await axios.get<SortedGames>(`${apiUrl}/api/games`, { timeout: 20000 });
+      if (Array.isArray(data?.popular) && Array.isArray(data?.latestReleases)) return data;
+      throw new Error('The backend answered with something that is not the catalogue');
+    } catch (err) {
+      console.error('Error during API request:', err);
+      if (attempt === 0) await new Promise((wake) => setTimeout(wake, 4000));
     }
+  }
+  return EMPTY_GAMES;
+};
+
+//One title, the deep plate: long description, screenshots, minimum specs.
+//Only the catalogue's own endpoint carries these. shortcut: called direct because that
+//API answers any origin; mirror it as GET /api/game if everything must go through the backend.
+export const fetchGameDetails = async (id: string): Promise<GameDetails | null> => {
+  try {
+    const response = await axios.get<GameDetails>(`https://www.freetogame.com/api/game?id=${id}`);
+    return response.status === 200 ? response.data : null;
   } catch (err) {
     console.error('Error during API request:', err);
-    return { popular: [], latestReleases: [] };
+    return null;
   }
 };
+
+//Account, as the redesigned screens use it.
+//The session bundle the server answers with: /login and /user/:id return different
+//shapes, so both go through toServerUser.
+export type ServerUser = { id: string; name: string; email: string; bio: string; favourites: string[]; joined: string };
+
+export const toServerUser = (u: any): ServerUser => ({
+  id: String(u?._id ?? u?.userId ?? ''),
+  name: u?.name ?? '',
+  email: u?.email ?? '',
+  bio: u?.description ?? '',
+  favourites: (u?.favoriteGames ?? u?.userFavorite ?? []).map(String),
+  joined: u?.createdAt ?? '',
+});
+
+export type CallResult = { ok: true; data: any } | { ok: false; message: string };
+
+const call = async (method: 'get' | 'post' | 'put' | 'delete', path: string, body?: unknown): Promise<CallResult> => {
+  try {
+    const response = method === 'delete'
+      ? await axios.delete(`${apiUrl}${path}`, { data: body })
+      : await axios({ method, url: `${apiUrl}${path}`, data: body });
+    return { ok: true, data: response.data };
+  } catch (error: any) {
+    const message = error?.response?.data?.message;
+    console.error(`Error during ${method} ${path}:`, error);
+    return { ok: false, message: typeof message === 'string' ? message : 'The server did not answer. Try again.' };
+  }
+};
+
+/* The session. The server also sends a token cookie, but it is httpOnly, so the page
+   cannot read it back after a reload — the app keeps its own copy instead and drops
+   it on sign out. */
+const SESSION_KEY = 'gamerslobby-token';
+export const rememberToken = (token: string) => window.localStorage.setItem(SESSION_KEY, token);
+export const savedToken = () => window.localStorage.getItem(SESSION_KEY);
+export const forgetToken = () => window.localStorage.removeItem(SESSION_KEY);
+
+export const registerAccount = (input: { name: string; email: string; password: string }) => call('post', '/register', input);
+export const loginAccount = (input: { email: string; password: string; rememberMe: boolean }) => call('post', '/login', input);
+export const fetchAccount = (userId: string) => call('get', `/user/${userId}`);
+export const updateAccount = (userId: string, fields: { userName: string; userDescription: string }) => call('put', '/userUpdate', { userId, ...fields });
+export const saveFavourite = (userId: string, gameId: number, add: boolean) => call(add ? 'post' : 'delete', add ? '/favorite' : '/rmfavorite', { userId, gameId });
 
 //User !!!!
 

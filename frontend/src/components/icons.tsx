@@ -1,6 +1,6 @@
-/* One icon family for the whole redesign: 24x24, 1.6 stroke, square caps.
-   Size is always set at the call site with Tailwind (w-5 h-5 …) so the glyphs
-   never inherit sizing from a parent selector. */
+/* One icon family for the storefront: 24x24 grid, 1.7 stroke, rounded joins.
+   Size always comes from the class on the glyph (.arc-icon, --sm, --lg) so a
+   glyph never inherits geometry from a parent selector. */
 
 import type { SVGProps } from 'react';
 
@@ -12,9 +12,9 @@ function Icon({ filled, children, ...rest }: IconProps) {
       viewBox="0 0 24 24"
       fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="square"
-      strokeLinejoin="miter"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
       focusable={false}
       {...rest}
@@ -70,6 +70,16 @@ export const PlayIcon = (p: IconProps) => (
 
 export const CheckIcon = (p: IconProps) => (
   <Icon {...p}><path d="m5 12.5 4.5 4.5L19 7" /></Icon>
+);
+
+/* Eight teeth on a ring, plus the axle hole. The earlier version was a circle
+   with eight free spokes and read as a sun. */
+export const CogIcon = (p: IconProps) => (
+  <Icon {...p}><path d="M9.99 4.98L10.15 2.48A9.7 9.7 0 0 1 13.85 2.48L14.01 4.98A7.3 7.3 0 0 1 15.54 5.62L17.42 3.96A9.7 9.7 0 0 1 20.04 6.58L18.38 8.46A7.3 7.3 0 0 1 19.02 9.99L21.52 10.15A9.7 9.7 0 0 1 21.52 13.85L19.02 14.01A7.3 7.3 0 0 1 18.38 15.54L20.04 17.42A9.7 9.7 0 0 1 17.42 20.04L15.54 18.38A7.3 7.3 0 0 1 14.01 19.02L13.85 21.52A9.7 9.7 0 0 1 10.15 21.52L9.99 19.02A7.3 7.3 0 0 1 8.46 18.38L6.58 20.04A9.7 9.7 0 0 1 3.96 17.42L5.62 15.54A7.3 7.3 0 0 1 4.98 14.01L2.48 13.85A9.7 9.7 0 0 1 2.48 10.15L4.98 9.99A7.3 7.3 0 0 1 5.62 8.46L3.96 6.58A9.7 9.7 0 0 1 6.58 3.96L8.46 5.62Z" /><path d="M12 8.9a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2Z" /></Icon>
+);
+
+export const ClockIcon = (p: IconProps) => (
+  <Icon {...p}><path d="M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17Z" /><path d="M12 7.6V12l3.5 2.2" /></Icon>
 );
 
 export const UsersIcon = (p: IconProps) => (

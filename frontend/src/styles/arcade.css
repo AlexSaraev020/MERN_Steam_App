@@ -1,209 +1,380 @@
 /* ============================================================================
-   arcade.css — Gamers Lobby redesign, single shared layer.
+   arcade.css — GamersLobby storefront design layer.
 
-   Import at the TOP of src/index.css (before the @tailwind directives):
+   Imported at the TOP of src/index.css (before the @tailwind directives):
      @import './styles/arcade.css';
 
-   Contains: design tokens, CRT scanline + grain texture, kinetic card motion,
-   keyframes, and the app's custom dark scrollbars. Components use Tailwind
-   utilities for layout/spacing and these classes for type, texture and motion.
+   This file carries the whole look: tokens, type, surfaces, components, layout
+   for the five screens, and motion. Tailwind stays available for one-off
+   utilities, but nothing the design system promises lives in a utility class —
+   that is what keeps preview.html and the app drawing the same picture.
+
+   Design decisions live in DESIGN.md at the project root.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@80..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
 
+/* ---------------------------------------------------------------- tokens */
 :root {
-  /* ---- identity carried over from the current app ---- */
-  --g-ink: #000000;
-  --g-base: #0a0a0a;        /* near-black page ground */
-  --g-panel: #18181b;       /* zinc-800 */
-  --g-panel-2: #1a1a1a;     /* the custom #1a1a1a surface */
-  --g-rule: #3f3f46;        /* zinc-700 hairline */
-  --g-rule-soft: #27272a;   /* zinc-800 hairline */
-  --g-fg: #f4f4f5;
-  --g-fg-2: #e4e4e7;        /* zinc-200 body text */
-  --g-fg-3: #a1a1aa;        /* zinc-400 — labels and meta only */
-  --g-acc: #ef4444;         /* red-500 — the only accent */
-  --g-acc-hi: #f87171;      /* red-400 — hover */
+  color-scheme: dark;
 
-  /* ---- type: condensed display + Barlow body (two faces, one superfamily) ---- */
-  --g-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
-  --g-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  /* ---- ground and surfaces: blue-graphite, layered, never pure black ---- */
+  --g-base: #101418;        /* page ground */
+  --g-band: #14191f;        /* recessed band under a section */
+  --g-panel: #171d24;       /* card / panel surface */
+  --g-raise: #1d242c;       /* raised surface: buttons, hover, avatar */
+  --g-field: #232b34;       /* input surface */
+  --g-rule: #2f3945;        /* hairline that must be seen */
+  --g-rule-soft: #232b34;   /* hairline that only separates */
+  --g-rule-hi: #3d4a58;     /* hairline at rest-hover */
 
-  --g-t-hero: clamp(46px, 8.4vw, 104px);
-  --g-t-xl: clamp(30px, 4.4vw, 56px);      /* game titles, oversized numerals */
-  --g-t-lg: clamp(22px, 2.8vw, 34px);      /* section titles */
-  --g-t-md: clamp(18px, 1.5vw, 22px);      /* card titles, lead body */
-  --g-t-body: 17px;
-  --g-t-sm: 14px;
-  --g-t-xs: 12px;
+  /* ---- ink ---- */
+  --g-fg: #eef2f6;          /* titles, values */
+  --g-fg-2: #c3ccd6;        /* body copy */
+  --g-fg-3: #8e9aa8;        /* metadata, captions, placeholders */
+
+  /* ---- one accent for actions, one warm for quantities and saved things ---- */
+  --g-acc: #35c9bb;         /* hsl(174 58% 50%) — the only interactive hue */
+  --g-acc-hi: #57dcd0;      /* hover / focus on accent */
+  --g-acc-ink: #07100f;     /* text sitting on an accent fill */
+  --g-acc-wash: rgba(53, 201, 187, .12);   /* selected-state fill */
+  --g-warm: #e2a55f;        /* numerals, hours, favourites */
+  --g-warm-ink: #1b1206;    /* text sitting on a warm fill */
+  --g-ok: #8ad3a6;          /* success text */
+  --g-bad: #f0907f;         /* error text */
+  --g-ink: #07100f;
+
+  /* ---- type: wide Archivo display + IBM Plex Sans UI ---- */
+  --g-display: "Archivo", "Archivo Expanded", "Segoe UI", system-ui, sans-serif;
+  --g-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --g-wide: 112%;           /* Archivo's width axis, opened for display only */
+
+  --g-t-hero: clamp(34px, 4.6vw, 60px);
+  --g-t-xl: clamp(26px, 3.2vw, 40px);      /* page titles, oversized numerals */
+  --g-t-lg: clamp(20px, 2.2vw, 26px);      /* section titles */
+  --g-t-md: 18px;                          /* card titles, leads */
+  --g-t-body: 16px;                        /* never below this */
+  --g-t-sm: 14px;                          /* labels, meta */
+  --g-t-xs: 13px;                          /* numeral units only */
 
   /* ---- 4 / 8 spacing rhythm ---- */
   --g-s1: 4px;  --g-s2: 8px;  --g-s3: 12px; --g-s4: 16px;
   --g-s5: 24px; --g-s6: 32px; --g-s7: 48px; --g-s8: 64px; --g-s9: 96px;
 
-  /* ---- glow: the existing white bloom, upgraded ---- */
-  --g-glow: 0 0 0 1px rgba(255, 255, 255, .07), 0 10px 40px -12px rgba(255, 255, 255, .18);
-  --g-glow-hot: 0 0 0 1px rgba(239, 68, 68, .55), 0 14px 44px -14px rgba(255, 255, 255, .26);
+  /* ---- corner language: container 14, control 10, inner 8, chip pill ---- */
+  --g-r-card: 14px;
+  --g-r-ctl: 10px;
+  --g-r-inner: 8px;
+  --g-r-chip: 999px;
+
+  /* ---- elevation: tinted to the ground, no neon ---- */
+  --g-e1: 0 1px 2px rgba(4, 8, 12, .45);
+  --g-e2: 0 12px 28px -14px rgba(4, 8, 12, .9), 0 2px 6px rgba(4, 8, 12, .5);
+  --g-e3: 0 24px 52px -22px rgba(4, 8, 12, .95);
+  --g-edge: inset 0 0 0 1px var(--g-rule-soft);
+  --g-edge-hi: inset 0 0 0 1px var(--g-rule-hi);
 
   /* ---- motion ---- */
-  --g-ease-out: cubic-bezier(.16, 1, .3, 1);
-  --g-ease-in: cubic-bezier(.4, 0, 1, 1);
-  --g-dur: 220ms;
+  --g-d1: 180ms;   /* hover, focus */
+  --g-d2: 240ms;   /* state change */
+  --g-d3: 320ms;   /* entry, reveal */
+  --g-ease: cubic-bezier(.2, .8, .2, 1);       /* enter: ease-out */
+  --g-ease-in: cubic-bezier(.4, 0, 1, 1);      /* exit: 60-70% of enter */
+  --g-stagger: 40ms;
 
-  /* ---- diagonal / offset grid ---- */
-  --g-skew: -14deg;
-  --g-shift: 28px;
-  --g-chamfer: 12px;          /* cut corner size */
-  --g-capsule: 460 / 215;     /* matches the real capsule art ratio — no crop */
+  /* ---- measures and media ratios ---- */
+  --g-max: 1240px;          /* content column on a wide screen */
+  --g-measure: 68ch;        /* reading width for prose */
+  --g-capsule: 460 / 215;   /* the catalogue capsule, uncropped */
+  --g-wide-plate: 16 / 9;   /* the wide plate, uncropped */
+
+  /* ---- z scale: chrome, plate overlay, heart ---- */
+  --g-z-heart: 4;
+  --g-z-plate: 2;
+  --g-z-chrome: 40;
+  --g-z-skip: 60;
+  --g-z-modal: 70;
 }
 
-/* ------------------------------------------------------------------ app root */
+/* ------------------------------------------------------------- app shell */
+.arc-app,
+.arc-app *,
+.arc-app *::before,
+.arc-app *::after { box-sizing: border-box; }
+
 .arc-app {
-  background: var(--g-base);
+  min-height: 100dvh;
+  padding-top: 56px;          /* mobile top strip */
+  padding-bottom: 76px;       /* mobile bottom bar */
+  background:
+    radial-gradient(1100px 520px at 78% -12%, #16212b 0%, rgba(22, 33, 43, 0) 62%),
+    var(--g-base);
   color: var(--g-fg-2);
   font-family: var(--g-body);
   font-size: var(--g-t-body);
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  text-rendering: optimizeLegibility;
 }
 
-/* ------------------------------------------------- custom dark scrollbars */
-.arc-app,
-.arc-app * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--g-rule) var(--g-base);
+@media (min-width: 1024px) {
+  .arc-app { padding-top: 68px; padding-bottom: 0; }
 }
+
+/* Quiet dark scrollbars — the rails are meant to look scrollable. */
+.arc-app,
+.arc-app * { scrollbar-width: thin; scrollbar-color: var(--g-rule) var(--g-base); }
 .arc-app ::-webkit-scrollbar { width: 10px; height: 10px; }
 .arc-app ::-webkit-scrollbar-track { background: var(--g-base); }
 .arc-app ::-webkit-scrollbar-thumb {
   background: var(--g-rule-soft);
   border: 2px solid var(--g-base);
-  border-radius: 0;
+  border-radius: 999px;
 }
 .arc-app ::-webkit-scrollbar-thumb:hover { background: var(--g-rule); }
 .arc-app ::selection { background: var(--g-acc); color: var(--g-ink); }
 
-/* ------------------------------------------------------------------ texture */
+/* ------------------------------------------------------ content columns */
+.arc-wrap {
+  width: 100%;
+  max-width: var(--g-max);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 1024px) { .arc-wrap { padding-inline: 32px; } }
 
-/* Any textured surface anchors its scanlines and grain to itself. */
-.arc-crt { position: relative; }
+.arc-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g-s6);
+  padding-block: var(--g-s6) var(--g-s8);
+}
+@media (min-width: 1024px) {
+  .arc-main { gap: var(--g-s7); padding-block: var(--g-s7) var(--g-s9); }
+}
 
-/* Text that behaves as a button: no browser link styling reaches product UI. */
-.arc-open {
-  color: inherit;
-  font: inherit;
-  text-align: inherit;
-  background: none;
-  border: 0;
+/* shortcut: dropped — .arc-wrap carries no padding-top of its own, so this only ever
+   hit blocks that set their own padding (the profile card lost its top padding). */
+/* Inside a section the blocks had no rhythm: head, filter bar, rail and the "see all"
+   line sat edge to edge, so a title sat directly on top of its cards. */
+.arc-main section { display: grid; align-content: start; gap: var(--g-s5); }
+
+/* An empty state is one sentence, not a 1176px slab with a line floating in it. */
+.arc-empty { max-width: 64ch; }
+
+.arc-split { display: grid; gap: var(--g-s6); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) {
+  .arc-split { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: var(--g-s7); }
+}
+.arc-side { display: flex; flex-direction: column; gap: var(--g-s4); min-width: 0; }
+
+/* ---------------------------------------------------------- navigation */
+
+/* One line, 64px, sticky. The mobile strip and the bottom bar are the same
+   component at a different width, never a third navigation. */
+.arc-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--g-z-chrome);
+  display: none;
+  background: rgba(16, 20, 24, .92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--g-rule);
+}
+@media (min-width: 1024px) { .arc-nav { display: block; } }
+
+.arc-nav-inner {
+  max-width: var(--g-max);
+  margin-inline: auto;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: var(--g-s5);
+  padding-inline: 32px;
+}
+
+.arc-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--g-s3);
+  min-height: 44px;
   padding: 0;
+  border: 0;
+  background: none;
+  color: var(--g-fg);
   cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease);
+}
+.arc-brand:hover { color: var(--g-acc); }
+.arc-brand:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 3px; border-radius: var(--g-r-inner); }
+
+.arc-brand-mark {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: none;
 }
 
-/* Numerals, prices and their units never wrap. */
-.arc-nowrap { white-space: nowrap; }
-.arc-stat { min-width: 0; }
-
-/* Scanlines and film grain live in one static layer so .arc-art can keep
-   ::before for its diagonal hatch. Texture, not motion: it survives
-   prefers-reduced-motion unchanged. */
-.arc-crt::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, .05) 0 1px,
-      rgba(0, 0, 0, 0) 1px 3px
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.26'/%3E%3C/svg%3E");
-  background-size: auto, 140px 140px;
-}
-
-/* Travelling scan beam (motion). */
-.arc-beam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 38%;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(239, 68, 68, 0) 0%, rgba(239, 68, 68, .10) 45%, rgba(255, 255, 255, .06) 55%, rgba(239, 68, 68, 0) 100%);
-  animation: arcBeam 9s linear infinite;
-}
-
-/* Diagonal hairline hatch for panels and auth backdrop. */
-.arc-hatch {
-  background-image: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, .05) 0 1px,
-    rgba(0, 0, 0, 0) 1px 12px
-  );
-}
-
-/* Red slash marker used on section titles and the active nav item. */
-.arc-slash {
-  display: inline-block;
-  width: 4px;
-  height: 1em;
-  background: var(--g-acc);
-  transform: skewX(var(--g-skew));
-  box-shadow: 0 0 14px -2px rgba(239, 68, 68, .65);
-}
-
-/* ---------------------------------------------------------------- typography */
-.arc-kicker {
+.arc-brand-word {
   font-family: var(--g-display);
-  font-size: var(--g-t-xs);
-  font-weight: 600;
-  letter-spacing: .1em;          /* all-caps floor */
-  text-transform: uppercase;
+  font-stretch: var(--g-wide);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -.01em;
+  color: var(--g-fg);
+  white-space: nowrap;
+}
+
+.arc-nav-list { display: flex; align-items: stretch; gap: var(--g-s5); list-style: none; margin: 0; padding: 0; }
+.arc-nav-list > li { display: flex; }
+
+/* Plain words with an underline on the active one, sitting on the bar's own edge —
+   not a rounded pill with a tinted fill, which is what every generated nav looks like. */
+.arc-navlink {
+  display: inline-flex;
+  align-items: center;
+  height: 68px;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
   color: var(--g-fg-3);
-  line-height: 1.5;
+  font-family: var(--g-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .005em;
+  cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease), border-color var(--g-d1) var(--g-ease);
 }
-.arc-title-hero {
+@media (hover: hover) { .arc-navlink:hover { color: var(--g-fg); } }
+.arc-navlink[aria-current="page"] { color: var(--g-fg); border-bottom-color: var(--g-acc); }
+.arc-navlink:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -4px; }
+
+.arc-session { margin-left: auto; display: flex; align-items: center; gap: var(--g-s4); }
+/* A status line, not another button: a dot that says "signed in" and the name. */
+.arc-session-tag {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--g-fg-2);
+  font-size: var(--g-t-sm);
+  font-weight: 500;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arc-session-tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: var(--g-r-chip);
+  background: var(--g-acc);
+}
+
+/* Mobile: compact strip on top, three-item bar at the bottom. */
+.arc-topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--g-z-chrome);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--g-s3);
+  height: 56px;
+  padding-inline: 20px;
+  background: rgba(16, 20, 24, .94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--g-rule);
+}
+.arc-tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--g-z-chrome);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--g-band);
+  border-top: 1px solid var(--g-rule);
+}
+/* After both definitions: an equal-specificity rule only wins if it comes later. */
+@media (min-width: 1024px) { .arc-topbar, .arc-tabbar { display: none; } }
+.arc-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: var(--g-s3);
+  border: 0;
+  border-top: 2px solid transparent;
+  background: none;
+  color: var(--g-fg-3);
+  font-size: var(--g-t-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease), background var(--g-d1) var(--g-ease);
+}
+@media (hover: hover) { .arc-tab:hover { color: var(--g-fg-2); background: var(--g-panel); } }
+.arc-tab[aria-current="page"] { color: var(--g-fg); border-top-color: var(--g-acc); background: var(--g-panel); }
+.arc-tab:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -3px; }
+
+.arc-skip {
+  position: absolute;
+  left: -9999px;
+  top: var(--g-s4);
+  z-index: var(--g-z-skip);
+}
+.arc-skip:focus { position: fixed; left: var(--g-s4); top: var(--g-s4); }
+/* Read by a screen reader, never seen: the loading announcement without a line of text. */
+.arc-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ------------------------------------------------------------ typography */
+.arc-title-hero, .arc-title, .arc-h2, .arc-h3, .arc-card-title, .arc-num, .arc-brand-word, .arc-art-title {
   font-family: var(--g-display);
+  font-stretch: var(--g-wide);
+  color: var(--g-fg);
+  text-transform: none;          /* sentence case; no shouted caps */
+  margin: 0;
+  text-wrap: balance;
+}
+
+.arc-title-hero {
   font-size: var(--g-t-hero);
   font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: .06em;         /* uppercase display keeps caps tracking */
-  text-transform: uppercase;
-  color: var(--g-fg);
+  line-height: 1.06;
+  letter-spacing: -.022em;
+  overflow-wrap: anywhere;
 }
 .arc-title {
-  font-family: var(--g-display);
   font-size: var(--g-t-xl);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--g-fg);
+  letter-spacing: -.018em;
 }
 .arc-h2 {
-  font-family: var(--g-display);
   font-size: var(--g-t-lg);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--g-fg);
+  line-height: 1.2;
+  letter-spacing: -.012em;
 }
-.arc-h3 {
-  font-family: var(--g-display);
+.arc-h3, .arc-card-title {
   font-size: var(--g-t-md);
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--g-fg);
+  line-height: 1.25;
+  letter-spacing: -.006em;
 }
-.arc-num {                 /* oversized numerals: prices, counts, hours */
-  font-family: var(--g-display);
-  font-weight: 700;
+.arc-num {                        /* numerals and counts: the store's loud voice */
+  font-weight: 800;
   line-height: 1;
   letter-spacing: -.02em;
   font-variant-numeric: tabular-nums;
@@ -213,175 +384,203 @@
 .arc-num-xl { font-size: var(--g-t-xl); }
 .arc-num-lg { font-size: var(--g-t-lg); }
 .arc-num-md { font-size: var(--g-t-md); }
-.arc-unit {              /* unit sits with its numeral, never wrapped */
-  font-family: var(--g-display);
-  font-weight: 600;
-  font-size: .55em;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--g-fg-3);
-}
-.arc-label {
+.arc-num--hero { font-size: var(--g-t-hero); }
+.arc-num--warm { color: var(--g-warm); }
+
+.arc-unit {                      /* a unit is pinned to its numeral, never wrapped */
   font-family: var(--g-body);
-  font-size: var(--g-t-sm);
   font-weight: 500;
+  font-size: max(var(--g-t-xs), .58em);
+  letter-spacing: .01em;
+  color: var(--g-fg-3);
+  white-space: nowrap;
+}
+
+.arc-eyebrow {
+  font-size: var(--g-t-sm);
+  font-weight: 600;
   letter-spacing: .02em;
-  color: var(--g-fg-2);
+  color: var(--g-acc);
+  margin: 0;
 }
 .arc-meta {
-  font-family: var(--g-body);
-  font-size: var(--g-t-xs);
+  font-size: var(--g-t-sm);
   font-weight: 500;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  letter-spacing: .01em;
   color: var(--g-fg-3);
+  margin: 0;
+  text-wrap: pretty;
 }
-.arc-lead { font-size: var(--g-t-md); line-height: 1.6; color: var(--g-fg-2); }
-.arc-body { font-size: var(--g-t-body); line-height: 1.6; color: var(--g-fg-2); }
+.arc-label {
+  font-size: var(--g-t-sm);
+  font-weight: 600;
+  color: var(--g-fg-2);
+  margin: 0;
+}
+.arc-lead { font-size: var(--g-t-md); line-height: 1.55; color: var(--g-fg-2); margin: 0; max-width: var(--g-measure); }
+.arc-body { font-size: var(--g-t-body); line-height: 1.65; color: var(--g-fg-2); margin: 0; max-width: var(--g-measure); text-wrap: pretty; }
+.arc-prose { font-size: var(--g-t-body); line-height: 1.72; color: var(--g-fg-2); max-width: var(--g-measure); }
+.arc-prose > * + * { margin-top: var(--g-s4); }
+.arc-count { display: flex; align-items: baseline; gap: 8px; margin: 0; }
 
-/* Clamped data text (descriptions, reviews) — authored copy is never clamped. */
 .arc-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.arc-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.arc-nowrap { white-space: nowrap; }
+.arc-stat { display: grid; gap: var(--g-s1); min-width: 0; }
+.arc-stats { display: flex; flex-wrap: wrap; gap: var(--g-s4) var(--g-s6); margin: 0; padding: 0; list-style: none; }
+/* The featured panel's release date is always its own row: with wrap it sat beside
+   "PC" for a short date and below it for a long one, so the panel changed shape per slide. */
+.arc-hero-panel .arc-stat:last-child { flex-basis: 100%; }
+.arc-strong { color: var(--g-fg); font-weight: 600; }
 
-/* ------------------------------------------------------------------ chrome */
+/* ------------------------------------------------------------- controls */
+.arc-open {                      /* text that behaves as a button */
+  display: inline;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease);
+}
+.arc-open:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 3px; border-radius: var(--g-r-inner); }
 
-/* Chamfered filled control: red-500 fill, black text on hover/focus. */
+.arc-link {
+  color: var(--g-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--g-acc);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease), text-decoration-color var(--g-d1);
+}
+@media (hover: hover) { .arc-link:hover { color: var(--g-acc-hi); } }
+.arc-open.arc-link { display: inline; }
+
 .arc-btn {
-  --g-chamfer: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--g-s2);
   min-height: 44px;
-  padding: 10px 20px;
-  font-family: var(--g-display);
-  font-size: var(--g-t-sm);
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  padding: 10px 18px;
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-ctl);
+  background: var(--g-raise);
   color: var(--g-fg);
-  background: var(--g-panel);
-  box-shadow: inset 0 0 0 1px var(--g-rule);
-  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, var(--g-chamfer) 100%, 0 calc(100% - var(--g-chamfer)));
+  font-family: var(--g-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
   cursor: pointer;
-  transition: background var(--g-dur) var(--g-ease-out), color var(--g-dur), box-shadow var(--g-dur), filter var(--g-dur);
+  transition: background var(--g-d1) var(--g-ease), border-color var(--g-d1) var(--g-ease),
+              color var(--g-d1) var(--g-ease), transform var(--g-d1) var(--g-ease);
 }
 @media (hover: hover) {
-  .arc-btn:hover:not(:disabled) {
-    background: var(--g-acc);
-    color: var(--g-ink);
-    box-shadow: inset 0 0 0 1px var(--g-acc-hi);
-    filter: drop-shadow(0 0 14px rgba(239, 68, 68, .45));
-  }
+  .arc-btn:hover:not(:disabled) { background: #232c36; border-color: var(--g-rule-hi); }
 }
-.arc-btn:focus-visible {
-  outline: none;
-  background: var(--g-acc);
-  color: var(--g-ink);
-  box-shadow: inset 0 0 0 2px var(--g-fg);
-  filter: drop-shadow(0 0 14px rgba(239, 68, 68, .5));
-}
-.arc-btn--solid { background: var(--g-acc); color: var(--g-ink); box-shadow: inset 0 0 0 1px var(--g-acc-hi); }
-.arc-btn--solid:hover:not(:disabled) { background: var(--g-acc-hi); color: var(--g-ink); }
+.arc-btn:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+.arc-btn:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
 .arc-btn:disabled {
-  background: var(--g-panel-2);
+  background: var(--g-panel);
+  border-color: var(--g-rule-soft);
   color: var(--g-fg-3);
-  box-shadow: inset 0 0 0 1px var(--g-rule-soft);
   cursor: not-allowed;
-  filter: none;
 }
-
-/* Ghost control for icon-only buttons (carousel arrows). */
-.arc-icon-btn {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  color: var(--g-fg-2);
-  background: rgba(26, 26, 26, .82);
+.arc-btn--solid { background: var(--g-acc); border-color: var(--g-acc); color: var(--g-acc-ink); }
+@media (hover: hover) {
+  .arc-btn--solid:hover:not(:disabled) { background: var(--g-acc-hi); border-color: var(--g-acc-hi); color: var(--g-acc-ink); }
 }
+.arc-btn[aria-pressed="true"] { background: var(--g-acc-wash); border-color: var(--g-acc); color: var(--g-fg); }
+.arc-btn--solid[aria-pressed="true"] { background: var(--g-warm); border-color: var(--g-warm); color: var(--g-warm-ink); }
 
-/* Genre / filter chip. */
+.arc-icon-btn { width: 44px; height: 44px; padding: 0; }
+
 .arc-chip {
-  --g-chamfer: 7px;
   display: inline-flex;
   align-items: center;
   gap: var(--g-s1);
-  min-height: 40px;
-  padding: 8px 14px;
-  font-family: var(--g-display);
-  font-size: var(--g-t-sm);
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1px solid var(--g-rule-soft);
+  border-radius: var(--g-r-chip);
+  background: var(--g-panel);
   color: var(--g-fg-2);
-  background: var(--g-panel-2);
-  box-shadow: inset 0 0 0 1px var(--g-rule-soft);
-  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, 0 calc(100% - var(--g-chamfer)));
-  cursor: pointer;
-  transition: background var(--g-dur) var(--g-ease-out), color var(--g-dur), box-shadow var(--g-dur);
-}
-.arc-chip[aria-pressed="true"],
-.arc-chip[aria-checked="true"] {
-  background: var(--g-acc);
-  color: var(--g-ink);
-  box-shadow: inset 0 0 0 1px var(--g-acc-hi);
-}
-@media (hover: hover) {
-  .arc-chip:hover { box-shadow: inset 0 0 0 1px var(--g-acc); color: var(--g-fg); }
-  .arc-chip[aria-pressed="true"]:hover, .arc-chip[aria-checked="true"]:hover { color: var(--g-ink); }
-}
-.arc-chip:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--g-fg); }
-
-/* Tag = read-only genre marker. */
-.arc-tag {
-  display: inline-block;
-  padding: 4px 8px;
   font-family: var(--g-body);
-  font-size: var(--g-t-xs);
+  font-size: var(--g-t-sm);
   font-weight: 500;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--g-fg-3);
-  box-shadow: inset 0 0 0 1px var(--g-rule);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--g-d1) var(--g-ease), border-color var(--g-d1) var(--g-ease), color var(--g-d1) var(--g-ease);
 }
+@media (hover: hover) { .arc-chip:hover { border-color: var(--g-rule-hi); color: var(--g-fg); } }
+.arc-chip[aria-pressed="true"], .arc-chip[aria-checked="true"] {
+  background: var(--g-acc-wash);
+  border-color: var(--g-acc);
+  color: var(--g-fg);
+}
+.arc-chip:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
 
-/* Form field: label always visible, error beside the field. */
+.arc-tag {                       /* read-only genre marker */
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--g-r-inner);
+  background: var(--g-band);
+  box-shadow: var(--g-edge);
+  color: var(--g-fg-3);
+  font-size: var(--g-t-sm);
+  font-weight: 500;
+}
+.arc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
 .arc-field {
   width: 100%;
   min-height: 46px;
   padding: 12px 14px;
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-ctl);
+  background: var(--g-field);
+  color: var(--g-fg);
   font-family: var(--g-body);
   font-size: var(--g-t-body);
-  color: var(--g-fg);
-  background: var(--g-panel-2);
-  border: 1px solid var(--g-rule);
-  border-radius: 0;
-  transition: border-color var(--g-dur) var(--g-ease-out), box-shadow var(--g-dur);
+  transition: border-color var(--g-d1) var(--g-ease), box-shadow var(--g-d1) var(--g-ease);
 }
-.arc-field::placeholder { color: #71717a; }
-.arc-field:focus {
-  outline: none;
-  border-color: var(--g-acc);
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, .35), 0 0 22px -6px rgba(239, 68, 68, .5);
+.arc-field::placeholder { color: var(--g-fg-3); }
+.arc-field:focus { outline: none; border-color: var(--g-acc); box-shadow: 0 0 0 3px var(--g-acc-wash); }
+.arc-field[aria-invalid="true"] { border-color: var(--g-bad); box-shadow: 0 0 0 3px rgba(240, 144, 127, .14); }
+.arc-field--select {
+  appearance: none;
+  width: auto;
+  min-width: 180px;
+  padding-right: 38px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--g-fg-3) 50%),
+    linear-gradient(135deg, var(--g-fg-3) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
 }
-.arc-field[aria-invalid="true"] { border-color: var(--g-acc-hi); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .35); }
-.arc-error {
-  font-size: var(--g-t-sm);
-  line-height: 1.5;
-  color: var(--g-acc-hi);
-}
-.arc-ok { font-size: var(--g-t-sm); line-height: 1.5; color: #86efac; }
+.arc-field--num { width: 88px; min-height: 42px; padding: 8px 10px; font-size: 15px; }
+.arc-field--icon { padding-left: 42px; }
+.arc-field--reveal { padding-right: 76px; }
+.arc-field--area { min-height: 92px; resize: vertical; }
 
-/* Hairline rules and panels. */
-.arc-hair { border: 1px solid var(--g-rule-soft); }
-.arc-hair-b { border-bottom: 1px solid var(--g-rule); }
+.arc-checkbox { width: 22px; height: 22px; accent-color: var(--g-acc); cursor: pointer; }
+.arc-checkbox:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
+
+.arc-error { font-size: var(--g-t-sm); line-height: 1.55; color: var(--g-bad); margin: 6px 0 0; }
+.arc-ok { font-size: var(--g-t-sm); line-height: 1.55; color: var(--g-ok); }
+.arc-help { font-size: var(--g-t-sm); line-height: 1.5; color: var(--g-fg-3); margin: 6px 0 0; }
+
+/* -------------------------------------------------- surfaces and rails */
 .arc-panel {
-  background: var(--g-panel-2);
+  padding: var(--g-s5);
   border: 1px solid var(--g-rule-soft);
+  border-radius: var(--g-r-card);
+  background: var(--g-panel);
 }
 
-/* Horizontal rails keep the visible dark scrollbar — it is part of the identity. */
 .arc-rail {
   display: flex;
   gap: var(--g-s4);
@@ -389,194 +588,599 @@
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   padding-bottom: var(--g-s3);
+  /* A flex/grid item's automatic minimum size is its content width, which lets a rail
+     push past the column instead of scrolling inside it. */
+  min-width: 0;
+  scrollbar-width: none;
 }
-.arc-rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+.arc-rail::-webkit-scrollbar { display: none; }
+/* The right edge fades so "there is more to the right" reads without a scrollbar. */
+.arc-rail:not(.arc-rail--chips) {
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+}
+.arc-rail > * { flex: 0 0 auto; scroll-snap-align: start; }
+.arc-rail--chips { gap: var(--g-s2); padding-bottom: var(--g-s2); flex-wrap: wrap; overflow-x: visible; }
 
-/* ------------------------------------------------------------------- cards */
+.arc-grid {
+  display: grid;
+  gap: var(--g-s5);
+  grid-template-columns: repeat(auto-fill, minmax(276px, 1fr));
+  list-style: none;
+  /* Only the <ul> defaults are reset here: `margin: 0; padding: 0` on the same element
+     also killed .arc-wrap's centring and gutters, so the grid ran off the column. */
+  margin-block: 0;
+  padding-left: 0;
+}
+.arc-grid--pair { gap: var(--g-s4); grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 
+.arc-list { display: grid; gap: var(--g-s2); list-style: none; margin-block: 0; padding-left: 0; }
+
+/* A vertical stack of blocks inside one section. */
+.arc-stack { display: grid; gap: var(--g-s6); }
+.arc-stack > * { min-width: 0; }
+.arc-stack--tight { display: grid; gap: var(--g-s4); }
+
+/* --------------------------------------------------------------- cards */
 .arc-card {
   position: relative;
-  display: block;
-  text-align: left;
-  background: var(--g-panel-2);
-  border: 1px solid var(--g-rule-soft);
-  clip-path: polygon(0 0, calc(100% - var(--g-chamfer)) 0, 100% var(--g-chamfer), 100% 100%, var(--g-chamfer) 100%, 0 calc(100% - var(--g-chamfer)));
-  transition: transform var(--g-dur) var(--g-ease-out), border-color var(--g-dur), filter var(--g-dur);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--g-r-card);
+  background: var(--g-panel);
+  box-shadow: var(--g-edge), var(--g-e1);
+  transition: transform var(--g-d1) var(--g-ease);
+}
+/* The hover shadow rides on a layer that only fades, so the lift itself is
+   transform + opacity and nothing else. */
+.arc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: var(--g-e2), inset 0 0 0 1px var(--g-rule-hi);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--g-d1) var(--g-ease);
 }
 @media (hover: hover) {
-  .arc-card:hover {
-    transform: translateY(-6px);
-    border-color: var(--g-acc);
-    filter: drop-shadow(0 10px 26px rgba(255, 255, 255, .14)) drop-shadow(0 0 16px rgba(239, 68, 68, .35));
-  }
-  .arc-card:hover .arc-art::before { transform: translateY(-6%); }
-  .arc-card:hover .arc-card-title { transform: translateX(-4px); color: var(--g-fg); }
+  .arc-card:hover { transform: translateY(-4px); }
+  .arc-card:hover::after { opacity: 1; }
 }
-.arc-card:focus-within,
-.arc-card:has(.arc-open:focus-visible) {
-  border-color: var(--g-acc);
-  filter: drop-shadow(0 0 18px rgba(239, 68, 68, .45));
-}
-.arc-card-title {
-  font-family: var(--g-display);
-  font-size: var(--g-t-md);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--g-fg-2);
-  transition: transform var(--g-dur) var(--g-ease-out), color var(--g-dur);
-}
+/* Inset, not outset: an outset ring is clipped by the rail's overflow box and
+   reads as a stray line at the carousel edge. */
+.arc-card:focus-within { box-shadow: var(--g-edge), var(--g-e1), inset 0 0 0 2px var(--g-acc); }
 
-/* Cover plate. Ratio comes from the real capsule ratio, so dropped-in art is
-   never cropped. Generated art fills the same plate when cover is absent. */
+.arc-card--grid { width: 100%; }
+.arc-card--rail { width: 288px; }
+@media (min-width: 1440px) { .arc-card--rail { width: 320px; } }
+
+.arc-card-body { display: flex; flex-direction: column; gap: var(--g-s3); padding: var(--g-s4); }
+.arc-card-title { color: var(--g-fg); }
+@media (hover: hover) { .arc-card:hover .arc-card-title { color: var(--g-acc-hi); } }
+.arc-card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--g-s3);
+  margin-top: var(--g-s1);
+  padding-top: var(--g-s3);
+  border-top: 1px solid var(--g-rule-soft);
+}
+.arc-card-foot p { display: flex; align-items: baseline; gap: 6px; margin: 0; }
+.arc-card-foot .arc-num { color: var(--g-fg-2); }
+
+/* --------------------------------------------------- artwork and plates */
 .arc-art {
   position: relative;
   aspect-ratio: var(--g-capsule);
   overflow: hidden;
-  background:
-    linear-gradient(115deg, hsl(var(--g-hue, 0) 62% 24%) 0%, hsl(calc(var(--g-hue, 0) + 45) 70% 9%) 58%, var(--g-base) 100%);
-  border-bottom: 1px solid var(--g-rule-soft);
-}
-.arc-art::before {
-  content: "";
-  position: absolute;
-  inset: -25%;
-  background: repeating-linear-gradient(
-    115deg,
-    hsl(var(--g-hue, 0) 90% 62% / .18) 0 2px,
-    rgba(0, 0, 0, 0) 2px 16px
-  );
-  transition: transform 280ms var(--g-ease-out);
+  border-radius: var(--g-r-card) var(--g-r-card) 0 0;
+  background: linear-gradient(120deg, hsl(var(--g-hue, 205) 30% 20%) 0%, hsl(var(--g-hue, 205) 24% 12%) 55%, var(--g-base) 100%);
 }
 .arc-art img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;      /* deliberate uniform crop: 2.14:1 plate vs 2.14:1 capsule */
+  object-fit: cover;   /* deliberate uniform crop: every capsule is 460x215 already */
+}
+.arc-art--row { border-radius: var(--g-r-inner); width: 92px; }
+.arc-art--hero {
+  aspect-ratio: var(--g-wide-plate);
+  border-radius: var(--g-r-card);
+  box-shadow: var(--g-e3), var(--g-edge);
+}
+
+/* The whole plate is the thing you reach for: a transparent button above the
+   image, the heart in its own layer above that. */
+.arc-open-plate {
+  position: absolute;
+  inset: 0;
+  z-index: var(--g-z-plate);
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.arc-open-plate:focus-visible { outline: 2px solid var(--g-fg); outline-offset: -4px; border-radius: inherit; }
+
+.arc-heart {
+  position: absolute;
+  top: var(--g-s2);
+  right: var(--g-s2);
+  z-index: var(--g-z-heart);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--g-r-ctl);
+  background: rgba(12, 16, 20, .74);
+  box-shadow: inset 0 0 0 1px var(--g-rule);
+  color: var(--g-fg);
+  cursor: pointer;
+  transition: color var(--g-d1) var(--g-ease), background var(--g-d1) var(--g-ease), transform var(--g-d1) var(--g-ease);
+}
+@media (hover: hover) { .arc-heart:hover { background: rgba(12, 16, 20, .9); color: var(--g-warm); } }
+.arc-heart:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
+.arc-heart[aria-pressed="true"] { color: var(--g-warm); box-shadow: inset 0 0 0 1px var(--g-warm); }
+.arc-heart[aria-pressed="true"] svg { fill: currentColor; animation: arcPop var(--g-d2) var(--g-ease); }
+.arc-heart--inline { position: static; background: none; box-shadow: inset 0 0 0 1px var(--g-rule); }
+
+.arc-art-code {
+  position: absolute;
+  top: var(--g-s2);
+  left: var(--g-s3);
+  font-family: var(--g-body);
+  font-size: var(--g-t-sm);
+  font-weight: 600;
+  color: var(--g-fg-3);
 }
 .arc-art-title {
   position: absolute;
-  left: 14px;
-  bottom: 10px;
-  right: 14px;
-  font-family: var(--g-display);
-  font-size: clamp(20px, 2vw, 30px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, .8);
-}
-.arc-art-code {
-  position: absolute;
-  top: 8px;
-  left: 12px;
-  font-family: var(--g-display);
-  font-size: var(--g-t-xs);
-  font-weight: 600;
-  letter-spacing: .12em;
-  color: rgba(255, 255, 255, .6);
+  left: var(--g-s3);
+  right: var(--g-s3);
+  bottom: var(--g-s3);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--g-fg);
 }
 
-/* Wide cinematic plate for hero / game page backdrops — cover-crop is intentional. */
-.arc-art-wide { aspect-ratio: 16 / 7; }
-@media (max-width: 767px) { .arc-art-wide { aspect-ratio: 4 / 3; } }
-
-/* Heart control — colour alone is never the cue: aria-pressed + filled glyph. */
-.arc-heart {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 4;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  color: var(--g-fg-2);
-  background: rgba(10, 10, 10, .66);
-  box-shadow: inset 0 0 0 1px var(--g-rule);
-  cursor: pointer;
-  transition: color 160ms var(--g-ease-out), box-shadow 160ms, background 160ms, transform 160ms var(--g-ease-out);
-}
-.arc-heart:hover { color: var(--g-acc-hi); box-shadow: inset 0 0 0 1px var(--g-acc); }
-.arc-heart:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--g-fg); }
-.arc-heart[aria-pressed="true"] { color: var(--g-acc); box-shadow: inset 0 0 0 1px var(--g-acc); }
-.arc-heart[aria-pressed="true"] svg { fill: currentColor; animation: arcPop 260ms var(--g-ease-out); }
-
-/* List row (dense view of All games). */
+/* Rows in the dense catalogue view. */
 .arc-row {
   display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--g-s4);
   padding: var(--g-s3) var(--g-s4);
-  background: var(--g-panel-2);
   border: 1px solid var(--g-rule-soft);
-  transition: border-color var(--g-dur), background var(--g-dur), transform var(--g-dur) var(--g-ease-out);
+  border-radius: var(--g-r-card);
+  background: var(--g-panel);
+  transition: border-color var(--g-d1) var(--g-ease), background var(--g-d1) var(--g-ease);
 }
-@media (hover: hover) {
-  .arc-row:hover { border-color: var(--g-acc); background: var(--g-panel); transform: translateX(4px); }
+@media (hover: hover) { .arc-row:hover { border-color: var(--g-rule-hi); background: var(--g-raise); } }
+@media (min-width: 1024px) {
+  .arc-row { grid-template-columns: 132px minmax(0, 1.6fr) auto auto; gap: var(--g-s6); }
+}
+.arc-row-main { min-width: 0; }
+.arc-row-main .arc-open { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arc-row-main .arc-open:hover { color: var(--g-acc-hi); }
+.arc-row-year { display: none; margin: 0; }
+@media (min-width: 1024px) { .arc-row-year { display: flex; align-items: baseline; gap: 6px; } }
+.arc-row-year .arc-num { color: var(--g-fg-3); }
+.arc-row-actions { display: flex; align-items: center; gap: var(--g-s3); justify-content: flex-end; }
+.arc-row-actions > .arc-num { min-width: 56px; text-align: right; }
+
+/* ---------------------------------------------------------- page blocks */
+.arc-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--g-s4) var(--g-s6);
+}
+.arc-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--g-s2) var(--g-s5);
+}
+.arc-backbar { display: flex; align-items: center; justify-content: space-between; gap: var(--g-s4); }
+.arc-cta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--g-s4) var(--g-s6);
+  background: var(--g-band);
 }
 
-/* Diagonal offset grid: alternate tiles drop by one shift. Mobile keeps a
-   straight single column so the reading order stays clean. */
-@media (min-width: 768px) {
-  .arc-offset > *:nth-child(even) { margin-top: var(--g-shift); }
+/* Featured: the plate carries the picture, the panel carries the words. */
+.arc-hero {
+  display: grid;
+  gap: var(--g-s5);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+/* Stretch, not start: the plate and the panel share one row height, so their edges
+   line up instead of the panel hanging above and below the image. */
+@media (min-width: 1024px) {
+  .arc-hero { grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: var(--g-s6); align-items: stretch; }
+}
+.arc-hero-art { position: relative; aspect-ratio: var(--g-wide-plate); overflow: hidden; border-radius: var(--g-r-card); background: var(--g-band); box-shadow: var(--g-e3), var(--g-edge); }
+.arc-hero-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.arc-hero-art > .arc-open-plate { z-index: var(--g-z-plate); }
+.arc-hero-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g-s3);
+  padding: var(--g-s5);
+  border: 1px solid var(--g-rule-soft);
+  border-radius: var(--g-r-card);
+  background: var(--g-panel);
+  box-shadow: var(--g-e1);
+}
+.arc-hero-actions { display: flex; flex-wrap: wrap; gap: var(--g-s2); margin-top: auto; padding-top: var(--g-s2); }
+/* One control, not three loose ones: the arrows and the dots share a single
+   translucent pill so the cluster reads as the carousel's handle. */
+.arc-hero-nav {
+  position: absolute;
+  right: var(--g-s4);
+  bottom: var(--g-s4);
+  z-index: var(--g-z-heart);
+  display: flex;
+  align-items: center;
+  gap: var(--g-s1);
+  padding: 6px;
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-chip);
+  background: rgba(12, 16, 20, .78);
+  backdrop-filter: blur(8px);
+}
+/* After both base rules on purpose (same specificity). The panel overlaps the plate by
+   24px so the plate is cut along the panel's edge and the two read as one object; the
+   handle shifts left with it and stays clear of the overlap. */
+@media (min-width: 1024px) {
+  /* aspect-ratio off, or a stretched plate sizes itself from the row height and
+     overflows its column (170px of overlap at 1024). The img is object-fit: cover. */
+  .arc-hero-art { aspect-ratio: auto; }
+  .arc-hero-panel { margin-left: -56px; position: relative; z-index: var(--g-z-plate); }
+  .arc-hero-nav { right: calc(var(--g-s4) + 24px); }
+}
+.arc-hero-nav .arc-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-color: transparent;
+  background: rgba(238, 242, 246, .08);
+  border-radius: var(--g-r-chip);
+}
+@media (hover: hover) { .arc-hero-nav .arc-icon-btn:hover { background: rgba(238, 242, 246, .18); } }
+
+.arc-dot {
+  position: relative;
+  width: 28px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.arc-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--g-r-chip);
+  background: rgba(238, 242, 246, .38);
+  transition: background var(--g-d1) var(--g-ease), transform var(--g-d1) var(--g-ease);
+}
+@media (hover: hover) { .arc-dot:hover::after { background: rgba(238, 242, 246, .7); } }
+.arc-dot[aria-current="true"]::after { background: var(--g-acc); transform: translate(-50%, -50%) scale(1.25); }
+.arc-dot:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -2px; border-radius: var(--g-r-inner); }
+/* On a phone the plate is only ~190px tall, so the cluster tightens — but the 44px
+   touch targets stay, which is what the token sheet promises. */
+@media (max-width: 639px) {
+  .arc-hero-nav { right: var(--g-s2); bottom: var(--g-s2); gap: 2px; padding: 4px; }
+  .arc-dot { width: 24px; }
 }
 
-/* ------------------------------------------------------------------- motion */
-.arc-rise { animation: arcRise 360ms var(--g-ease-out) both; }
-.arc-stagger > * { animation: arcRise 360ms var(--g-ease-out) both; }
+/* The one signature effect: a sheen that crosses the featured plate when the
+   slide changes. It is a layer, not a colour animation, and it runs once. */
+.arc-sheen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 40%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(100deg, rgba(238, 242, 246, 0) 0%, rgba(238, 242, 246, .10) 45%, rgba(238, 242, 246, .02) 70%, rgba(238, 242, 246, 0) 100%);
+  animation: arcSheen 1100ms var(--g-ease) both;
+}
+
+/* -------------------------------------------------------- filters, search */
+/* Chips take the row, sort and clear sit at its right end instead of floating
+   alone on a line of their own. */
+.arc-filter { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--g-s4); }
+.arc-filter .arc-rail--chips { flex: 1 1 320px; }
+.arc-filter-tail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--g-s3);
+  margin-left: auto;
+}
+.arc-filter-tail > label { padding-bottom: 10px; }
+
+.arc-search-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--g-s4); }
+.arc-search-field { flex: 1 1 260px; min-width: 0; display: grid; gap: 6px; }
+.arc-field-shell { position: relative; }
+.arc-field-shell .arc-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--g-fg-3); pointer-events: none; }
+.arc-view-toggle { display: grid; gap: 6px; }
+.arc-view-group { display: flex; gap: var(--g-s2); }
+/* A button in a plain <li> sits on the line's baseline, so the line box grows by the
+   strut (~7px) and the dot lands above the pill's middle. Same fix as .arc-nav-list. */
+.arc-view-group > li { display: flex; }
+
+/* ----------------------------------------------------------- game title */
+.arc-title-head { display: grid; gap: var(--g-s5); }
+@media (min-width: 1024px) { .arc-title-head { gap: var(--g-s6); } }
+.arc-title-plate { display: grid; gap: var(--g-s2); }
+
+.arc-facts {
+  display: grid;
+  gap: var(--g-s4);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arc-fact { display: grid; gap: 4px; min-width: 0; }
+.arc-fact .arc-meta { color: var(--g-fg-3); }
+.arc-fact-value {
+  font-family: var(--g-display);
+  font-stretch: var(--g-wide);
+  font-size: var(--g-t-md);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--g-fg);
+  overflow-wrap: anywhere;
+}
+
+.arc-specs { display: grid; gap: var(--g-s3); margin: 0; }
+/* A card sitting on a shelf: the shelf is the band colour, the card stays raised. */
+.arc-shelf {
+  display: grid;
+  gap: var(--g-s3);
+  padding: var(--g-s3);
+  border: 1px solid var(--g-rule-soft);
+  border-radius: var(--g-r-card);
+  background: var(--g-band);
+}
+.arc-access-hours { padding-top: var(--g-s4); border-top: 1px solid var(--g-rule-soft); }
+.arc-spec { display: grid; grid-template-columns: minmax(84px, 116px) minmax(0, 1fr); gap: var(--g-s3); align-items: baseline; }
+.arc-spec dt { font-size: var(--g-t-sm); font-weight: 600; color: var(--g-fg-3); }
+.arc-spec dd { margin: 0; font-size: var(--g-t-body); line-height: 1.55; color: var(--g-fg-2); overflow-wrap: anywhere; }
+
+.arc-shots { display: grid; gap: var(--g-s4); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin: 0; padding: 0; list-style: none; }
+.arc-shot { border-radius: var(--g-r-card); overflow: hidden; box-shadow: var(--g-edge), var(--g-e1); background: var(--g-band); }
+.arc-shot-btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.arc-shot-btn:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -4px; border-radius: var(--g-r-card); }
+@media (hover: hover) { .arc-shot:hover { box-shadow: var(--g-edge), var(--g-e2); } }
+.arc-shot img { display: block; width: 100%; height: auto; aspect-ratio: var(--g-wide-plate); }
+
+/* Full-size screenshot. The backdrop is the close target; the image stops the click. */
+.arc-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--g-z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--g-s5);
+  background: rgba(8, 11, 14, .88);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.arc-lightbox-img {
+  max-width: min(1200px, 100%);
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: var(--g-r-card);
+  box-shadow: var(--g-e3);
+  cursor: default;
+}
+.arc-lightbox-close {
+  position: absolute;
+  top: var(--g-s4);
+  right: var(--g-s4);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-ctl);
+  background: rgba(12, 16, 20, .8);
+  color: var(--g-fg);
+  cursor: pointer;
+}
+.arc-lightbox-close:hover { color: var(--g-acc); border-color: var(--g-acc); }
+.arc-lightbox-close:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
+@media (max-width: 639px) {
+  .arc-lightbox { padding: var(--g-s2); }
+  .arc-lightbox-close { top: var(--g-s2); right: var(--g-s2); }
+  /* Two thumbnails across on a phone: a full-width thumbnail is already as wide as
+     the viewport, so opening it would not be a zoom at all. */
+  .arc-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--g-s2); }
+}
+
+/* -------------------------------------------------------------- profile */
+.arc-profile-head {
+  display: grid;
+  gap: var(--g-s5);
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--g-s5);
+  border: 1px solid var(--g-rule-soft);
+  border-radius: var(--g-r-card);
+  background: var(--g-panel);
+  box-shadow: var(--g-e1);
+}
+/* Stats and buttons share one row on a desktop: stacked they measure 126px against
+   a 113px content box, so the numerals spilled over the card's top padding. */
+@media (min-width: 1024px) {
+  .arc-profile-head { grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding: var(--g-s6); gap: var(--g-s6); }
+}
+.arc-profile-id { display: flex; align-items: flex-end; gap: var(--g-s5); min-width: 0; }
+.arc-profile-actions { display: flex; flex-direction: column; align-items: flex-end; gap: var(--g-s4); }
+/* After the base rule on purpose: same specificity, and the column default wins if it
+   is written later. */
+@media (min-width: 1024px) { .arc-profile-actions { flex-direction: row; align-items: center; } }
+@media (max-width: 1023px) { .arc-profile-actions { align-items: flex-start; } }
+.arc-profile-actions > div { display: flex; flex-wrap: wrap; gap: var(--g-s2); }
+
+.arc-avatar {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  flex: none;
+  border-radius: 22px;
+  background: var(--g-raise);
+  box-shadow: inset 0 0 0 1px var(--g-rule-hi), var(--g-e1);
+  color: var(--g-fg);
+  font-family: var(--g-display);
+  font-stretch: var(--g-wide);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 1024px) { .arc-avatar { width: 92px; height: 92px; font-size: 34px; } }
+
+.arc-hours {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--g-s2) var(--g-s3);
+}
+.arc-hours-total { display: flex; align-items: center; gap: 6px; margin: 0; }
+.arc-hours-total .arc-icon { color: var(--g-warm); }
+.arc-hours-add { display: flex; gap: var(--g-s2); margin-left: auto; }
+@media (max-width: 420px) { .arc-hours-add { margin-left: 0; } }
+
+/* ----------------------------------------------------------------- auth */
+.arc-auth { display: grid; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) { .arc-auth { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); } }
+.arc-auth-aside {
+  display: flex;
+  flex-direction: column;
+  /* The panel is as tall as the viewport; space-between left a 500px hole in the middle. */
+  justify-content: center;
+  gap: var(--g-s6);
+  padding: var(--g-s5);
+  background: var(--g-band);
+  border-bottom: 1px solid var(--g-rule);
+}
+@media (min-width: 1024px) {
+  .arc-auth-aside {
+    padding: var(--g-s7);
+    border-bottom: 0;
+    border-right: 1px solid var(--g-rule);
+    min-height: calc(100dvh - 68px);
+  }
+}
+.arc-auth-copy { display: grid; gap: var(--g-s3); }
+.arc-auth-form { display: flex; flex-direction: column; justify-content: center; gap: var(--g-s5); padding: var(--g-s5); }
+@media (min-width: 1024px) { .arc-auth-form { padding: var(--g-s7); } }
+/* label above the input, helper below it */
+.arc-field-block { display: grid; gap: 6px; }
+.arc-auth-row { display: flex; align-items: flex-start; gap: var(--g-s3); cursor: pointer; }
+.arc-auth-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-s3); padding-top: var(--g-s4); border-top: 1px solid var(--g-rule-soft); }
+.arc-error-summary { display: grid; gap: var(--g-s2); }
+.arc-reveal {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--g-r-inner);
+  background: none;
+  color: var(--g-fg-3);
+  font-size: var(--g-t-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (hover: hover) { .arc-reveal:hover { color: var(--g-fg); } }
+.arc-reveal:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
+
+/* ------------------------------------------------------------ loading */
+.arc-skeleton {
+  border-radius: var(--g-r-card);
+  background: linear-gradient(90deg, var(--g-panel) 0%, var(--g-raise) 45%, var(--g-panel) 90%);
+  background-size: 220% 100%;
+  animation: arcShimmer 1400ms var(--g-ease) infinite;
+}
+.arc-skeleton--hero { aspect-ratio: var(--g-wide-plate); }
+.arc-skeleton--art { aspect-ratio: var(--g-capsule); border-radius: var(--g-r-card) var(--g-r-card) 0 0; }
+.arc-skeleton--line { height: 14px; border-radius: var(--g-r-inner); }
+.arc-skeleton--line-lg { height: 22px; border-radius: var(--g-r-inner); }
+.arc-skeleton-body { display: grid; gap: var(--g-s3); padding: var(--g-s4); }
+
+/* --------------------------------------------------------------- icons */
+/* One family: 24x24, 1.7 stroke, rounded joins. Size always comes from the
+   class on the glyph, never from a parent selector. */
+.arc-icon { display: inline-block; width: 20px; height: 20px; flex: none; vertical-align: -4px; }
+.arc-icon--sm { width: 16px; height: 16px; vertical-align: -2px; }
+.arc-icon--lg { width: 24px; height: 24px; vertical-align: -5px; }
+
+/* -------------------------------------------------------------- motion */
+.arc-rise { animation: arcRise var(--g-d3) var(--g-ease) both; }
+.arc-stagger > * { animation: arcRise var(--g-d3) var(--g-ease) both; }
 .arc-stagger > :nth-child(1) { animation-delay: 0ms; }
-.arc-stagger > :nth-child(2) { animation-delay: 40ms; }
-.arc-stagger > :nth-child(3) { animation-delay: 80ms; }
-.arc-stagger > :nth-child(4) { animation-delay: 120ms; }
-.arc-stagger > :nth-child(5) { animation-delay: 160ms; }
-.arc-stagger > :nth-child(6) { animation-delay: 200ms; }
-.arc-stagger > :nth-child(7) { animation-delay: 240ms; }
-.arc-stagger > :nth-child(8) { animation-delay: 280ms; }
-.arc-stagger > :nth-child(n + 9) { animation-delay: 320ms; }
+.arc-stagger > :nth-child(2) { animation-delay: var(--g-stagger); }
+.arc-stagger > :nth-child(3) { animation-delay: calc(var(--g-stagger) * 2); }
+.arc-stagger > :nth-child(4) { animation-delay: calc(var(--g-stagger) * 3); }
+.arc-stagger > :nth-child(5) { animation-delay: calc(var(--g-stagger) * 4); }
+.arc-stagger > :nth-child(6) { animation-delay: calc(var(--g-stagger) * 5); }
+.arc-stagger > :nth-child(7) { animation-delay: calc(var(--g-stagger) * 6); }
+.arc-stagger > :nth-child(8) { animation-delay: calc(var(--g-stagger) * 7); }
+.arc-stagger > :nth-child(n + 9) { animation-delay: calc(var(--g-stagger) * 8); }
 
-.arc-flicker { animation: arcFlicker 6s steps(1, end) infinite; }
-.arc-pulse { animation: arcPulse 2.4s ease-in-out infinite; }
-
-@keyframes arcBeam {
-  0% { transform: translateY(-45%); opacity: 0; }
-  12% { opacity: 1; }
-  88% { opacity: 1; }
-  100% { transform: translateY(240%); opacity: 0; }
-}
 @keyframes arcRise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes arcPop {
-  0% { transform: scale(.7); }
-  60% { transform: scale(1.18); }
+  0% { transform: scale(.72); }
+  60% { transform: scale(1.14); }
   100% { transform: scale(1); }
 }
-@keyframes arcPulse {
-  0%, 100% { opacity: .35; }
-  50% { opacity: 1; }
+@keyframes arcSheen {
+  from { transform: translateX(0); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translateX(350%); opacity: 0; }
 }
-@keyframes arcFlicker {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: .55; }
-  98% { opacity: 1; }
-  99% { opacity: .7; }
+@keyframes arcShimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
 }
 
-/* Reduced motion: texture stays, movement stops. */
+/* Reduced motion: the store stays still, nothing else changes. */
 @media (prefers-reduced-motion: reduce) {
-  .arc-beam { display: none; }
-  .arc-rise, .arc-stagger > *, .arc-flicker, .arc-pulse,
+  .arc-rise, .arc-stagger > *, .arc-sheen, .arc-skeleton,
   .arc-heart[aria-pressed="true"] svg { animation: none !important; }
+  .arc-sheen { display: none; }
   .arc-card:hover { transform: none; }
-  .arc-row:hover { transform: none; }
+  .arc-btn:active:not(:disabled) { transform: none; }
   .arc-app *, .arc-app *::before, .arc-app *::after { transition-duration: 1ms !important; }
 }
 
-/* Focus order helper: skip link target. */
+/* Focus order helper. */
 .arc-skip:focus { outline: 2px solid var(--g-acc); outline-offset: 3px; }
