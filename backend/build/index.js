@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const axios_1 = __importDefault(require("axios"));
 const Mongoose_1 = require("./Components/ConnectToDatabase/Mongoose");
 const AuthRoutes_1 = require("./Components/UserRoutes/AuthRoutes");
 const FetchGames_1 = require("./Components/FetchGames/FetchGames");
@@ -26,9 +27,23 @@ app.use(cookieParser());
 (0, UpdateUser_1.updateUser)(app);
 (0, FetchGames_1.fetchGames)(app);
 (0, FetchGames_1.favoriteGame)(app);
+app.get('/health', (req, res) => {
+    res.json({ ok: true });
+});
 app.get('/', (req, res) => {
     res.send('Backend server listening');
 });
+/* A free Render instance spins down after 15 minutes without inbound traffic and the
+   wake costs the next visitor about a minute. Asking for our own /health every 4 minutes
+   keeps inbound traffic non-zero, so the service never sleeps.
+   shortcut: Render documents the 15-minute rule, not self-ping. If Render ever stops
+   counting a service's own requests as inbound, move this to an external monitor. */
+const publicUrl = process.env.RENDER_EXTERNAL_URL;
+if (process.env.RENDER === 'true' && publicUrl) {
+    setInterval(() => {
+        axios_1.default.get(`${publicUrl}/health`, { timeout: 10000 }).catch(() => { });
+    }, 4 * 60 * 1000);
+}
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
