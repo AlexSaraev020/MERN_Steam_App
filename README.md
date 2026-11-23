@@ -1,68 +1,74 @@
-# 🚀 MERN Steam App
+# GamersLobby
 
-Welcome to the MERN Steam App! This guide will help you set up and run the application on your local machine.
+A storefront for the free-to-play game catalogue: browse it, heart what you want to play, log the
+hours you spent on each title.
 
-## Prerequisites
+Live app: <https://gamerslobby.vercel.app> · API: <https://gamerslobby-api.onrender.com> · health: <https://gamerslobby-api.onrender.com/health>
 
-- 🟢 **Node.js** (v12.x or later)
-- 🔵 **npm** (v6.x or later)
+The catalogue comes from [freetogame.com](https://www.freetogame.com/api-doc). The backend re-serves
+it so the browser talks to one origin.
 
-## Getting Started
+## Screens
 
-Follow these steps to download, set up, and run the project:
+| | |
+|---|---|
+| Store | featured carousel, genre rails |
+| Search game | filter chips, sorting, grid or list view |
+| Title | description, screenshots (lightbox), minimum requirements, hours control |
+| Profile | favourites on the account, hours logged, gamertag and bio editor |
 
-### 1. 📥 Download the Project
-
-Download both the `Frontend` and `Backend` folders.
-
-### 2. 📂 Organize the Project
-
-Place both folders in a single root directory:
+## Layout
 
 ```
-MERN_Steam_App/
-├── frontend/
-└── backend/
+gamers-lobby/
+├── frontend/   Create React App + TypeScript + Tailwind
+│   └── src/styles/arcade.css   the whole look, one file
+└── backend/    Express + Mongoose, TypeScript compiled with tsc
 ```
 
-### 3. ⚙️ Install Dependencies
+## Run it locally
 
-Open your terminal and navigate to the project directory. Run the following commands to install the necessary dependencies:
-
-For the frontend:
-```sh
-cd MERN_Steam_App/frontend
-npm install
+```powershell
+npm --prefix backend install
+npm --prefix backend run dev
 ```
 
-For the backend:
-```sh
-cd MERN_Steam_App/backend
-npm install
+```powershell
+npm --prefix frontend install
+npm --prefix frontend run start
 ```
 
-### 4. ▶️ Start the Application
+Frontend on `http://localhost:3000`, backend on `http://localhost:3001` (`PORT` overrides it).
 
-#### Frontend
+`frontend/.env.local` sets `REACT_APP_SERVER_LINK=` empty on purpose: the requests then go to
+`/api/games` relative and CRA's dev proxy (`frontend/package.json`) forwards them to the deployed
+API, whose CORS allowlist answers only to `gamerslobby.vercel.app` and refuses `localhost`.
 
-Navigate to the frontend directory and start the development server:
-```sh
-cd MERN_Steam_App/frontend
-npm run start
-```
+The backend needs `MONGODB_LINK` (a MongoDB connection string). Without it the server still starts
+and still serves `/api/games`, but the account routes have nowhere to write.
 
-The frontend server should now be running and accessible at `http://localhost:3000`.
+## Routes
 
-#### Backend
+`POST /register` · `POST /login` · `GET /user/:userId` · `PUT /userUpdate` · `DELETE /deleteUser/:userId` ·
+`GET /api/games` · `POST /favorite` · `DELETE /rmfavorite` · `GET /health`
 
-Navigate to the backend directory and start the development server:
-```sh
-cd MERN_Steam_App/backend
-npm run dev
-```
+Login answers with a JWT and an httpOnly cookie. The page also keeps the token in `localStorage` and
+decodes it to restore the session, because the cookie cannot be read back from JavaScript.
 
-The backend server should now be running and accessible at `http://localhost:5000`.
+Playtime lives in the browser, under a key namespaced by the signed-in user id — the user record has
+no playtime column yet.
 
-## ℹ️ Additional Information
+## Keeping the backend awake
 
-- Ensure both servers are running simultaneously for the application to function correctly.
+Render's free web service spins down after 15 minutes without inbound traffic, and the wake costs
+the next visitor about a minute. Two things stop that:
+
+- the service asks its own public `/health` every 4 minutes (`backend/src/index.ts`, gated on
+  `RENDER=true` and `RENDER_EXTERNAL_URL`)
+- an external cron hitting <https://gamerslobby-api.onrender.com/health> works too, and is the
+  fallback if Render ever stops counting a service's own requests as inbound
+
+## Known gaps
+
+The JWT is signed but not verified on the account routes, and `/register` and `/userUpdate` return
+the stored bcrypt hash. Fine for a personal project, not for anything else.
