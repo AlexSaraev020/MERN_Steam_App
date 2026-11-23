@@ -66,8 +66,7 @@ no playtime column yet, so this is a deliberate local store rather than a fake s
 
 ## Key features
 
-- Featured carousel with keyboard arrows, dots, auto-advance that pauses on hover or focus, and a
-  reduced-motion path
+- Featured carousel with keyboard arrows, dots, auto-advance, and a reduced-motion path
 - Filter bar with genre chips derived from the fetched catalogue, plus newest / oldest / A–Z sorting
 - Grid and list views over the same filtered result
 - Favourites saved on the account and restored after a reload
