@@ -32,6 +32,9 @@ Thumbs.db
 # Test coverage output
 coverage/
 
+# CRA's production output — Vercel builds it, the repo does not carry it
+frontend/build/
+
 # Temp files
 *.log
 *.tmp
