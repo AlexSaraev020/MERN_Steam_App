@@ -21,7 +21,6 @@ gallery:
   - docs/portfolio/gamerslobby-search.jpg
   - docs/portfolio/gamerslobby-title.jpg
   - docs/portfolio/gamerslobby-profile.jpg
-  - docs/portfolio/gamerslobby-mobile.jpg
 live: https://gamerslobby.vercel.app
 tags:
   - react
