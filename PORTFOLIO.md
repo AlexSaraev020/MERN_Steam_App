@@ -138,7 +138,10 @@ wrapped only for some titles, and a featured plate that resized per slide (548 �
 until the panel was given one fixed height and its genre row a fixed box — 720 × 420 px on every slide
 now. Ordering the catalogue by
 newest instead of by member votes also put one-vote releases on the front page, so the shelf keeps the
-order its members rated and Newest stays a sort you pick.
+order its members rated and Newest stays a sort you pick. The deployed API kept answering with the old
+catalogue after the switch because Render's build command was only `npm install` while the start command
+ran `node build/index.js` — a compiled `build/` folder carried in the repository and in Render's cache,
+never rebuilt from `src/`. The build command now runs `tsc` and the compiled output is no longer committed.
 
 ## Future
 

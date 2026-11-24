@@ -54,6 +54,10 @@ The backend needs `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` — a confidential a
 without the third the server still starts and still serves the catalogue, but the account routes have
 nowhere to write.
 
+On Render the service builds from `backend/` with `npm install && npm run build` and starts with
+`npm start` (`node build/index.js`). `build/` is generated output and is not committed — a build command
+that only installs leaves the previous compiled version in place.
+
 ## Routes
 
 `POST /register` · `POST /login` · `GET /user/:userId` · `PUT /userUpdate` · `DELETE /deleteUser/:userId` ·
