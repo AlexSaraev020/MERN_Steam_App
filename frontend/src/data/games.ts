@@ -76,14 +76,18 @@ export type Game = {
   hue: number;            // drives the generated plate when the capsule is missing
 };
 
+/* A row that carries neither list is treated as carrying empty ones: an older response
+   (a cached answer from the previous backend) used to throw here and leave the whole page
+   stuck on its loading skeleton, because the throw happened before the failed state could
+   be set. */
 export const toGame = (a: ApiGame): Game => {
-  const platforms = Array.from(new Set(a.platforms.map((p) => PLATFORM_SHORT[p] ?? p)));
+  const platforms = Array.from(new Set((a.platforms ?? []).map((p) => PLATFORM_SHORT[p] ?? p)));
   return {
     id: String(a.id),
     title: a.title,
     tagline: [platforms.join(' / '), a.developer].filter(Boolean).join(' · '),
 
-    genres: a.genres.map((g) => GENRE_ALIASES[g] ?? g),
+    genres: (a.genres ?? []).map((g) => GENRE_ALIASES[g] ?? g),
     platforms,
     released: a.release_date,
     cover: a.thumbnail,
