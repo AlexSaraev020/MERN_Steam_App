@@ -1,11 +1,9 @@
 import axios from "axios";
-import { Game } from "../types/types";
 import Cookies from "js-cookie";
 import { User } from "../types/types";
 import { NavigateFunction } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { GamesData } from "../types/types";
-import { GameDetails } from "../data/games";
+import { ApiGame, GameDetails, toGame, type Game } from "../data/games";
 
 const apiUrl = process.env.REACT_APP_SERVER_LINK;
 
@@ -13,8 +11,8 @@ const apiUrl = process.env.REACT_APP_SERVER_LINK;
 //Get Games!!!
 
 interface SortedGames {
-  popular: Game[];
-  latestReleases: Game[];
+  popular: ApiGame[];
+  latestReleases: ApiGame[];
 }
 
 /* The catalogue lives on Render's free instance, which hibernates when nobody asks for
@@ -38,16 +36,32 @@ export const fetchGames = async (): Promise<SortedGames> => {
   return EMPTY_GAMES;
 };
 
-//One title, the deep plate: long description, screenshots, minimum specs.
-//Only the catalogue's own endpoint carries these. shortcut: called direct because that
-//API answers any origin; mirror it as GET /api/game if everything must go through the backend.
+/* One title, the deep plate: the long description, every screenshot and trailer, both scores,
+   and the two related lists the title page shows under the media. The backend answers those as
+   raw catalogue rows, so they go through toGame like everything else. */
+type RawDetails = Omit<GameDetails, 'similar' | 'byDeveloper'> & { similar?: ApiGame[]; byDeveloper?: ApiGame[] };
+
 export const fetchGameDetails = async (id: string): Promise<GameDetails | null> => {
   try {
-    const response = await axios.get<GameDetails>(`https://www.freetogame.com/api/game?id=${id}`);
-    return response.status === 200 ? response.data : null;
+    const response = await axios.get<RawDetails>(`${apiUrl}/api/game/${id}`);
+    if (response.status !== 200) return null;
+    const { data } = response;
+    return { ...data, similar: (data.similar ?? []).map(toGame), byDeveloper: (data.byDeveloper ?? []).map(toGame) };
   } catch (err) {
     console.error('Error during API request:', err);
     return null;
+  }
+};
+
+/* Search goes to the backend, which asks IGDB's own full-text index. That reaches all
+   388,273 records, not only the two rails the app loads up front. */
+export const fetchSearch = async (term: string): Promise<Game[]> => {
+  try {
+    const { data } = await axios.get<ApiGame[]>(`${apiUrl}/api/search`, { params: { q: term }, timeout: 20000 });
+    return (Array.isArray(data) ? data : []).map(toGame);
+  } catch (err) {
+    console.error('Error during API request:', err);
+    return [];
   }
 };
 
@@ -271,24 +285,3 @@ export const rmFavorite = async ({ userId, gameId, setFavoriteButton, favoriteBu
   }
 }
 
-interface GetFavoriteParams {
-  userId: string | undefined;
-  gamesData: GamesData | null;
-  setFavoriteGames: (games: Game[]) => void;
-}
-
-export const getFavorite = async ({ userId, gamesData, setFavoriteGames }: GetFavoriteParams) => {
-  try {
-    if (userId) {
-      const response = await axios.get(`${apiUrl}/user/${userId}`);
-      if (response.status === 200) {
-        const favoriteGameIds = response.data.userFavorite;
-        if (gamesData?.popular) {
-          setFavoriteGames(gamesData.popular.filter((game) => favoriteGameIds.includes(game.id)));
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching favorite games:', error);
-  }
-};

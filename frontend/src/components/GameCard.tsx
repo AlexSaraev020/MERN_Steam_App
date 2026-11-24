@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { type Game } from '../data/games';
+import { formatRating, platformLabel, type Game } from '../data/games';
 import { HeartIcon } from './icons';
 
 /** What a screen needs: the whole favourites list plus the two card actions. */
@@ -19,9 +19,10 @@ type Props = Omit<CardActions, 'favourites'> & {
   variant?: 'grid' | 'rail';
 };
 
-/* The capsule is the store's product shot: 460x215 at its own ratio, no
-   letterbox, soft shadow, a 4px lift on hover. The free-to-play price is real —
-   every title in this catalogue is free — so it is the card's numeral. */
+/* Every card is the same shape: the art box is 3:4, the ratio IGDB cuts its
+   cover_big at, so a cover shows whole instead of sliced. A rail card carries no
+   numbers at all — the score and the platform list live on the title page, and a long
+   platform list used to push this row out of the card box. */
 export default function GameCard({
   game, favourite, onToggleFavourite, onOpen, index, variant = 'grid',
 }: Props) {
@@ -31,7 +32,7 @@ export default function GameCard({
     <article className={`arc-card ${variant === 'rail' ? 'arc-card--rail' : 'arc-card--grid'}`}>
       <div className="arc-art" style={hue}>
         {game.cover ? (
-          <img src={game.cover} alt={`Cover art for ${game.title}`} width={460} height={215} loading="lazy" />
+          <img src={game.cover} alt={`Cover art for ${game.title}`} width={345} height={460} loading="lazy" />
         ) : (
           <>
             <span className="arc-art-code">{index != null ? `#${String(index + 1).padStart(2, '0')}` : 'LOBBY'}</span>
@@ -60,23 +61,22 @@ export default function GameCard({
       />
 
       <div className="arc-card-body">
-        <h3 className="arc-card-title">{game.title}</h3>
+        <h3 className="arc-card-title arc-clamp-2">{game.title}</h3>
 
+        {/* Three pills, one row: a fourth wrapped under the box and was cut off there anyway. */}
         <ul className="arc-tags" aria-label="Genres">
-          {game.genres.map((g) => <li key={g} className="arc-tag">{g}</li>)}
+          {game.genres.slice(0, 3).map((g) => <li key={g} className="arc-tag">{g}</li>)}
         </ul>
 
-        <div className="arc-card-foot">
-          {/* "runs on" is dropped here: "PC + Browser runs on" plus "Free to play" is 305px
-              and the narrowest card gives 260px, so the label used to clip. */}
-          <p className="arc-nowrap">
-            <span className="arc-num arc-num-md">{game.platform}</span>
-          </p>
-          <p>
-            <span className="arc-num arc-num-lg arc-num--warm">Free</span>
-            <span className="arc-unit">to play</span>
-          </p>
-        </div>
+        {variant === 'grid' && (
+          <div className="arc-card-foot">
+            {/* "runs on" is dropped here: "PC + Browser runs on" plus "Free to play" is 305px
+                and the narrowest card gives 260px, so the label used to clip. */}
+            <p className="arc-nowrap">
+              <span className="arc-num arc-num-md">{platformLabel(game.platforms)}</span>
+            </p>
+          </div>
+        )}
       </div>
     </article>
   );
@@ -88,7 +88,7 @@ export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: P
     <li className="arc-row">
       <div className="arc-art arc-art--row" style={{ '--g-hue': game.hue } as CSSProperties}>
         {game.cover
-          ? <img src={game.cover} alt={`Cover art for ${game.title}`} width={460} height={215} loading="lazy" />
+          ? <img src={game.cover} alt={`Cover art for ${game.title}`} width={345} height={460} loading="lazy" />
           : <span className="arc-art-code">{String((index ?? -1) + 1).padStart(2, '0')}</span>}
         <button
           type="button"
@@ -105,12 +105,12 @@ export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: P
           </button>
         </h3>
         <p className="arc-meta">
-          {game.genres.join(' / ')} · {game.platform}
+          {game.genres.join(' / ')} · {platformLabel(game.platforms)}
         </p>
       </div>
 
       <p className="arc-row-year arc-nowrap">
-        <span className="arc-num arc-num-md">{game.released.slice(0, 4)}</span>
+        <span className="arc-num arc-num-md">{game.released.slice(0, 4) || '—'}</span>
         <span className="arc-unit">released</span>
       </p>
 
@@ -124,7 +124,7 @@ export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: P
         >
           <HeartIcon className="arc-icon" filled={favourite} />
         </button>
-        <p className="arc-num arc-num-md arc-num--warm">Free</p>
+        {game.rating != null && <p className="arc-num arc-num-md arc-num--warm">{formatRating(game.rating)}</p>}
       </div>
     </li>
   );

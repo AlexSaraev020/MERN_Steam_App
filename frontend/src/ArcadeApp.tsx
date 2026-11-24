@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import ArcadeNav, { type Route } from './components/ArcadeNav';
 import AllGames from './screens/AllGames';
@@ -17,9 +17,20 @@ import './styles/arcade.css';
    session is the JWT the login answers with, kept in localStorage because the server's
    own cookie is httpOnly and the page cannot read it back. Playtime is local for now —
    the user record has no column for it yet. */
+/* The screen lives in the URL hash, so the browser's back and forward work and a title
+   page survives a reload. Hash instead of path: the bundle is served as one page and needs
+   no routing rules on the host. */
+const parseHash = (): { route: Route; id: string | null } => {
+  const [name, id] = window.location.hash.replace(/^#\/?/, '').split('/');
+  if (name === 'game' && id) return { route: 'game', id };
+  if (name === 'games' || name === 'profile') return { route: name, id: null };
+  return { route: 'home', id: null };
+};
+
 export default function App() {
-  const [route, setRoute] = useState<Route>('home');
-  const [gameId, setGameId] = useState<string | null>(null);
+  const [start] = useState(parseHash);
+  const [route, setRoute] = useState<Route>(start.route);
+  const [gameId, setGameId] = useState<string | null>(start.id);
   const [genreSeed, setGenreSeed] = useState<Genre | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
@@ -59,21 +70,40 @@ export default function App() {
 
   const adopt = (account: ServerUser) => { setUser(account); setFavourites(account.favourites); };
 
+  const show = (next: Route, id?: string) => {
+    setRoute(next);
+    if (id !== undefined) setGameId(id);
+    window.location.hash = next === 'game' ? `/game/${id ?? gameId}` : `/${next}`;
+  };
+
   const navigate = (next: Route, genre?: Genre) => {
     if (genre !== undefined) setGenreSeed(genre);
-    setRoute(next);
+    show(next);
   };
 
-  const openGame = (id: string) => {
-    setGameId(id);
-    setRoute('game');
-  };
+  const openGame = (id: string) => show('game', id);
 
-  /* The heart answers at once; the server decides whether it stays. */
+  /* Back and forward change the hash on their own; this is where that lands. */
+  useEffect(() => {
+    const apply = () => {
+      const { route: next, id } = parseHash();
+      setRoute(next);
+      if (id !== null) setGameId(id);
+    };
+    window.addEventListener('hashchange', apply);
+    return () => window.removeEventListener('hashchange', apply);
+  }, []);
+
+  /* A new screen starts at its top: the title page is long, and jumping from one title to
+     another used to keep the old scroll position. */
+  useEffect(() => { window.scrollTo(0, 0); }, [route, gameId]);
+
+  /* The heart answers at once; the server decides whether it stays. A visitor has no account to
+     write to, so the heart does nothing rather than faking a save that a reload would drop. */
   const toggleFavourite = (id: string) => {
+    if (!user) return;
     const add = !favourites.includes(id);
     setFavourites((list) => (add ? [...list, id] : list.filter((x) => x !== id)));
-    if (!user) return;
     saveFavourite(user.id, Number(id), add).then((r) => {
       if (!r.ok) setFavourites((list) => (add ? list.filter((x) => x !== id) : [...list, id]));
     });
@@ -111,7 +141,16 @@ export default function App() {
 
   const actions = { favourites, onToggleFavourite: toggleFavourite, onOpen: openGame };
   const library = { playtime, onAddPlaytime: addPlaytime };
-  const byId = useMemo(() => Object.fromEntries(games.map((g) => [g.id, g]) as [string, Game][]), [games]);
+  /* Titles that are not on the shelf — the ones a search returned, and the related lists a title
+     page shows — have to be known here, or clicking one of their cards lands on
+     "that title is not in the loaded shelf". */
+  const [extra, setExtra] = useState<Game[]>([]);
+  const knowTitles = useCallback((list: Game[]) => setExtra((prev) => {
+    const map = new Map(prev.map((g) => [g.id, g]));
+    for (const g of list) map.set(g.id, g);
+    return Array.from(map.values());
+  }), []);
+  const byId = useMemo(() => Object.fromEntries([...games, ...extra].map((g) => [g.id, g]) as [string, Game][]), [games, extra]);
   const game = gameId ? byId[gameId] : undefined;
   const gamertag = user?.name ?? 'visitor';
   /* With the Account section gone, signing in happens on the profile screen itself. */
@@ -126,7 +165,7 @@ export default function App() {
   if (state !== 'ready') {
     return (
       <div className="arc-app">
-        <ArcadeNav route={route} onNavigate={navigate} gamertag={gamertag} />
+        <ArcadeNav route={route} onNavigate={navigate} gamertag={gamertag} signedIn={!!user} />
         <main id="main" className="arc-main">
           {state === 'loading' ? (
             <>
@@ -170,16 +209,32 @@ export default function App() {
 
   return (
     <div className="arc-app">
-      <ArcadeNav route={route} onNavigate={navigate} gamertag={gamertag} />
+      <ArcadeNav route={route} onNavigate={navigate} gamertag={gamertag} signedIn={!!user} />
 
       {route === 'home' && <Home games={games} {...actions} onNavigate={navigate} />}
 
       {route === 'games' && (
-        <AllGames key={genreSeed ?? 'all'} games={games} {...actions} initialGenre={genreSeed} onNavigate={navigate} />
+        <AllGames key={genreSeed ?? 'all'} games={games} {...actions} initialGenre={genreSeed} onNavigate={navigate} onSearched={knowTitles} />
       )}
 
       {route === 'game' && game && (
-        <GamePage game={game} games={games} {...actions} {...library} onNavigate={navigate} />
+        <GamePage game={game} games={games} signedIn={!!user} {...actions} {...library} onNavigate={navigate} onKnown={knowTitles} />
+      )}
+
+      {/* A title reached through search is not on the shelf, and the shelf is what a reload
+          brings back. Saying so beats showing an empty page. */}
+      {route === 'game' && !game && (
+        <section className="arc-wrap">
+          <div className="arc-panel arc-stack--tight">
+            <h1 className="arc-h2">That title is not in the loaded shelf.</h1>
+            <p className="arc-body">
+              It came from a search, and search results are not kept across a reload. Find it again by title.
+            </p>
+            <div>
+              <button type="button" className="arc-btn arc-btn--solid" onClick={() => navigate('games')}>Search game</button>
+            </div>
+          </div>
+        </section>
       )}
 
       {route === 'profile' && (user ? (

@@ -4,7 +4,7 @@ import FilterBar, { DEFAULT_FILTERS, type Filters } from '../components/FilterBa
 import GameCard, { type CardActions } from '../components/GameCard';
 import { ChevronLeftIcon, ChevronRightIcon, HeartIcon } from '../components/icons';
 import {
-  applyFilters, formatDate, formatInt, genreFacets, type Genre, type Game, wideCover,
+  applyFilters, formatDate, formatInt, formatRating, genreFacets, type Genre, type Game,
 } from '../data/games';
 
 type Props = CardActions & {
@@ -28,7 +28,8 @@ const CAROUSEL_MS = 7000;
 
 export default function Home({ games, favourites, onToggleFavourite, onOpen, onNavigate }: Props) {
   const reduced = useReducedMotion();
-  /* Featured = the three newest releases the catalogue reports. */
+  /* Featured = the first three of the catalogue, which arrives ordered by how many members rated
+     each title. Taking the newest three instead put one-vote releases on the front page. */
   const featured = useMemo(() => games.slice(0, 3), [games]);
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -44,7 +45,10 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
   /* ---- filter bar state: it drives the "Recommended for you" strip ---- */
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
 
-  const recommendations = useMemo(() => applyFilters(games, filters), [games, filters]);
+  /* The featured three are already on the plate at the top of the page, so they are not shown
+     again in the rails below it. Counts and chips still come from the whole shelf. */
+  const rest = useMemo(() => games.filter((g) => !featured.some((f) => f.id === g.id)), [games, featured]);
+  const recommendations = useMemo(() => applyFilters(rest, filters), [rest, filters]);
 
   const facets = useMemo(() => genreFacets(games), [games]);
   /* The three genre rails are whichever genres the catalogue actually holds most. */
@@ -72,7 +76,7 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
           <div className="arc-hero-art" style={{ '--g-hue': hero.hue } as CSSProperties}>
             {hero.cover ? (
               <img
-                src={wideCover(hero.cover)}
+                src={hero.wide || hero.cover}
                 alt={`Cover art for ${hero.title}`}
                 width={1200}
                 height={675}
@@ -121,21 +125,25 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
               Featured {String(slide + 1).padStart(2, '0')} of {String(featured.length).padStart(2, '0')} · {hero.publisher}
             </p>
             <h1 className="arc-title-hero">{hero.title}</h1>
-            <p className="arc-lead">{hero.tagline}</p>
+            <p className="arc-lead arc-clamp-2">{hero.tagline}</p>
 
-            <ul className="arc-tags" aria-label="Genres">
-              {hero.genres.map((g) => <li key={g} className="arc-tag">{g}</li>)}
+            {/* Three pills in a fixed-height row: a fourth wrapped and made the panel — and with it
+                the plate — taller than the previous slide. */}
+            <ul className="arc-tags arc-hero-tags" aria-label="Genres">
+              {hero.genres.slice(0, 3).map((g) => <li key={g} className="arc-tag">{g}</li>)}
             </ul>
 
             <div className="arc-stats">
               <p className="arc-stat">
-                <span className="arc-num arc-num-lg arc-num--warm">Free</span>
-                <span className="arc-meta">to play</span>
+                <span className="arc-num arc-num-lg arc-num--warm">
+                  {hero.rating != null ? formatRating(hero.rating) : '—'}
+                </span>
+                <span className="arc-meta">
+                  {hero.rating != null ? `rated by ${formatInt(hero.ratingCount)} members` : 'no ratings yet'}
+                </span>
               </p>
-              <p className="arc-stat">
-                <span className="arc-num arc-num-lg">{hero.platform}</span>
-                <span className="arc-meta">runs on</span>
-              </p>
+              {/* "runs on" is not repeated here: the line above the pills already lists every
+                  platform, and the same list twice in two sizes is what read as inconsistent. */}
               <p className="arc-stat">
                 <span className="arc-num arc-num-lg">{formatDate(hero.released)}</span>
                 <span className="arc-meta">released</span>
@@ -205,7 +213,7 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
         <div className="arc-stack">
           {genreRails.map((g) => {
             const inGenre = games.filter((x) => x.genres.includes(g));
-            const rail = inGenre.slice(0, 6);
+            const rail = rest.filter((x) => x.genres.includes(g)).slice(0, 6);
             return (
               <div key={g}>
                 <div className="arc-section-head">
@@ -231,7 +239,7 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
         </div>
 
         <div className="arc-panel arc-cta-bar">
-          <p className="arc-lead">Everything in here is free to play.</p>
+          <p className="arc-lead">The shelf is what IGDB's members rated most.</p>
           <button type="button" className="arc-btn arc-btn--solid" onClick={() => onNavigate('games')}>
             Browse the catalogue
           </button>

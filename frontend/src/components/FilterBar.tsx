@@ -2,7 +2,9 @@ import { SORTS, type Genre, type SortKey } from '../data/games';
 
 /* No price filter: every title the catalogue serves is free to play. */
 export type Filters = { genre: Genre | null; sort: SortKey };
-export const DEFAULT_FILTERS: Filters = { genre: null, sort: 'new' };
+/* 'relevance' keeps the order the catalogue came in — what its members rated most. Defaulting to
+   'new' put the freshest release first, and IGDB's freshest releases are mostly one-vote titles. */
+export const DEFAULT_FILTERS: Filters = { genre: null, sort: 'relevance' };
 
 type Props = {
   value: Filters;

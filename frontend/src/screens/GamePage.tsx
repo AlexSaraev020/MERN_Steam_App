@@ -2,101 +2,221 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import GameCard, { type CardActions } from '../components/GameCard';
 import HoursControl from '../components/HoursControl';
-import { ChevronLeftIcon, CloseIcon, HeartIcon } from '../components/icons';
+import { CloseIcon, HeartIcon } from '../components/icons';
 import { fetchGameDetails } from '../actions/apiRequests';
-import { formatDate, paragraphs, specRows, type Game, type GameDetails, type Playtime, wideCover } from '../data/games';
+import { formatDate, formatInt, formatRating, lead, paragraphs, type Game, type GameDetails, type Playtime } from '../data/games';
 
 type Props = CardActions & {
   game: Game;
   games: Game[];
   playtime: Playtime;
+  signedIn: boolean;
   onAddPlaytime: (id: string, hours: number) => void;
   onNavigate: (route: Route) => void;
+  /** Hands the related titles to the app, so opening one of them can resolve it. */
+  onKnown: (list: Game[]) => void;
 };
 
-/* Everything here is a field the catalogue actually serves. The pass that had
-   reviews, aggregate score and system requirements invented is gone: the backend
-   publishes no reviews or scores. The minimum specs are real — they come from the
-   per-title endpoint. Playtime is the log this device keeps, see data/games.ts. */
+/** One item of the media strip. `youtube` is set on a trailer, which the plate plays. */
+type Media = { key: string; label: string; thumb: string; full: string; youtube?: string };
+
+/* Everything here is a field the catalogue actually serves. IGDB publishes no price, no system
+   requirements and no user reviews — the scores shown are its member votes and its critic
+   aggregate. Playtime is the log this device keeps, see data/games.ts. */
 export default function GamePage({
-  game, games, favourites, playtime, onAddPlaytime, onToggleFavourite, onOpen, onNavigate,
+  game, games, favourites, playtime, signedIn, onAddPlaytime, onToggleFavourite, onOpen, onNavigate, onKnown,
 }: Props) {
   const isFavourite = favourites.includes(game.id);
-  const similar = games.filter((g) => g.id !== game.id && g.genres.some((x) => game.genres.includes(x))).slice(0, 6);
   const hue = { '--g-hue': game.hue } as CSSProperties;
 
-  /* The list row carries 10 fields; the catalogue's per-title endpoint adds the long
-     description, its own screenshots and minimum specs. It answers any origin, so the
-     page asks it directly instead of waiting on a backend route. */
+  /* The list carries what a card needs; the backend's per-title route adds the long
+     description, the screenshots, the critic score and the two related lists. */
   const [details, setDetails] = useState<GameDetails | null>(null);
-  /* A screenshot opens full size; a click anywhere outside it, or Escape, closes it. */
-  const [shot, setShot] = useState<string | null>(null);
+  /* A still on the plate opens full size; a click anywhere outside it, or Escape, closes it. */
+  const [big, setBig] = useState(false);
+  /* Which item of the carousel the big plate shows. */
+  const [index, setIndex] = useState(0);
   useEffect(() => {
     let alive = true;
     setDetails(null);
-    setShot(null);
-    fetchGameDetails(game.id).then((d) => { if (alive) setDetails(d); });
+    setBig(false);
+    setIndex(0);
+    fetchGameDetails(game.id).then((d) => {
+      if (!alive) return;
+      setDetails(d);
+      /* The cards in the two rails below are not on the shelf; the app has to know them or
+         clicking one says the title does not exist. */
+      if (d) onKnown([...(d.similar ?? []), ...(d.byDeveloper ?? [])]);
+    });
     return () => { alive = false; };
-  }, [game.id]);
+  }, [game.id, onKnown]);
 
-  const about = paragraphs(details?.description || game.description);
-  const shots = (details?.screenshots ?? []).slice(0, 4);
-  const specs = specRows(details?.minimum_system_requirements);
+  const about = paragraphs(details?.description ?? '');
+  /* IGDB's own similar list when it has one; otherwise the shelf's genre neighbours, which is
+     what this page did before the related route existed. */
+  const similar = details?.similar?.length
+    ? details.similar
+    : games.filter((g) => g.id !== game.id && g.genres.some((x) => game.genres.includes(x))).slice(0, 6);
+  const byDeveloper = details?.byDeveloper ?? [];
+
+  /* What the carousel carries: the trailers IGDB links to YouTube first, then every screenshot.
+     The cover is not in it — it sits in the card on the right the whole time. Nothing is capped,
+     and IGDB's `artworks` array stays out: that is where a title's logo, wallpapers and box art
+     all live, and it is not a set of pictures of the game. */
+  const media: Media[] = [
+    ...(details?.videos ?? []).map((v) => ({ key: `v${v.id}`, label: v.name, thumb: `https://img.youtube.com/vi/${v.youtube}/hqdefault.jpg`, full: '', youtube: v.youtube })),
+    ...(details?.screenshots ?? []).map((s, i) => ({ key: `s${s.id}`, label: `Screenshot ${i + 1} of ${game.title}`, thumb: s.thumb, full: s.full })),
+  ];
+  /* A title with neither a trailer nor a screenshot still needs something on the plate. */
+  const shown = media[Math.min(index, Math.max(media.length - 1, 0))]
+    ?? { key: 'cover', label: `Cover art for ${game.title}`, thumb: game.cover, full: game.wide || game.cover };
+  const cover = (details?.cover?.full ?? game.wide) || game.cover;
+  const rating = details?.rating ?? game.rating;
+  const critics = details?.criticRating ?? null;
+  const members = details?.ratingCount ?? game.ratingCount;
+  const ratingLabel = rating == null
+    ? 'no ratings yet'
+    : `rated by ${formatInt(members)} IGDB members${critics == null ? '' : ` · critics ${formatRating(critics)}`}`;
+
+  /* Left and right move the plate, and they keep working while a picture is open big. The
+     carousel is trailers first and stills after, so inside the lightbox the range is the stills
+     only — an arrow never throws you onto a trailer. */
+  const firstStill = media.findIndex((m) => !m.youtube);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setBig(false); return; }
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const dir = e.key === 'ArrowRight' ? 1 : -1;
+      setIndex((i) => {
+        if (!big) return (i + dir + media.length) % media.length;
+        const lo = firstStill, hi = media.length - 1;
+        const n = i + dir;
+        return n < lo ? hi : n > hi ? lo : n;
+      });
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [big, media.length, firstStill]);
 
   useEffect(() => {
-    if (!shot) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShot(null); };
-    document.addEventListener('keydown', onKey);
+    if (!big) return;
     document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [shot]);
+    return () => { document.body.style.overflow = ''; };
+  }, [big]);
 
   const facts = [
-    { label: 'Developer', value: game.developer },
-    { label: 'Publisher', value: game.publisher },
-    { label: 'Runs on', value: game.platform },
     { label: 'Released', value: formatDate(game.released) },
+    { label: 'Developer', value: game.developer || '—' },
+    { label: 'Publisher', value: game.publisher || '—' },
+    { label: 'Runs on', value: game.platforms.join(' / ') || '—' },
   ];
 
-  return (
-    <main id="main" className="arc-main">
-      <div className="arc-wrap arc-backbar">
-        <button type="button" className="arc-btn" onClick={() => onNavigate('games')}>
-          <ChevronLeftIcon className="arc-icon" />
-          Search game
-        </button>
-        <p className="arc-meta">Catalogue id {game.id}</p>
-      </div>
-
-      {/* ------------------------------------------------------- key art */}
-      <header className="arc-wrap arc-title-head">
-        <div className="arc-art arc-art--hero" style={hue}>
-          {game.cover && (
-            <img
-              src={wideCover(game.cover)}
-              alt={`Cover art for ${game.title}`}
-              width={1200}
-              height={675}
-              onError={(e) => { const el = e.currentTarget; if (el.src !== game.cover) el.src = game.cover; }}
-            />
-          )}
+  /* The page waits for the media. Showing the plate and the card before the screenshots and the
+     trailers arrived made the layout jump twice while you were already looking at it. */
+  if (!details) {
+    return (
+      <main id="main" className="arc-main arc-main--title" aria-busy="true">
+        <div className="arc-wrap arc-title-cols">
+          <div className="arc-media-col">
+            <div className="arc-skeleton arc-skeleton--line-lg" />
+            <div className="arc-skeleton arc-skeleton--hero" />
+            <div className="arc-rail">
+              {[0, 1, 2, 3, 4].map((i) => <div key={i} className="arc-skeleton arc-thumb" />)}
+            </div>
+          </div>
+          <div className="arc-skeleton arc-title-card" />
         </div>
+      </main>
+    );
+  }
+
+  return (
+    <main id="main" className="arc-main arc-main--title">
+      {/* Name and platforms above the media, the way a store page reads them. */}
+      <header className="arc-wrap arc-title-head">
         <div className="arc-title-plate">
-          <p className="arc-meta">{game.genres.join(' · ')} · Released {formatDate(game.released)}</p>
           <h1 className="arc-title-hero">{game.title}</h1>
           <p className="arc-lead">{game.tagline}</p>
         </div>
       </header>
 
-      <div className="arc-wrap arc-split">
-        <div className="arc-stack arc-stack--tight">
-          {/* every title in this catalogue is free to play */}
-          <section className="arc-panel" aria-label="Access panel">
-            <div className="arc-section-head">
-              <p className="arc-stat">
-                <span className="arc-num arc-num--hero arc-num--warm">Free</span>
-                <span className="arc-meta">to play · no purchase needed to start</span>
-              </p>
+      {/* Left: the plate and every picture the entry carries, scrolling sideways up to the
+          trailers. Right: the card, which stays where it is while the page scrolls. */}
+      <div className="arc-wrap arc-title-cols">
+        <div className="arc-media-col">
+          <div className="arc-art arc-art--hero" style={hue}>
+            {shown.youtube ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${shown.youtube}`}
+                title={`${shown.label} — ${game.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <img
+                src={shown.full}
+                alt={shown.label}
+                width={1200}
+                height={675}
+                onError={(e) => { const el = e.currentTarget; if (el.src !== game.cover) el.src = game.cover; }}
+              />
+            )}
+            {!shown.youtube && (
+              <button
+                type="button"
+                className="arc-open-plate"
+                aria-label={`Open ${shown.label} full size`}
+                onClick={() => setBig(true)}
+              />
+            )}
+          </div>
+
+          {/* A click moves an item up to the plate instead of opening a second view. The item on
+              the plate is the marked one. */}
+          {media.length > 1 && (
+            <div className="arc-rail" aria-label="Videos and screenshots">
+              {media.map((m, i) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  className="arc-thumb"
+                  aria-pressed={i === Math.min(index, media.length - 1)}
+                  aria-label={`Show ${m.label}`}
+                  onClick={() => setIndex(i)}
+                >
+                  <img src={m.thumb} alt="" width={192} height={108} loading="lazy" />
+                  {m.youtube && <span className="arc-thumb-play" aria-hidden="true">▶</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className="arc-title-card" aria-label={`${game.title} at a glance`}>
+          <div className="arc-art arc-art--cover" style={hue}>
+            <img
+              src={cover}
+              alt={`Cover art for ${game.title}`}
+              width={640}
+              height={360}
+              onError={(e) => { const el = e.currentTarget; if (el.src !== game.cover) el.src = game.cover; }}
+            />
+          </div>
+          {about.length > 0 && <p className="arc-body">{lead(about[0])}</p>}
+          <ul className="arc-facts">
+            {facts.map((s) => (
+              <li key={s.label} className="arc-fact">
+                <span className="arc-meta">{s.label}</span>
+                <span className="arc-fact-value">{s.value}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="arc-stat">
+            <span className="arc-num arc-num--warm">{rating == null ? '—' : formatRating(rating)}</span>
+            <span className="arc-meta">{ratingLabel}</span>
+          </p>
+          {signedIn ? (
+            <>
               <button
                 type="button"
                 className="arc-btn arc-btn--solid"
@@ -106,101 +226,50 @@ export default function GamePage({
                 <HeartIcon className="arc-icon" filled={isFavourite} />
                 {isFavourite ? 'Saved to favourites' : 'Add to favourites'}
               </button>
-            </div>
+              <HoursControl hours={playtime[game.id] ?? 0} onAdd={(h) => onAddPlaytime(game.id, h)} label={game.title} />
+            </>
+          ) : (
+            /* Favourites live on the account and the hours log is keyed by it, so a visitor gets
+               the way in instead of controls that would silently do nothing. */
+            <button type="button" className="arc-btn arc-btn--solid" onClick={() => onNavigate('profile')}>
+              Log in to keep favourites and log hours
+            </button>
+          )}
+        </aside>
+      </div>
 
-            <div className="arc-access-hours">
-              <HoursControl
-                hours={playtime[game.id] ?? 0}
-                onAdd={(h) => onAddPlaytime(game.id, h)}
-                label={game.title}
-              />
-            </div>
-          </section>
-
+      <div className="arc-wrap arc-split">
+        <div className="arc-stack arc-stack--tight">
           <section aria-label="About this title" className="arc-stack--tight">
             <h2 className="arc-h2">About</h2>
             <div className="arc-prose">
-              {about.map((p, i) => <p key={i}>{p}</p>)}
+              {about.length === 0
+                ? <p>IGDB has no description for this entry yet.</p>
+                : about.map((p, i) => <p key={i}>{p}</p>)}
             </div>
             <ul className="arc-tags" aria-label="Genres">
               {game.genres.map((g) => <li key={g} className="arc-tag">{g}</li>)}
             </ul>
           </section>
-
-          {shots.length > 0 && (
-            <section aria-label="Screenshots">
-              <div className="arc-section-head">
-                <h2 className="arc-h2">Screenshots</h2>
-                <p className="arc-count">
-                  <span className="arc-num arc-num-md">{String(shots.length).padStart(2, '0')}</span>
-                  <span className="arc-unit">from the catalogue</span>
-                </p>
-              </div>
-              <ul className="arc-shots arc-stagger">
-                {shots.map((s, i) => (
-                  <li key={s.id} className="arc-shot">
-                    <button
-                      type="button"
-                      className="arc-shot-btn"
-                      aria-label={`Open screenshot ${i + 1} of ${game.title} full size`}
-                      onClick={() => setShot(s.image)}
-                    >
-                      <img src={s.image} alt={`Screenshot ${i + 1} of ${game.title}`} width={1920} height={1080} loading="lazy" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <ul className="arc-facts" aria-label="Title credits">
-            {facts.map((s) => (
-              <li key={s.label} className="arc-fact">
-                <span className="arc-meta">{s.label}</span>
-                <span className="arc-fact-value">{s.value}</span>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <aside aria-label="Catalogue entry" className="arc-side">
           <div className="arc-panel">
             <h2 className="arc-h2">Where this entry came from</h2>
             <p className="arc-body">
-              The list you browse, the text above, the screenshots and the requirements below all come
-              from the free-to-play catalogue at freetogame.com. The app adds nothing to them.
-              Every link here is a page on that site — the feed carries no address for the developer's
-              own site.
-              {/* shortcut: checked 60 of 416 game_url values, all freetogame.com. If a source ever
-                  publishes the studio's homepage, relabel this list. */}
+              The list you browse, the text above, the screenshots and both scores come from IGDB.
+              The app adds nothing to them: the big numeral is what IGDB members voted, the critic
+              score is IGDB's aggregate of published reviews. IGDB publishes no price and no system
+              requirements, so this page shows neither.
             </p>
             <ul className="arc-list">
               <li>
-                <a className="arc-link" href={game.profileUrl} target="_blank" rel="noopener noreferrer">
-                  Catalogue profile
-                </a>
-              </li>
-              <li>
                 <a className="arc-link" href={game.gameUrl} target="_blank" rel="noopener noreferrer">
-                  Play page
+                  Entry on IGDB
                 </a>
               </li>
             </ul>
           </div>
-
-          {specs.length > 0 && (
-            <div className="arc-panel">
-              <h2 className="arc-h2">Minimum requirements</h2>
-              <dl className="arc-specs">
-                {specs.map((r) => (
-                  <div key={r.label} className="arc-spec">
-                    <dt>{r.label}</dt>
-                    <dd>{r.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
         </aside>
       </div>
 
@@ -215,16 +284,27 @@ export default function GamePage({
         </section>
       )}
 
-      {shot && (
+      {byDeveloper.length > 0 && (
+        <section aria-label="More from the same developer" className="arc-wrap">
+          <h2 className="arc-h2">More from {game.developer}</h2>
+          <div className="arc-rail arc-stagger">
+            {byDeveloper.map((g, i) => (
+              <GameCard key={g.id} game={g} index={i} variant="rail" favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {big && !shown.youtube && (
         <div
           className="arc-lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label={`Screenshot of ${game.title}, full size`}
-          onClick={() => setShot(null)}
+          aria-label={`${shown.label}, full size. Arrow keys move to the next one, Escape closes it.`}
+          onClick={() => setBig(false)}
         >
-          <img className="arc-lightbox-img" src={shot} alt={`Screenshot of ${game.title}`} onClick={(e) => e.stopPropagation()} />
-          <button type="button" className="arc-lightbox-close" aria-label="Close screenshot" autoFocus onClick={() => setShot(null)}>
+          <img className="arc-lightbox-img" src={shown.full} alt={shown.label} onClick={(e) => e.stopPropagation()} />
+          <button type="button" className="arc-lightbox-close" aria-label="Close screenshot" autoFocus onClick={() => setBig(false)}>
             <CloseIcon className="arc-icon arc-icon--lg" />
           </button>
         </div>

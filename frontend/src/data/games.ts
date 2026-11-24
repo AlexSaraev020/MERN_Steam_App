@@ -1,19 +1,15 @@
 /* ==========================================================================
-   The catalogue the redesigned screens render.
+   The catalogue the screens render.
 
-   It is now the real one: the backend serves what freetogame.com publishes, in
-   exactly these fields — id, title, thumbnail, short_description, game_url,
-   genre, platform, publisher, developer, release_date, freetogame_profile_url.
-   Nothing else is knowable from it, so the type carries no price, no discount,
-   no concurrent-players count, no aggregate score and no review text. The
-   placeholders those numbers used are removed rather than invented.
+   It comes from IGDB through the backend: id, title, cover, wide cover, summary,
+   genres, release date, developer, publisher, and the member rating. IGDB publishes
+   no price and no player count, so the type carries neither — the numeral the cards
+   show is the rating, not a price.
    ========================================================================== */
 
 export type Genre = string;
 
-/* Genre chips derived from the fetched catalogue, most titles first. The old
-   hardcoded list carried 11 words while the feed uses 15 after aliasing, so ten
-   genres could not be filtered at all. */
+/* Genre chips derived from the fetched catalogue, most titles first. */
 export const genreFacets = (games: Game[]): Genre[] => {
   const count = new Map<Genre, number>();
   for (const g of games) for (const x of g.genres) count.set(x, (count.get(x) ?? 0) + 1);
@@ -22,80 +18,101 @@ export const genreFacets = (games: Game[]): Genre[] => {
     .map(([genre]) => genre);
 };
 
+/* IGDB's own genre names carry their abbreviation in parentheses; the chips read
+   better without it. */
 const GENRE_ALIASES: Record<string, Genre> = {
-  'Action': 'Action', 'Action Game': 'Action', 'Action RPG': 'Action',
-  'ARPG': 'Action', 'MMOARPG': 'Action', 'Card': 'Card Game',
+  'Role-playing (RPG)': 'RPG',
+  'Real Time Strategy (RTS)': 'RTS',
+  'Turn-based strategy (TBS)': 'Turn-based',
+  'Hack and slash/Beat \'em up': 'Beat \'em up',
+  'Card & Board Game': 'Card & Board',
+  'Quiz/Trivia': 'Trivia',
 };
 
 export type ApiGame = {
   id: number;
   title: string;
+  slug: string;
   thumbnail: string;
-  short_description: string;
-  game_url: string;
-  genre: string;
-  platform: string;
-  publisher: string;
-  developer: string;
+  wideCover: string;
+  genres: string[];
+  platforms: string[];
   release_date: string;
-  freetogame_profile_url?: string;
+  game_url: string;
+  developer: string;
+  publisher: string;
+  rating: number | null;
+  ratingCount: number;
+};
+
+/* IGDB's platform names are sentence-length; a card has room for three short ones. */
+const PLATFORM_SHORT: Record<string, string> = {
+  'PC (Microsoft Windows)': 'PC', 'PlayStation 5': 'PS5', 'PlayStation 4': 'PS4',
+  'PlayStation 3': 'PS3', 'PlayStation 2': 'PS2', 'Xbox Series X|S': 'Xbox',
+  'Xbox One': 'Xbox', 'Nintendo Switch': 'Switch', 'Nintendo Switch 2': 'Switch 2',
+  'Google Stadia': 'Stadia',
+};
+
+export const platformLabel = (platforms: string[]): string => {
+  const short = Array.from(new Set(platforms.map((p) => PLATFORM_SHORT[p] ?? p)));
+  if (short.length === 0) return '—';   // IGDB lists no platform for some records
+  return short.slice(0, 3).join(' / ') + (short.length > 3 ? ` +${short.length - 3}` : '');
 };
 
 export type Game = {
   id: string;
   title: string;
-  tagline: string;        // who made it and where it runs
-  description: string;    // the catalogue's own summary
+  tagline: string;        // where it runs and who made it
   genres: Genre[];
-  platform: string;       // PC | Browser | PC + Browser
+  platforms: string[];    // short labels, in IGDB's order
   released: string;       // ISO date
   cover: string;          // capsule art
+  wide: string;           // the 16:9 plate behind the featured panel
   gameUrl: string;
-  profileUrl: string;
   developer: string;
   publisher: string;
+  rating: number | null;  // IGDB member score, 0-100
+  ratingCount: number;
   hue: number;            // drives the generated plate when the capsule is missing
 };
 
-const PLATFORM: Record<string, string> = {
-  'PC (Windows)': 'PC',
-  'Web Browser': 'Browser',
-  'PC (Windows), Web Browser': 'PC + Browser',
-};
-
 export const toGame = (a: ApiGame): Game => {
-  const genre = GENRE_ALIASES[a.genre.trim()] ?? a.genre.trim();
-  const platform = PLATFORM[a.platform] ?? a.platform;
+  const platforms = Array.from(new Set(a.platforms.map((p) => PLATFORM_SHORT[p] ?? p)));
   return {
     id: String(a.id),
     title: a.title,
-    tagline: `${platform} · ${a.developer}`,
-    description: a.short_description,
-    genres: genre ? [genre] : [],
-    platform,
+    tagline: [platforms.join(' / '), a.developer].filter(Boolean).join(' · '),
+
+    genres: a.genres.map((g) => GENRE_ALIASES[g] ?? g),
+    platforms,
     released: a.release_date,
     cover: a.thumbnail,
+    wide: a.wideCover,
     gameUrl: a.game_url,
-    profileUrl: a.freetogame_profile_url ?? a.game_url,
     developer: a.developer,
     publisher: a.publisher,
+    rating: a.rating,
+    ratingCount: a.ratingCount,
     hue: (a.id * 37) % 360,
   };
 };
 
-/* popular and latestReleases are the same catalogue in two orders. Keep one
-   list, in popularity order, and let the sort do the rest. */
+/* popular and latestReleases are the same catalogue in two orders. Keep one list, in the order
+   its members actually rated things, and let the sort do the rest. Leading with the newest
+   releases put one-vote titles on the front page: the newest 12 rows were GTA VI, Unicorn
+   Academy (1 vote), Fakin It XL (1 vote), Splatchinko (1 vote). */
 export const toGameList = (payload: { popular: ApiGame[]; latestReleases: ApiGame[] }): Game[] => {
   const byId = new Map<string, Game>();
-  for (const a of [...payload.latestReleases, ...payload.popular]) {
+  for (const a of [...payload.popular, ...payload.latestReleases]) {
     if (!byId.has(String(a.id))) byId.set(String(a.id), toGame(a));
   }
   return Array.from(byId.values());
 };
 
-export type SortKey = 'new' | 'old' | 'title';
+export type SortKey = 'relevance' | 'new' | 'old' | 'title';
 
 export const SORTS: { key: SortKey; label: string }[] = [
+  { key: 'relevance', label: 'Best match' },
   { key: 'new', label: 'Newest' },
   { key: 'title', label: 'A–Z' },
   { key: 'old', label: 'Oldest' },
@@ -104,6 +121,7 @@ export const SORTS: { key: SortKey; label: string }[] = [
 export type FilterValue = { genre: Genre | null; sort: SortKey };
 
 const COMPARATORS: Record<SortKey, (a: Game, b: Game) => number> = {
+  relevance: () => 0,   // keep the order the source sent
   new: (a, b) => b.released.localeCompare(a.released),
   old: (a, b) => a.released.localeCompare(b.released),
   title: (a, b) => a.title.localeCompare(b.title),
@@ -123,41 +141,40 @@ export const compactInt = (value: number): string =>
 export const formatDate = (iso: string): string => {
   const d = new Date(`${iso}T00:00:00`);
   return Number.isNaN(d.getTime())
-    ? iso
+    ? '—'
     : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-/** The wide plate behind the featured panel: 1200x675 instead of the 365x206 capsule.
-    shortcut: checked 120 of 416 titles, 3 had no wide plate — Home falls back to the capsule. */
-export const wideCover = (cover: string): string => cover.replace('/thumbnail.', '/background.');
+/* What the per-title endpoint adds on top of the list: the long description, the
+   screenshots, the critic score and the age ratings. IGDB publishes no system
+   requirements, so the page no longer has a requirements block. */
+/** One picture from the entry: a small one for the strip, a 1920-wide one for the plate. */
+export type Shot = { id: number; thumb: string; full: string };
 
-/* What the catalogue's per-title endpoint adds on top of the list: a long
-   description, its own screenshots and minimum system requirements. The status
-   field is served too but reads "Live" for every one of 93 titles checked
-   (including titles that shut down years ago), so the UI does not show it. */
 export type GameDetails = {
   id: number;
   description?: string;
-  screenshots?: { id: number; image: string }[];
-  minimum_system_requirements?: Record<string, string> | null;
+  cover?: { thumb: string; full: string } | null;
+  screenshots?: Shot[];
+  videos?: { id: number; name: string; youtube: string }[];
+  rating?: number | null;
+  ratingCount?: number;
+  criticRating?: number | null;
+  /** IGDB's own `similar_games`, and the rest of the developer's catalogue. */
+  similar?: Game[];
+  byDeveloper?: Game[];
 };
 
-/** Blank-line separated source text into paragraphs. The source separates with CRLF CRLF,
-    which a plain \n{2,} never matches. */
+/** Blank-line separated source text into paragraphs. */
 export const paragraphs = (text: string): string[] =>
   text.split(/(?:\r\n|\r|\n){2,}/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
 
-/** Only the spec lines the source filled: 31 of 39 sampled titles have any, and the
-    values carry stray spaces and "?" placeholders. */
-const SPEC_LABELS: Record<string, string> = { os: 'OS', processor: 'Processor', memory: 'Memory', graphics: 'Graphics', storage: 'Storage' };
+/** A paragraph cut to a card: ends on a whole word, never mid-word. */
+export const lead = (text: string, max = 220): string =>
+  text.length <= max ? text : `${text.slice(0, max).replace(/\s+\S*$/, '')}…`;
 
-export const specRows = (specs?: Record<string, string> | null): { label: string; value: string }[] =>
-  Object.entries(specs ?? {})
-    .map(([key, value]) => ({
-      label: SPEC_LABELS[key] ?? key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()),
-      value: String(value ?? '').trim(),
-    }))
-    .filter((row) => row.value.length > 1 && row.value !== '?');
+/** 87.41340726540926 -> 87. IGDB scores are means over member votes. */
+export const formatRating = (rating: number): string => String(Math.round(rating));
 
 /* Playtime per title, keyed by whoever is signed in. The user record has no playtime
    column — that needs a backend field plus a Render redeploy — so the log lives in this

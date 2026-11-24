@@ -1,4 +1,4 @@
-import { type ComponentType, type SVGProps } from 'react';
+import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 import { GamepadIcon, GridIcon, UserIcon } from './icons';
 
 export type Route = 'home' | 'games' | 'game' | 'profile';
@@ -7,6 +7,7 @@ type Props = {
   route: Route;
   onNavigate: (route: Route) => void;
   gamertag: string;
+  signedIn: boolean;
 };
 
 const ITEMS: { route: Route; label: string; Icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
@@ -30,13 +31,34 @@ const Brand = ({ onNavigate }: { onNavigate: (route: Route) => void }) => (
 /* Same three destinations at every width: one sticky bar on a desktop, a
    compact strip plus a bottom bar on a phone. Which one you see is decided in
    arcade.css, never by rendering a different menu. */
-export default function ArcadeNav({ route, onNavigate, gamertag }: Props) {
+export default function ArcadeNav({ route, onNavigate, gamertag, signedIn }: Props) {
+  /* One underline for the whole list rather than one per word: it is moved under the current
+     word, so switching tabs slides it across instead of redrawing in place. */
+  const inner = useRef<HTMLDivElement>(null);
+  const [mark, setMark] = useState<{ x: number; w: number } | null>(null);
+  useEffect(() => {
+    const box = inner.current;
+    if (!box) return;
+    const place = () => {
+      const a = box.querySelector<HTMLElement>('[aria-current="page"]');
+      /* Below 1024px this bar is display:none and the word measures 0 wide; the bottom tab bar
+         carries its own mark there. */
+      if (!a || !a.offsetWidth) return setMark(null);
+      const own = box.getBoundingClientRect(), at = a.getBoundingClientRect();
+      setMark({ x: at.left - own.left, w: at.width });
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [route]);
+
   return (
     <>
       <a href="#main" className="arc-skip">Skip to content</a>
 
       <nav aria-label="Main" className="arc-nav">
-        <div className="arc-nav-inner">
+        <div className="arc-nav-inner" ref={inner}>
           <Brand onNavigate={onNavigate} />
 
           <ul className="arc-nav-list">
@@ -59,8 +81,19 @@ export default function ArcadeNav({ route, onNavigate, gamertag }: Props) {
             })}
           </ul>
 
+          {mark && (
+            <span
+              className="arc-nav-mark"
+              aria-hidden="true"
+              style={{ transform: `translateX(${mark.x}px)`, width: `${mark.w}px` }}
+            />
+          )}
+
+          {/* A signed-in name or the way in — the profile screen is where signing in happens. */}
           <div className="arc-session">
-            <p className="arc-session-tag">{gamertag}</p>
+            {signedIn
+              ? <p className="arc-session-tag">{gamertag}</p>
+              : <button type="button" className="arc-navlink" onClick={() => onNavigate('profile')}>Log in</button>}
           </div>
         </div>
       </nav>

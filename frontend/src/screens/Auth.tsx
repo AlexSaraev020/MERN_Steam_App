@@ -94,10 +94,10 @@ export default function Auth({ signedIn, gamertag, onSignIn, onSignOut, onBrowse
       {/* ------------------------------------------------ the promise, plainly */}
       <section className="arc-auth-aside" aria-label="What signing in gives you">
         <div className="arc-auth-copy">
-          <p className="arc-eyebrow">Free-to-play catalogue</p>
+          <p className="arc-eyebrow">IGDB catalogue, scored by its players</p>
           <h1 className="arc-title-hero">Enter the lobby</h1>
           <p className="arc-lead">
-            Free-to-play only, one library, no storefront noise. Sign in and the titles you heart are waiting for you
+            One library, no storefront noise. Sign in and the titles you heart are waiting for you
             next time.
           </p>
         </div>
@@ -105,8 +105,8 @@ export default function Auth({ signedIn, gamertag, onSignIn, onSignOut, onBrowse
             are not in this feed, so they are not on this page. */}
         <div className="arc-stats">
           <p className="arc-stat">
-            <span className="arc-num arc-num--hero arc-num--warm">Free</span>
-            <span className="arc-meta">every title in here</span>
+            <span className="arc-num arc-num--hero arc-num--warm">388k</span>
+            <span className="arc-meta">titles searchable on IGDB</span>
           </p>
         </div>
       </section>

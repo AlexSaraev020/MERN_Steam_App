@@ -1,34 +1,46 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import FilterBar, { DEFAULT_FILTERS, type Filters } from '../components/FilterBar';
 import GameCard, { GameRow, type CardActions } from '../components/GameCard';
 import { GridIcon, RowsIcon, SearchIcon } from '../components/icons';
+import { fetchSearch } from '../actions/apiRequests';
 import { applyFilters, genreFacets, type Game } from '../data/games';
 
 type Props = CardActions & {
   games: Game[];
   initialGenre?: Filters['genre'];
   onNavigate: (route: Route) => void;
+  /** Hands the found titles to the app, so opening one can resolve it. */
+  onSearched: (list: Game[]) => void;
 };
 
-export default function AllGames({ games, favourites, onToggleFavourite, onOpen, initialGenre, onNavigate }: Props) {
-  const [filters, setFilters] = useState<Filters>({ ...DEFAULT_FILTERS, genre: initialGenre ?? null });
+export default function AllGames({ games, favourites, onToggleFavourite, onOpen, initialGenre, onNavigate, onSearched }: Props) {
+  /* Search results arrive in IGDB's own relevance order; re-sorting them by date put a
+     "Portals Apart" above the title you actually typed. */
+  const [filters, setFilters] = useState<Filters>({ ...DEFAULT_FILTERS, sort: 'relevance', genre: initialGenre ?? null });
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
 
-  const results = useMemo(() => {
-    const filtered = applyFilters(games, filters);
-    const q = query.trim().toLowerCase();
-    return q ? filtered.filter((g) => g.title.toLowerCase().includes(q) || g.genres.some((x) => x.toLowerCase() === q)) : filtered;
-  }, [games, filters, query]);
+  /* A typed title is searched at IGDB, not in the loaded rails — the browsable list is
+     1,000 titles, the catalogue is 388,273. */
+  const term = query.trim();
+  const [remote, setRemote] = useState<Game[] | null>(null);
+  useEffect(() => {
+    if (term.length < 2) { setRemote(null); return; }
+    let alive = true;
+    const wait = setTimeout(() => fetchSearch(term).then((list) => { if (alive) { setRemote(list); onSearched(list); } }), 350);
+    return () => { alive = false; clearTimeout(wait); };
+  /* onSearched is the parent's setState — stable, so it does not re-run the search. */
+  }, [term, onSearched]);
 
-  const searching = query.trim().length > 0;
+  const searching = term.length >= 2;
+  const results = useMemo(() => applyFilters(remote ?? games, filters), [remote, games, filters]);
 
   return (
     <main id="main" className="arc-main">
       <header className="arc-wrap arc-page-head">
         <div>
-          <p className="arc-meta">Free-to-play catalogue</p>
+          <p className="arc-meta">IGDB catalogue · 388,273 titles searchable</p>
           <h1 className="arc-title">Search game</h1>
         </div>
         {/* Same rule as the Store: a count only when something is actually filtered. */}
@@ -49,7 +61,7 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
               id="all-search"
               type="search"
               className="arc-field arc-field--icon"
-              placeholder="Type a title — filters as you type"
+              placeholder="Type a title — searches IGDB's whole catalogue"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -91,7 +103,7 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
             <h2 className="arc-h2">Nothing in this slice</h2>
             <p className="arc-body">
               {searching
-                ? <>No title matches <span className="arc-strong">“{query.trim()}”</span>. Try a shorter fragment, or clear the genre filter.</>
+                ? <>IGDB has no title matching <span className="arc-strong">“{term}”</span>. Try a shorter fragment, or clear the genre filter.</>
                 : <>No title in the catalogue carries that genre right now. Clear the genre filter to see every title.</>}
             </p>
             <div className="arc-view-group">

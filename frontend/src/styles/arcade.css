@@ -85,7 +85,7 @@
   /* ---- measures and media ratios ---- */
   --g-max: 1240px;          /* content column on a wide screen */
   --g-measure: 68ch;        /* reading width for prose */
-  --g-capsule: 460 / 215;   /* the catalogue capsule, uncropped */
+  --g-capsule: 3 / 4;      /* IGDB cover_big is 1440x1920: every card shows its art uncropped */
   --g-wide-plate: 16 / 9;   /* the wide plate, uncropped */
 
   /* ---- z scale: chrome, plate overlay, heart ---- */
@@ -118,7 +118,7 @@
 }
 
 @media (min-width: 1024px) {
-  .arc-app { padding-top: 68px; padding-bottom: 0; }
+  .arc-app { padding-top: 92px; padding-bottom: 0; }   /* 12px of float + the 68px bar + 12px of air */
 }
 
 /* Quiet dark scrollbars — the rails are meant to look scrollable. */
@@ -170,7 +170,7 @@
 
 /* ---------------------------------------------------------- navigation */
 
-/* One line, 64px, sticky. The mobile strip and the bottom bar are the same
+/* One line, 68px, fixed. The mobile strip and the bottom bar are the same
    component at a different width, never a third navigation. */
 .arc-nav {
   position: fixed;
@@ -181,9 +181,21 @@
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--g-rule);
 }
-@media (min-width: 1024px) { .arc-nav { display: block; } }
+/* On a desktop the bar floats: off the edges, its own radius and shadow, so the page reads as
+   content with a control above it instead of a header welded to the top. */
+@media (min-width: 1024px) {
+  .arc-nav {
+    display: block;
+    inset: 12px 16px auto 16px;
+    background: rgba(16, 20, 24, .82);
+    border: 1px solid var(--g-rule);
+    border-radius: var(--g-r-card);
+    box-shadow: var(--g-e2);
+  }
+}
 
 .arc-nav-inner {
+  position: relative;                 /* the shared underline measures itself against this box */
   max-width: var(--g-max);
   margin-inline: auto;
   height: 68px;
@@ -236,7 +248,6 @@
   height: 68px;
   padding: 0;
   border: 0;
-  border-bottom: 2px solid transparent;
   border-radius: 0;
   background: none;
   color: var(--g-fg-3);
@@ -245,11 +256,21 @@
   font-weight: 600;
   letter-spacing: .005em;
   cursor: pointer;
-  transition: color var(--g-d1) var(--g-ease), border-color var(--g-d1) var(--g-ease);
+  transition: color var(--g-d1) var(--g-ease);
 }
 @media (hover: hover) { .arc-navlink:hover { color: var(--g-fg); } }
-.arc-navlink[aria-current="page"] { color: var(--g-fg); border-bottom-color: var(--g-acc); }
+.arc-navlink[aria-current="page"] { color: var(--g-fg); }
 .arc-navlink:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -4px; }
+/* One underline for the whole bar, moved under the word that is current. Switching tabs slides it
+   from the old word to the new one — the position and the width both animate. */
+.arc-nav-mark {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--g-acc);
+  transition: transform 320ms var(--g-ease), width 320ms var(--g-ease);
+}
 
 .arc-session { margin-left: auto; display: flex; align-items: center; gap: var(--g-s4); }
 /* A status line, not another button: a dot that says "signed in" and the name. */
@@ -656,14 +677,22 @@
 @media (min-width: 1440px) { .arc-card--rail { width: 320px; } }
 
 .arc-card-body { display: flex; flex-direction: column; gap: var(--g-s3); padding: var(--g-s4); }
-.arc-card-title { color: var(--g-fg); }
+/* Fixed body rows: the title holds two lines of 22.5px and the genre strip two rows of
+   30px + the 6px gap, so every card is the same height instead of stretching to its text. */
+.arc-card-title { color: var(--g-fg); min-height: 45px; }
+/* align-content: start — a wrapped flex row otherwise stretches its pills to the box height. */
+/* One row of pills: a rail card has no foot left to fill, so a reserved second row read as
+   dead space under the genres. Extra genres are clipped instead. */
+.arc-card .arc-tags { height: 28px; align-content: start; overflow: hidden; }
+.arc-card .arc-tag { font-size: var(--g-t-xs); padding: 3px 8px; }
+.arc-card--rail .arc-card-body { gap: var(--g-s2); }
 @media (hover: hover) { .arc-card:hover .arc-card-title { color: var(--g-acc-hi); } }
 .arc-card-foot {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--g-s3);
-  margin-top: var(--g-s1);
+  margin-top: auto;   /* pinned down, so cards in a row read as one shape */
   padding-top: var(--g-s3);
   border-top: 1px solid var(--g-rule-soft);
 }
@@ -678,18 +707,25 @@
   border-radius: var(--g-r-card) var(--g-r-card) 0 0;
   background: linear-gradient(120deg, hsl(var(--g-hue, 205) 30% 20%) 0%, hsl(var(--g-hue, 205) 24% 12%) 55%, var(--g-base) 100%);
 }
-.arc-art img {
+.arc-art img, .arc-art iframe {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;   /* deliberate uniform crop: every capsule is 460x215 already */
+  border: 0;
+  object-fit: cover;   /* uniform box: a cover that is not 3:4 is cropped, never letterboxed */
 }
 .arc-art--row { border-radius: var(--g-r-inner); width: 92px; }
+/* The plate is 900px, not the whole column: at 1240 it towered over the title and the strip. */
 .arc-art--hero {
   aspect-ratio: var(--g-wide-plate);
   border-radius: var(--g-r-card);
   box-shadow: var(--g-e3), var(--g-edge);
+  /* width, not just max-width: every child of the plate is absolutely positioned, so a
+     shrink-to-fit box would collapse to zero. */
+  width: 100%;
+  max-width: 900px;
+  justify-self: center;
 }
 
 /* The whole plate is the thing you reach for: a transparent button above the
@@ -824,6 +860,18 @@
   box-shadow: var(--g-e1);
 }
 .arc-hero-actions { display: flex; flex-wrap: wrap; gap: var(--g-s2); margin-top: auto; padding-top: var(--g-s2); }
+/* The panel decides the row height, so its variable parts get fixed boxes: a two-line title slot
+   and one row of pills. Without them the plate took a different height per slide (489 → 614 → 495
+   measured at 1280), which is what made the whole strip look like it was resizing.
+   One voice inside the panel: 13px labels, 16px body, 24px title, 18px numerals. Before this it
+   mixed a clamp(26-40) title, an 18px lead and 20-26px numerals, which read as three different
+   components bolted together. */
+.arc-hero-panel .arc-meta { font-size: var(--g-t-xs); }
+.arc-hero-panel .arc-title-hero { font-size: 24px; font-weight: 700; line-height: 1.15; }
+.arc-hero-panel .arc-lead { font-size: var(--g-t-body); line-height: 1.6; }
+.arc-hero-panel .arc-tag { font-size: var(--g-t-xs); padding: 3px 8px; }
+.arc-hero-panel .arc-num { font-size: var(--g-t-md); }
+.arc-hero-tags { height: 26px; align-content: start; overflow: hidden; }
 /* One control, not three loose ones: the arrows and the dots share a single
    translucent pill so the cluster reads as the carousel's handle. */
 .arc-hero-nav {
@@ -847,7 +895,11 @@
   /* aspect-ratio off, or a stretched plate sizes itself from the row height and
      overflows its column (170px of overlap at 1024). The img is object-fit: cover. */
   .arc-hero-art { aspect-ratio: auto; }
-  .arc-hero-panel { margin-left: -56px; position: relative; z-index: var(--g-z-plate); }
+  /* The row's height comes from here, not from a reserved line under the title: the plate is
+     stretched to it, and the panel's own slack collects above the buttons (margin-top: auto).
+     shortcut: 420px is what the tallest featured panel needs; a featured title long enough to
+     need three lines would push the row taller. */
+  .arc-hero-panel { margin-left: -56px; position: relative; z-index: var(--g-z-plate); min-height: 420px; }
   .arc-hero-nav { right: calc(var(--g-s4) + 24px); }
 }
 .arc-hero-nav .arc-icon-btn {
@@ -929,9 +981,14 @@
 .arc-view-group > li { display: flex; }
 
 /* ----------------------------------------------------------- game title */
-.arc-title-head { display: grid; gap: var(--g-s5); }
-@media (min-width: 1024px) { .arc-title-head { gap: var(--g-s6); } }
+/* The title page starts closer to the bar than the other screens do. */
+.arc-main--title { padding-block-start: var(--g-s4); }
+@media (min-width: 1024px) { .arc-main--title { padding-block-start: var(--g-s5); } }
+.arc-title-head { display: grid; gap: var(--g-s4); }
+@media (min-width: 1024px) { .arc-title-head { gap: var(--g-s5); } }
 .arc-title-plate { display: grid; gap: var(--g-s2); }
+/* A title is read here, not shouted: the page hero size is for the Store's carousel. */
+.arc-title-head .arc-title-hero { font-size: var(--g-t-xl); }
 
 .arc-facts {
   display: grid;
@@ -968,12 +1025,61 @@
 .arc-spec dt { font-size: var(--g-t-sm); font-weight: 600; color: var(--g-fg-3); }
 .arc-spec dd { margin: 0; font-size: var(--g-t-body); line-height: 1.55; color: var(--g-fg-2); overflow-wrap: anywhere; }
 
-.arc-shots { display: grid; gap: var(--g-s4); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin: 0; padding: 0; list-style: none; }
-.arc-shot { border-radius: var(--g-r-card); overflow: hidden; box-shadow: var(--g-edge), var(--g-e1); background: var(--g-band); }
-.arc-shot-btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
-.arc-shot-btn:focus-visible { outline: 2px solid var(--g-acc); outline-offset: -4px; border-radius: var(--g-r-card); }
-@media (hover: hover) { .arc-shot:hover { box-shadow: var(--g-edge), var(--g-e2); } }
-.arc-shot img { display: block; width: 100%; height: auto; aspect-ratio: var(--g-wide-plate); }
+/* Two columns: the media scrolls on the left, the card stays glued to it on the right. */
+.arc-title-cols { display: grid; gap: var(--g-s4); grid-template-columns: minmax(0, 1fr); }
+.arc-media-col { display: grid; gap: var(--g-s3); min-width: 0; }
+.arc-title-card {
+  display: grid;
+  gap: var(--g-s3);
+  align-content: space-between;   /* the leftover height spreads between the rows, not under them */
+  padding: var(--g-s4);
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-card);
+  background: var(--g-band);
+  box-shadow: var(--g-e2), var(--g-edge);
+}
+.arc-art--cover { aspect-ratio: var(--g-wide-plate); border-radius: var(--g-r-inner); }
+/* One voice inside the card: 13px labels over 16px values, both in the body face. The display
+   face and the oversized numerals belong to the page, not to a list of credits. */
+.arc-title-card .arc-body { font-size: var(--g-t-sm); line-height: 1.6; }
+.arc-title-card .arc-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--g-s3) var(--g-s4); }
+.arc-title-card .arc-fact { gap: 2px; }
+.arc-title-card .arc-fact-value { font-family: inherit; font-stretch: normal; font-size: var(--g-t-body); font-weight: 600; }
+.arc-title-card .arc-stat { display: flex; align-items: baseline; gap: var(--g-s3); }
+.arc-title-card .arc-num { font-size: var(--g-t-lg); }
+@media (min-width: 1024px) {
+  /* Stretch, not start: the card ends up exactly as tall as the plate plus the carousel. */
+  .arc-title-cols { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--g-s5); }
+  .arc-title-card { position: sticky; top: var(--g-s4); }
+}
+
+/* The media strip: 16:9 thumbs in the same rail the store uses, so it scrolls sideways
+   instead of making the page taller. The one on the plate is the marked one. */
+.arc-thumb {
+  position: relative;
+  width: 176px;
+  aspect-ratio: var(--g-wide-plate);
+  padding: 0;
+  border: 1px solid var(--g-rule);
+  border-radius: var(--g-r-inner);
+  background: var(--g-band);
+  overflow: hidden;
+  cursor: pointer;
+}
+.arc-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.arc-thumb[aria-pressed="true"] { border-color: var(--g-acc); }
+@media (hover: hover) { .arc-thumb:hover { border-color: var(--g-acc-hi); } }
+.arc-thumb:focus-visible { outline: 2px solid var(--g-acc); outline-offset: 2px; }
+/* A trailer's thumb carries a play mark, so it does not read as another still. */
+.arc-thumb-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--g-fg);
+  font-size: 22px;
+  background: rgb(0 0 0 / 45%);
+}
 
 /* Full-size screenshot. The backdrop is the close target; the image stops the click. */
 .arc-lightbox {
@@ -988,8 +1094,9 @@
   cursor: zoom-out;
 }
 .arc-lightbox-img {
-  max-width: min(1200px, 100%);
-  max-height: 100%;
+  /* 90% of the viewport on its longer side, whatever the screen is. */
+  max-width: 90vw;
+  max-height: 90vh;
   width: auto;
   height: auto;
   border-radius: var(--g-r-card);
@@ -1015,9 +1122,6 @@
 @media (max-width: 639px) {
   .arc-lightbox { padding: var(--g-s2); }
   .arc-lightbox-close { top: var(--g-s2); right: var(--g-s2); }
-  /* Two thumbnails across on a phone: a full-width thumbnail is already as wide as
-     the viewport, so opening it would not be a zoom at all. */
-  .arc-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--g-s2); }
 }
 
 /* -------------------------------------------------------------- profile */
@@ -1176,6 +1280,8 @@
 @media (prefers-reduced-motion: reduce) {
   .arc-rise, .arc-stagger > *, .arc-sheen, .arc-skeleton,
   .arc-heart[aria-pressed="true"] svg { animation: none !important; }
+  /* The underline still has to show, it just does not draw itself in. */
+  .arc-nav-mark { transition: none !important; }
   .arc-sheen { display: none; }
   .arc-card:hover { transform: none; }
   .arc-btn:active:not(:disabled) { transform: none; }
