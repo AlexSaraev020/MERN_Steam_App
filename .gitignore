@@ -41,3 +41,6 @@ frontend/build/
 
 # OS generated files
 .DS_Store
+
+# tsc output — Render builds it, the repo does not carry it
+backend/build/
