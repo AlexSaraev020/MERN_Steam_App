@@ -12,7 +12,7 @@ type Props = {
 
 const ITEMS: { route: Route; label: string; Icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
   { route: 'home', label: 'Store', Icon: GamepadIcon },
-  { route: 'games', label: 'Search game', Icon: GridIcon },
+  { route: 'games', label: 'Search', Icon: GridIcon },
   { route: 'profile', label: 'Profile', Icon: UserIcon },
 ];
 

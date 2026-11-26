@@ -11,11 +11,11 @@ type Props = {
   onChange: (next: Filters) => void;
   /** genreFacets(games): only the genres this catalogue really carries. */
   genres: Genre[];
-  /** Unique prefix so Home and Search game never share control IDs. */
+  /** Unique prefix so Home and Search never share control IDs. */
   idPrefix: string;
 };
 
-/* Shared by Home and Search game so both filter bars behave identically. */
+/* Shared by Home and Search so both filter bars behave identically. */
 export default function FilterBar({ value, onChange, genres, idPrefix }: Props) {
   const active = value.genre !== null;
 

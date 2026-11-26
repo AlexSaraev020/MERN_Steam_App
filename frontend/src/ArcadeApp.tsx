@@ -231,7 +231,7 @@ export default function App() {
               It came from a search, and search results are not kept across a reload. Find it again by title.
             </p>
             <div>
-              <button type="button" className="arc-btn arc-btn--solid" onClick={() => navigate('games')}>Search game</button>
+              <button type="button" className="arc-btn arc-btn--solid" onClick={() => navigate('games')}>Search</button>
             </div>
           </div>
         </section>

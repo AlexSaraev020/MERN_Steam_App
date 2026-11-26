@@ -82,7 +82,7 @@ export default function GameCard({
   );
 }
 
-/* Dense list row used by the Search game list view. */
+/* Dense list row used by the Search list view. */
 export function GameRow({ game, favourite, onToggleFavourite, onOpen, index }: Props) {
   return (
     <li className="arc-row">

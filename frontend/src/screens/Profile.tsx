@@ -230,7 +230,7 @@ export default function Profile({
           {favouriteGames.length === 0 ? (
             <p className="arc-panel arc-body arc-empty">
               Nothing hearted yet on this account. Heart any title in{' '}
-              <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games')}>Search game</button>{' '}
+              <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games')}>Search</button>{' '}
               and it lands here and stays after a reload.
             </p>
           ) : (

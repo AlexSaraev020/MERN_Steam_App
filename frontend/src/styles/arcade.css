@@ -157,7 +157,10 @@
    hit blocks that set their own padding (the profile card lost its top padding). */
 /* Inside a section the blocks had no rhythm: head, filter bar, rail and the "see all"
    line sat edge to edge, so a title sat directly on top of its cards. */
-.arc-main section { display: grid; align-content: start; gap: var(--g-s5); }
+/* minmax(0,1fr), not the implicit auto column: an auto column sizes to the widest
+   item's content, and a nowrap chip rail is 1990px of content — measured — so the
+   whole column, its cards and the Sort/Clear controls ran off a 380px screen. */
+.arc-main section { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--g-s5); }
 
 /* An empty state is one sentence, not a 1176px slab with a line floating in it. */
 .arc-empty { max-width: 64ch; }
@@ -344,6 +347,12 @@
   font-weight: 500;
   cursor: pointer;
   transition: color var(--g-d1) var(--g-ease), background var(--g-d1) var(--g-ease);
+}
+/* 64px of icon stacked over a word made the phone bar a slab. 54px is still
+   above the 44px touch floor once the glyph comes down to the standard 20px. */
+@media (max-width: 639px) {
+  .arc-tab { min-height: 52px; gap: 2px; padding: 6px 0; font-size: 13px; line-height: 1.2; }
+  .arc-tab .arc-icon--lg { width: 20px; height: 20px; }
 }
 @media (hover: hover) { .arc-tab:hover { color: var(--g-fg-2); background: var(--g-panel); } }
 .arc-tab[aria-current="page"] { color: var(--g-fg); border-top-color: var(--g-acc); background: var(--g-panel); }
@@ -621,6 +630,18 @@
 }
 .arc-rail > * { flex: 0 0 auto; scroll-snap-align: start; }
 .arc-rail--chips { gap: var(--g-s2); padding-bottom: var(--g-s2); flex-wrap: wrap; overflow-x: visible; }
+/* Thirty wrapped chips read as a wall. On a phone they run as one swipeable
+   line, the way a store's category row does, with the fade saying there is more;
+   the sort and clear drop onto their own line under it (nowrap chips otherwise
+   size their flex row to content and push Sort/Clear off the screen). */
+@media (max-width: 639px) {
+  .arc-rail--chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+  .arc-rail--chips .arc-chip { padding: 9px 12px; }
+}
 
 .arc-grid {
   display: grid;
@@ -633,6 +654,13 @@
   padding-left: 0;
 }
 .arc-grid--pair { gap: var(--g-s4); grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+/* A phone column fits one 276px card, so the catalogue showed one title per
+   screen. Two columns of covers is what a phone catalogue reads as — and a card
+   down to the cover and the name: the genres and the platform list are already
+   on the title page, and on a 172px card they only cut each other off. */
+@media (max-width: 639px) {
+  .arc-grid, .arc-grid--pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--g-s4); }
+}
 
 .arc-list { display: grid; gap: var(--g-s2); list-style: none; margin-block: 0; padding-left: 0; }
 
@@ -675,6 +703,9 @@
 .arc-card--grid { width: 100%; }
 .arc-card--rail { width: 288px; }
 @media (min-width: 1440px) { .arc-card--rail { width: 320px; } }
+/* 288px inside a 340px phone column leaves no peek of the next card. 168px shows
+   one whole cover and a slice of the next, which is what says the rail scrolls. */
+@media (max-width: 639px) { .arc-card--rail { width: 168px; } }
 
 .arc-card-body { display: flex; flex-direction: column; gap: var(--g-s3); padding: var(--g-s4); }
 /* Fixed body rows: the title holds two lines of 22.5px and the genre strip two rows of
@@ -696,8 +727,16 @@
   padding-top: var(--g-s3);
   border-top: 1px solid var(--g-rule-soft);
 }
-.arc-card-foot p { display: flex; align-items: baseline; gap: 6px; margin: 0; }
-.arc-card-foot .arc-num { color: var(--g-fg-2); }
+.arc-card-foot p { display: flex; align-items: baseline; gap: 6px; margin: 0; min-width: 0; }
+/* A long platform list is nowrap text inside a 360px card: measured, 22 of the
+   953 cards ran up to 320px past their own right edge. It gets clipped with an
+   ellipsis instead of running out of the card. */
+.arc-card-foot .arc-num { color: var(--g-fg-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* A phone card is a cover and a name. The genre pills and the platform line are
+   already on the title page; on a 172px card they only cut each other off. */
+@media (max-width: 639px) {
+  .arc-card--grid .arc-tags, .arc-card--grid .arc-card-foot { display: none; }
+}
 
 /* --------------------------------------------------- artwork and plates */
 .arc-art {
@@ -849,6 +888,52 @@
 .arc-hero-art { position: relative; aspect-ratio: var(--g-wide-plate); overflow: hidden; border-radius: var(--g-r-card); background: var(--g-band); box-shadow: var(--g-e3), var(--g-edge); }
 .arc-hero-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .arc-hero-art > .arc-open-plate { z-index: var(--g-z-plate); }
+/* The featured card on a phone is the plate and nothing else. NN/g: people scroll
+   straight past large feature carousels, and a 3:4 poster at full width was the
+   whole first screen. The name rides the art as a rounded banner, the frame count
+   is the only thing on screen, and a sideways swipe changes the game. Arrows and
+   dots are gone here — the same research calls dots a poor cue on touch. */
+.arc-hero-art .arc-hero-name, .arc-hero-art .arc-hero-count { display: none; }
+@media (max-width: 639px) {
+  .arc-hero-art {
+    aspect-ratio: 3 / 2;
+    box-shadow: var(--g-e3), var(--g-edge);
+    touch-action: pan-y;   /* sideways is ours; up and down stays the page's scroll */
+  }
+  .arc-hero-art > img { object-position: top; }
+  /* > .arc-hero-panel, not the bare class: the base rule for it comes later in this
+     file and an equal-specificity rule only wins if it is later. */
+  .arc-hero-art .arc-hero-nav, .arc-hero > .arc-hero-panel { display: none; }
+  .arc-hero-art .arc-hero-name, .arc-hero-art .arc-hero-count {
+    position: absolute;
+    z-index: 4;
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: var(--g-r-chip);
+    background: rgba(12, 16, 20, .82);
+    color: var(--g-fg);
+    /* a tap on the banner must still land on the plate button */
+    pointer-events: none;
+  }
+  .arc-hero-art .arc-hero-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    top: var(--g-s2);
+    left: var(--g-s2);
+    max-width: 74%;
+    font-size: var(--g-t-md);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .arc-hero-art .arc-hero-count {
+    display: block;
+    right: var(--g-s3);
+    bottom: var(--g-s3);
+    font-size: var(--g-t-sm);
+    font-variant-numeric: tabular-nums;
+  }
+}
 .arc-hero-panel {
   display: flex;
   flex-direction: column;
@@ -1079,6 +1164,14 @@
   color: var(--g-fg);
   font-size: 22px;
   background: rgb(0 0 0 / 45%);
+}
+/* On a phone the title page is read, not advertised: the page title and the
+   section titles come down a step, and the media strip gets smaller thumbs so the
+   next one still peeks. */
+@media (max-width: 639px) {
+  .arc-title-head .arc-title-hero { font-size: var(--g-t-lg); }
+  .arc-h2 { font-size: var(--g-t-md); }
+  .arc-thumb { width: 140px; }
 }
 
 /* Full-size screenshot. The backdrop is the close target; the image stops the click. */

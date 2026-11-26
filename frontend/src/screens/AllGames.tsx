@@ -41,7 +41,7 @@ export default function AllGames({ games, favourites, onToggleFavourite, onOpen,
       <header className="arc-wrap arc-page-head">
         <div>
           <p className="arc-meta">IGDB catalogue · 388,273 titles searchable</p>
-          <h1 className="arc-title">Search game</h1>
+          <h1 className="arc-title">Search</h1>
         </div>
         {/* Same rule as the Store: a count only when something is actually filtered. */}
         {(filters.genre || searching) && (

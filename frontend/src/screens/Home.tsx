@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useMemo, useState } from 'react';
+import { type CSSProperties, type MouseEvent, type TouchEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { type Route } from '../components/ArcadeNav';
 import FilterBar, { DEFAULT_FILTERS, type Filters } from '../components/FilterBar';
 import GameCard, { type CardActions } from '../components/GameCard';
@@ -36,8 +36,34 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
 
   const go = (delta: number) => setSlide((n) => (n + delta + featured.length) % featured.length);
 
+  /* A phone has no arrows on the plate, so the plate is swiped. The swipe is
+     recognised only when it travels sideways further than it travels up, so
+     scrolling the page is untouched, and the click the browser still fires at the
+     end of the swipe is swallowed so a swipe does not open the title page. */
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    const t = e.changedTouches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    const from = touch.current;
+    touch.current = null;
+    if (!from) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - from.x, dy = t.clientY - from.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    swiped.current = true;
+    go(dx < 0 ? 1 : -1);
+  };
+  const onPlateClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (swiped.current) { e.stopPropagation(); swiped.current = false; }
+  };
+
   useEffect(() => {
-    if (paused || reduced || featured.length < 2) return;
+    /* NN/g: never auto-forward on a phone — the page is short, so by the time the
+       frame changes the reader is already below it. Width is read once per run. */
+    if (paused || reduced || featured.length < 2 || window.matchMedia('(max-width: 639px)').matches) return;
     const t = window.setInterval(() => setSlide((n) => (n + 1) % featured.length), CAROUSEL_MS);
     return () => window.clearInterval(t);
   }, [paused, reduced, featured.length]);
@@ -73,7 +99,13 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
         className="arc-wrap"
       >
         <div className="arc-hero">
-          <div className="arc-hero-art" style={{ '--g-hue': hero.hue } as CSSProperties}>
+          <div
+            className="arc-hero-art"
+            style={{ '--g-hue': hero.hue } as CSSProperties}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onClickCapture={onPlateClick}
+          >
             {hero.cover ? (
               <img
                 src={hero.wide || hero.cover}
@@ -96,6 +128,14 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
               aria-label={`Open ${hero.title}`}
               onClick={() => onOpen(hero.id)}
             />
+
+            {/* On a phone the name is this banner and the frame count is the only
+                control: no arrows, no dots. Both are hidden at 640px and above, where
+                the panel beside the plate carries the words. */}
+            <h1 className="arc-title-hero arc-hero-name arc-clamp-2">{hero.title}</h1>
+            <p className="arc-hero-count">
+              {slide + 1} / {featured.length}
+            </p>
 
             <div className="arc-hero-nav">
               <button type="button" className="arc-btn arc-icon-btn" aria-label="Previous featured game" onClick={() => go(-1)}>
@@ -186,23 +226,23 @@ export default function Home({ games, favourites, onToggleFavourite, onOpen, onN
         {recommendations.length === 0 ? (
           <p className="arc-panel arc-body">
             No titles match <span className="arc-strong">{filters.genre ?? 'that filter'}</span>. Clear a filter, or browse every title from{' '}
-            <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games')}>Search game</button>.
+            <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games')}>Search</button>.
           </p>
         ) : (
           /* A 416-card horizontal scroller is a slider nobody can use; the strip shows the
-             first twelve and hands the rest to Search game, where they are a real grid. */
+             first eight and hands the rest to Search, where they are a real grid. */
           <div className="arc-rail arc-stagger">
-            {recommendations.slice(0, 12).map((g, i) => (
+            {recommendations.slice(0, 8).map((g, i) => (
               <GameCard key={g.id} game={g} index={i} variant="rail" favourite={favourites.includes(g.id)} onToggleFavourite={onToggleFavourite} onOpen={onOpen} />
             ))}
           </div>
         )}
 
-        {recommendations.length > 12 && (
+        {recommendations.length > 8 && (
           <p className="arc-meta">
-            First 12 ·{' '}
+            First 8 ·{' '}
             <button type="button" className="arc-open arc-link" onClick={() => onNavigate('games', filters.genre ?? undefined)}>
-              see the rest in Search game
+              see the rest in Search
             </button>
           </p>
         )}
