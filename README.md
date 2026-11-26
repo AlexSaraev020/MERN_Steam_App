@@ -14,7 +14,7 @@ IGDB is free for non-commercial use and allows 4 requests per second.
 | | |
 |---|---|
 | Store | featured carousel, genre rails; the three featured titles are not repeated in the rails below them |
-| Search game | filter chips, sorting, grid or list view; a typed title is searched at IGDB |
+| Search | filter chips, sorting, grid or list view; a typed title is searched at IGDB |
 | Title | name on top; left: a 16:9 media plate with the trailers and every screenshot scrolling under it, arrow keys move it; right: a card the same height as the media, with the cover, the short description, the release date, the developer, the publisher, both scores, favourites and hours; below: the long description, IGDB's similar titles and the rest of that developer's catalogue. The page waits for the media before it draws anything |
 | Profile | favourites on the account, hours logged, gamertag and bio editor |
 

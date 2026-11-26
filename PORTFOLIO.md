@@ -36,7 +36,7 @@ updated: 2026-11-24
 ## Overview
 
 GamersLobby is a store view over IGDB's game catalogue. Three screens carry it: a Store with a featured
-carousel and genre rails, Search game with a filter bar and a grid or list view, and a profile that
+carousel and genre rails, Search with a filter bar and a grid or list view, and a profile that
 holds the titles you hearted and the hours you logged. The Store shows the shelf IGDB's members rated
 most; a typed title is searched at IGDB itself, so all 388,273 records are reachable, not only the
 thousand on the shelf.
